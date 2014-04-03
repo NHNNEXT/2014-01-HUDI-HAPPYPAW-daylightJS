@@ -335,6 +335,12 @@ daylight.index = daylight.indexOf = function(arr, object) {
 		return -1;
 	}
 }
+
+/**
+* @description : 해당 객체가 Node(Element)인지 확인
+* @param : o(Element), text(텍스트 노드 포함 체크)
+* @return : Boolean(노드이면 true 아니면 false)
+*/
 daylight.isNode = function(o, text) {
 	if(!t)
 		return false;
@@ -345,6 +351,11 @@ daylight.isNode = function(o, text) {
 
 	return false;
 }
+/**
+* @description : replaceAll
+* @param : from(바뀔 문자), to(바꿀 문자), str(문자열)
+* @return : String
+*/
 daylight.replace = function(from, to, str) {
 	return str.split(from).join(to);	
 }
@@ -362,6 +373,8 @@ daylight.each = daylight.forEach = function(arr, callback) {
 			arr.each(callback);
 	}
 }
+
+
 //addClass, removeClass, hasClass
 daylight.extend({
 	/**
@@ -429,6 +442,8 @@ daylight.extend({
 		return true;
 	}
 });
+
+
 daylight.$ = daylight.init = function(query, option) {
 	var objects;
 	var t = daylight.type(query);
