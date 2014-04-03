@@ -200,6 +200,7 @@ daylight.object = function(arr) {
 	var size = this.size = arr.length;
 	this.o = this.objects = arr;
 	
+	//옵션 설정하면 제이쿼리랑 비슷하게 사용 가능 하지만 느려짐.
 	if(OPTION.speed == CONSTANT.SLOW) {
 		this.length = size;
 		for(var i = 0; i < size; ++i) {
@@ -207,9 +208,16 @@ daylight.object = function(arr) {
 		}
 	}	
 }
+//daylight.object의 프로토타입은 Array이다. JQuery가 느린 원인 중 하나. 하지만 매우 편하게 사용할 수 있다.
 daylight.object.prototype = [];
+
+//프로토타입을 daylight.fn으로 묶는다.
 daylight.fn = daylight.object.prototype;
+
+//daylight object라는 것을 인식
 daylight.fn.daylight = "daylight";
+
+//확장 함수
 daylight.extend = daylight.fn.extend = function() {
 	var a = arguments;
 	var length = a.length;
@@ -235,6 +243,8 @@ daylight.extend = daylight.fn.extend = function() {
 		}
 	}
 }
+
+//daylight만의 타입  Array, String 등 구분가능.
 daylight.type = function(obj, expand) {
 	var type = typeof obj;
 	if(!expand)
@@ -244,7 +254,9 @@ daylight.type = function(obj, expand) {
 	
 }
 
+//define 관련 함수들 모음
 daylight.extend( {
+	//해당 함수를 선언합니다.
 	define : function(object, name, func) {
 		var type = typeof object;
 		if(type == "object" && object.__proto__)
@@ -254,6 +266,7 @@ daylight.extend( {
 		else if(type == "object")
 			object[name] = func;
 	},
+	//GetterSetter함수를 만듭니다.
 	defineGetterSetter :function(object, name) {
 		this.defineGetter(object, name);
 		this.defineSetter(object, name);
@@ -272,12 +285,15 @@ daylight.extend( {
 		name =  "set" + name.charAt(0).toUpperCase() + name.substr(1, name.length);	
 		this.define(object, name, func);
 	}
+	//전역변수를 만듭니다.
 	,defineGlobal : function(name, o) {
 		var typeName = this.type(name);
 		if(typeName === "string")
 			window[name] = o;
 	}
 });
+
+//내용을 복사합니다.
 daylight.clone = function(node, dataAndEvent, deepDataAndEvent) {
 	var n = node.cloneNode();
 	n.innerHTML = node.innerHTML;
@@ -294,6 +310,8 @@ daylight.create = function(classFunction) {
 		return a;
 	};
 }
+
+//해당 index를 보여줍니다.
 daylight.index = daylight.indexOf = function(arr, object) {
 	var type = typeof arr;
 	
