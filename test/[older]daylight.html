@@ -1,0 +1,238 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<script src="../js/daylight.js"></script>
+<script src="../js/jquery.js"></script>
+<script src="../js/jindo.desktop.all.ns.js"></script>
+<style>
+#query th {
+	width: 200px;
+	text-align: left;
+	
+}
+#query td {
+	height: 20px;
+}
+#query th:second-child {
+	
+}
+</style>
+<script>
+function timer(name, func) {
+		var time = "";
+		if(name) {
+			var start = Date.now();
+			console.time(name);
+			func();
+			console.timeEnd(name);
+			var end = Date.now();
+			time = end - start;
+			time += "ms";
+		
+		} else {
+			name = "";
+			console.log("");
+		}
+		var body = $("#query");
+		body.html(body.html() + "<tr><td>"+name + "</td><td>" + time + "</td></tr>");
+	}
+dlight.$(window).event("load", function(e) {
+	var count = 10000;
+	var newfunc = function() {
+				this.a = "asd";
+				this.b = "asd";
+				this.c = "aa";
+			};
+	timer("NONE", function() {
+		for(var i = 0; i < count; ++i) {
+		}
+	});
+	timer("Variable", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = 10;
+		}
+	});
+	timer("var function", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = function() {};
+		}
+	});
+	timer("var Array", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = [1, 2, 3];
+			a[3] = 10;
+			a[4] = 10;
+			a[5] = {};
+		}
+	});
+	timer("Object 생성", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = {a : "asd", b: "asd", c: "aa"};
+		}
+	});
+	timer("클래스 생성", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = new newfunc();
+		}
+	});
+	timer();
+	timer("DOM Query", function() {
+		for(var i = 0; i < count; ++i) {
+			document.querySelectorAll("span");
+		}
+	});
+	timer("daylight Query", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = daylight("span");
+		}
+	});
+	timer("JINDO Query", function() {
+		for(var i = 0; i < count; ++i) {
+			jindo.$("span");
+		}
+	});
+	timer("jQuery Query", function() {
+		for(var i = 0; i < count; ++i) {
+			jQuery("span");
+		}
+	});
+
+	timer();
+	timer("DOM attr", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = document.querySelectorAll("span");
+			for(var j = 0; j < a.length; ++j) {
+				a[j].setAttribute("class", "heelo");
+			}
+		}
+	});
+	timer("daylight attr", function() {
+		var a = "";
+		for(var i = 0; i < count; ++i) {
+			a = dlight("span").attr("class", "heelo");
+		}
+	});
+/*
+	timer("jindo attr", function() {
+		for(var i = 0; i < count; ++i) {
+			jindo.$Element("span").attr("class", "heelo");
+		}
+	});
+*/
+	timer("jQuery attr", function() {
+		for(var i = 0; i < count; ++i) {
+			jQuery("span").attr("class", "heelo");
+		}
+	});
+	timer();
+	timer("DOM html", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = document.querySelectorAll("span");
+			var b= a[0].innerHtml;
+		}
+	});
+	timer("daylight html", function() {
+		for(var i = 0; i < count; ++i) {
+			var b= dlight.$("span").html();
+		}
+	});
+	timer("jQuery html", function() {
+		for(var i = 0; i < count; ++i) {
+			var b= jQuery("span").html();
+		}
+	});
+	timer();
+	timer("DOM equal", function() {
+		for(var j = 0; j < count; ++j) {
+			var a = document.querySelectorAll("span");
+			var b = document.querySelectorAll("span");
+			if(a.length == b.length) {
+				var length = b.length;
+				for(var i = 0; i < length; ++i) {
+					if(daylight.indexOf(a, b[i]) == -1)
+						break;
+				}
+			}
+		}
+	});
+	timer("daylight equal", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = daylight.$("span");
+			var b = daylight.$("span");
+			var c = a.equal(b);
+		}			
+	});
+	jQuery.fn.equals = function(selector) { 
+		return $(this).get(0)==$(selector).get(0); 
+	};
+	timer("jQuery equal", function() {
+		for(var i = 0; i < count; ++i) {
+			var a = jQuery("span");
+			var b = jQuery("span:first-child");
+			var c = a.equals(b);
+		}			
+	});
+	timer();
+	timer("daylight Event", function() {
+		var a;
+		for(var i = 0; i < count; ++i) {
+			a = daylight.$Event(e);
+			
+		}
+		//console.log(a.pos())		
+	});
+	timer();
+	timer("DOM map", function(index, array) {
+		var a;
+
+		for(var i = 0; i < count; ++i) {
+			var span = document.querySelectorAll("span");
+			var arr = [];
+			var func = function(index) {return index};
+			for(var j = 0; j < span.length; ++j) {
+				arr[j] = func.call(span[j], j, span);
+			}
+		}
+	});
+	timer("daylight map", function(index, array) {
+		var a;
+		for(var i = 0; i < count; ++i) {
+			daylight.$("span").map(function(index) {
+				return index;
+			});
+			
+		}
+	});
+	timer("jQuery map", function(index, array) {//this == value, index,  array
+		var a;
+		for(var i = 0; i < count; ++i) {
+			a = jQuery("span").map(function() {
+				return index;
+			});
+			
+		}
+		//console.log(a);
+	});	
+
+});
+</script>
+</head>
+<body>
+<span style="display:block;background:#f44;">1</span>
+<span>2</span>
+<span id="#test">3</span>
+<span>4</span>
+<span>5</span>
+<span>6</span>
+<span>7</span>
+<span>8</span>
+<span>9</span>
+<table id="query">
+<tr>
+<th>query Execute</th><th>Spend Time</th>
+</tr>
+</table>
+
+
+</body>
+</html>
