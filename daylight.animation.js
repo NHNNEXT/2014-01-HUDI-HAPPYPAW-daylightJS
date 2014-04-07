@@ -3,9 +3,9 @@ daylight.animation = {
 		CONSTANT : {
 			browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
 			transformList : {"left":"translateX(?)", "top":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
-			browserEffectCSS : {"origin" : "transform-origin:?;"}
+			browserEffectCSS : {"origin" : "transform-origin:?"}
 		},
-		css : function(actionList) {
+		css : function(actionList, prefix) {
 			var CONSTANT = daylight.animation.CONSTANT;
 			var transformList = [];
 			var browserEffectList = [];
@@ -17,11 +17,8 @@ daylight.animation = {
 				if(action in CONSTANT.browserEffectCSS)
 					browserEffectList.push(action);				
 			}
-			
-			var prefix = CONSTANT.browserPrefix[1];
-			
 			if(transformList.length > 0) {
-				var transformStyle = prefix + "transform:";
+				var transformStyle = "{prefix}transform:";
 				for(var j = 0; j < transformList.length; ++j) {
 					var action = transformList[j];
 					var replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
@@ -30,20 +27,26 @@ daylight.animation = {
 				transformStyle += ";\n";
 				style += transformStyle;
 			}
-			
 			if(browserEffectList.length > 0) {
 				var browserEffectStyle = "" ;
 				for(var j = 0; j < browserEffectList.length; ++j) {
 					var action = browserEffectList[j];
-					var replaceMotion = prefix + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
+					var replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
 					browserEffectStyle += " " + replaceMotion;
 				browserEffectStyle += ";\n";
 				}
-
 				style += browserEffectStyle;
 			}
-			
-			return style;
+			var cssStyle = "";
+			if(!prefix) {
+				for(var i = 0; i < CONSTANT.browserPrefix.length; ++i) {
+					cssStyle += daylight.replace("{prefix}", CONSTANT.browserPrefix[i], style);
+				}
+			} else {
+				cssStyle += daylight.replace("{prefix}", CONSTANT.browserPrefix[0], style);
+				cssStyle += daylight.replace("{prefix}", prefix, style);
+			}
+			return cssStyle;
 		}
 		,timeline : function(query) {
 			console.log("NEW TIMELINE");
@@ -72,7 +75,7 @@ daylight.animation.timeline.prototype.hasLayer = function(layer) {
 		var layerObject = layers[i];
 		if(!is_string && layerObject.layer.object.equal(layer.object))
 			return true;
-	
+		
 		if(is_string && layerObject.layer.id != layer)
 			continue;
 		else if(!is_string && (layerObject.layer != layer))// && layers[i].layer.id != layer.id
@@ -108,7 +111,7 @@ daylight.animation.timeline.prototype.addLayer = function(query, initMotion) {
 	}
 	if(this.hasLayer(layer)) {
 		alert("이미 레이어가 있습니다. id : " + layer.id);
-		return null;
+		return layer.id;
 	}
 /*
 	if(this.hasLayer(layer.id)) {
@@ -229,7 +232,9 @@ daylight.animation.timeline.prototype.start = function() {
 }
 daylight.animation.timeline.prototype.pause = function() {
 	console.log("PAUSE TIMELINE");
-	$(".daylightAnimationLayer").addClass("animationPause");
+	$(".daylightAnimationLayer").toggleClass("animationPause");
 }
-
+daylight.animation.timeline.prototype.showAnimationBar = function() {
+	
+}
 daylight.defineGetterSetter(daylight.animation.timeline, "animationType");

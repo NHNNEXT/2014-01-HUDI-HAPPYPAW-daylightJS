@@ -336,22 +336,39 @@ daylight.index = daylight.indexOf = function(arr, object) {
 	}
 }
 
-/**
-* @description : 해당 객체가 Node(Element)인지 확인
-* @param : o(Element), text(텍스트 노드 포함 체크)
+
+daylight.extend({	
+	/**
+* @func : daylight.isNode(Node)
+* @description : 해당 객체가 Node인지 확인
+* @param : Node
 * @return : Boolean(노드이면 true 아니면 false)
 */
-daylight.isNode = function(o, text) {
-	if(!t)
+	isNode : function(o) {
+		if(o instanceof Node)
+			return true;
+	
 		return false;
-	if(o.nodeType == 1)
-		return true;
-	if(text && o.nodeType)
-		return true;
-
-	return false;
-}
+	},
 /**
+* @func : daylight.isElement(Node)
+* @description : 해당 객체가 Element인지 확인
+* @param : Element
+* @return : Boolean(Element이면 true 아니면 false)
+*/
+	isElement : function(o) {
+		if(!o)
+			return false;
+			
+		if(o.nodeType === 1)
+			return true;
+	
+		return false;
+	}
+});
+
+/**
+* @func : daylight.replace(SearchValue, NewValue, String)
 * @description : replaceAll
 * @param : from(바뀔 문자), to(바꿀 문자), str(문자열)
 * @return : String
@@ -378,12 +395,15 @@ daylight.each = daylight.forEach = function(arr, callback) {
 //addClass, removeClass, hasClass
 daylight.extend({
 	/**
-	@ 클래스를 삭제를 합니다.
-	@param element : 삭제할 element, className : 삭제할 클래스 이름, ignoreCheck : element의 검사를 무시할 수 있다.(중복 체크)
-	@return Boolean(삭제 체크)
+	* @func : daylight.removeClass(Element, className)
+	* @description : 클래스를 삭제를 합니다.
+	* @func : daylight.removeClass(Element, className, Boolean(ignore Checking Element))
+	* @description : 클래스를 삭제를 합니다. (3번째 인자가 true로 들어오면 첫번째 인자가 Element인지 검사를 하는 코드를 무시합니다.)
+	* @param : element(삭제할 element), className : 삭제할 클래스 이름, ignoreCheck : element의 검사를 무시할 수 있다.(중복 체크)
+	* @return : Boolean(삭제 체크)
 	*/
 	removeClass : function(element, className, ignoreCheck) {
-		if(!ignoreCheck && !daylight.isNode(element))
+		if(!ignoreCheck && !daylight.isElement(element))
 			return false;
 			
 		var name = element.className;
@@ -407,12 +427,13 @@ daylight.extend({
 		return true;
 	}
 	/**
-	@ 클래스를 가지고 있는지 확인
-	@param element : 찾을 element, className : 찾을 클래스 이름
-	@return Boolean(가지고 있는지 체크)
+	* @func : daylight.hasClass(Element, className)
+	* @description : 클래스를 가지고 있는지 확인
+	* @param : Element(찾을 element), className : 찾을 클래스 이름
+	* @return : Boolean(가지고 있는지 체크)
 	*/
 	,hasClass : function(element, className) {
-		if(!daylight.isNode(element))
+		if(!daylight.isElement(element))
 			return false;
 			
 		var name = element.className;
@@ -426,9 +447,9 @@ daylight.extend({
 		return false;
 	}, 
 	/**
-	@ 클래스를 추가한다.
-	@param element : 추가할 element, className : 추가할 클래스 이름
-	@return Boolean(추가되었는지 체크)
+	* @func : daylight.addClass(Element, className)
+	* @param : element(추가할 element), className(추가할 클래스 이름)
+	* @return : Boolean(추가되었는지 체크)
 	*/
 	addClass : function(element, className) {
 		if(daylight.hasClass(element, className))
@@ -443,7 +464,11 @@ daylight.extend({
 	}
 });
 
-
+/**
+* @func : daylight.init(query)
+* @param : query(CSS Query)
+* @return : new daylight.object
+*/
 daylight.$ = daylight.init = function(query, option) {
 	var objects;
 	var t = daylight.type(query);
@@ -463,41 +488,52 @@ daylight.$ = daylight.init = function(query, option) {
 	}
 	return new this.object(objects, option);
 }
-
+/**
+* @func : daylight.template(object, template)
+* @param : object(Array, Object), template(String, Daylight)
+* @return : html(String)
+*/
 daylight.template = function(obj, template) {
 	var type = this.type(obj);
 	var templateType = this.type(template);
+	
 	if(templateType == "daylight")
-		template = template.ohtml();
-	if(type == "array") {
+		template = template.ohtml();//html 형태로 변환
+		
+	if(type == "array") {//배열이면 리스트 형태로 만든다.
 		var contents = [];
 		var length = obj.length;
 		for(var i = 0; i < length; ++i) {
 			var content = obj[i];
-			contents[contents.length] = this.template(content, template);
+			contents[contents.length] = this.template(content, template);//배열의 요소를 다시 template을 만든다.
 		}
 		return contents.join(" ");
-	} else if(type == "object") {
+	} else if(type == "object") {//배열의 요소를 분석해서 {key}를 바꿔준다.
 		for(var k in obj) {
 			var value = obj[k];
-			if(this.type(value) == "array") {
+			if(this.type(value) == "array") {//만드는 중
 				var length = value.length;
 				for(var i = 0; i < length; ++i) {
 					value[i]
 
 				}
-				template = daylight.replace("{" + k + "}", value, template);
+				template = daylight.replace("{" + k + "}", value, template);//{key} => value
 			} else {
-				template = daylight.replace("{" + k + "}", value, template);
+				template = daylight.replace("{" + k + "}", value, template);//{key} => value
 			}
 		}
 		return template;
 	} else {
-		
+		//배열이나 Dictionary 형태가 아닌 다른 것들은 키를 1로 하고 value로 바꿔준다.
+		return daylight.replace("{1}", obj, template);//{1} => value
 	}
 	return "";
 }
-
+/**
+* @func : daylight.attr(name, value)
+* @param : name(String), value(undefined, String)
+* @return : attribute(String)
+*/
 daylight.fn.attr = function(name, value) {
 	if(value === "" || value) {
 		this.each(function(obj) {
@@ -558,19 +594,7 @@ daylight.fn.css = function(name, value) {
 		
 	return this.o[0].currentStyle ? this.o[0].currentStyle[name] : this.o[0].style[name];
 }
-daylight.fn.children = function() {
-	var o = [];
-	this.each(function(v) {
-		if(!daylight.isNode(v))
-			return;
-			
-		var a = this.children;
-		var l = a.length;
-		for(var i = 0; i < l; ++i)
-			o[o.length] = a[i];
-	});
-	return $(o);
-}
+
 daylight.fn.drag = function(dragFunc) {
 	var dragObject = null;
 	var is_drag = false;
@@ -621,9 +645,10 @@ daylight.fn.addEvent = daylight.fn.event = function(key, func) {
 	}
 }
 daylight.fn.equal = function(object) {
-	if((object instanceof HTMLElement) && this.size == 1 && object == this.o[0]) {
+	var type = daylight.type(object);
+	if(type == "html" && this.size == 1 && object == this.o[0]) {
 		return true;
-	} else if((object instanceof daylight.object) &&  this.size == object.size) {
+	} else if(type == "daylight" &&  this.size == object.size) {
 		for(var i = 0; i < object.size; ++i) {
 			if(this.index(object.o[i]) == -1)
 				return false;
@@ -636,7 +661,7 @@ daylight.fn.equal = function(object) {
 daylight.fn.find = function(query) {
 	var o = [];
 	this.each(function() {
-		if(!daylight.isNode(this))
+		if(!daylight.isElement(this))
 			return;
 		
 		var a = this.querySelectorAll(query);
@@ -763,7 +788,7 @@ daylight.fn.extend({
 			return this;
 		}
 		_domEach(this, objs, function(target, element) {
-			if(daylight.isNode(target) && target.parentNode)
+			if(daylight.isElement(target) && target.parentNode)
 				target.parentNode.insertBefore(element, target);
 		});
 		return this;
@@ -775,7 +800,7 @@ daylight.fn.extend({
 			return this;
 		}
 		_domEach(this, objs, function(target, element) {
-			if(daylight.isNode(target))
+			if(daylight.isElement(target))
 				target.insertBefore(element, target.firstChild);
 		});
 		return this;
@@ -787,7 +812,7 @@ daylight.fn.extend({
 			return this;
 		}
 		_domEach(this, object, function(target, element) {
-			if(daylight.isNode(target))
+			if(daylight.isElement(target))
 				target.appendChild(element);
 		});
 		return this;
@@ -800,14 +825,14 @@ daylight.fn.extend({
 			return this;
 		}
 		_domEach(this, objs, function(target, element) {
-			if(daylight.isNode(target) && target.parentNode)
+			if(daylight.isElement(target) && target.parentNode)
 				target.parentNode.insertBefore(element,  target.nextSibling );
 		});
 		return this;
 	},
 	insertHTML : function(position, html) {//html 삽입하는 함수
 		this.each(function(element) {
-			if(!daylight.isNode(element))//만약 element가 아니면 insertAdjacentHTML을 사용할 수 없다.
+			if(!daylight.isElement(element))//만약 element가 아니면 insertAdjacentHTML을 사용할 수 없다.
 				return false;
 			
 			element.insertAdjacentHTML(position, html);
@@ -816,16 +841,16 @@ daylight.fn.extend({
 });
 
 daylight.fn.extend({
-	isNull : function() {
+	isEmpty : function() {
 		return this.size == 0;
-	}, isNode : function(index) {
+	}, isElement : function(index) {
 		if(index) {
-			if(daylight.isNode(this.o[i]))
+			if(daylight.isElement(this.o[i]))
 				return true;
 				
 			return false;
 		}
-		if(daylight.isNode(this.o))
+		if(this.o.constructor === NodeList)
 			return true;
 		
 		return false;
@@ -833,10 +858,13 @@ daylight.fn.extend({
 });
 
 daylight.fn.index = function(object) {
-	if((object instanceof HTMLElement))
-		return daylight.indexOf(this.o, object);
-	else if((object instanceof daylight.object) && object.size == 1)
-		return daylight.indexOf(this.o, object.o[0]);
+	var type = daylight.type(object);
+	if(type == "daylight")
+		object = object.o[0];
+	for(var i = 0; i < this.size; ++i) {
+		if(this.o[i] === object)
+			return i;
+	}
 	return -1;
 }
 
@@ -880,7 +908,7 @@ daylight.fn.parent = function(object) {
 
 	if(type === "number") {
 		this.each(function(v) {
-			if(!daylight.isNode(v))
+			if(!daylight.isElement(v))
 				return;
 			var i = object;
 			while(--i >= 0 && (v = v.parentNode)) {}
@@ -892,7 +920,7 @@ daylight.fn.parent = function(object) {
 		});
 	} else {
 		this.each(function(v) {
-			if(!daylight.isNode(v))
+			if(!daylight.isElement(v))
 				return;
 
 			var a = v.parentNode;
@@ -904,35 +932,6 @@ daylight.fn.parent = function(object) {
 }
 
 
-daylight.fn.prev = function() {
-	var arr = [];
-	for(var i = 0; i < this.size; ++i) {
-		var e = this.o[i];
-		if(daylight.type(e) != "object")
-			continue;
-		while((e = e.previousSibling) != null && e.nodeType != 1) {}
-
-		if(!e)
-			continue;
-		
-		arr.push(e);
-	};
-	return $(arr);
-};
-daylight.fn.next = function() {
-	var arr = [];
-	for(var i = 0; i < this.size; ++i) {
-		var e = this.o[i];
-		if(typeof e != "object")
-			continue;
-		while((e = e.nextSibling) != null && e.nodeType != 1) {}
-		if(!e)
-			continue;
-
-		arr[arr.length] = e;
-	}
-	return $(arr);
-};
 daylight.fn.siblings = function() {
 	var arr = [];
 };
@@ -948,7 +947,7 @@ daylight.fn.text = function(value) {
 daylight.fn.val = function(value) {
 	if(!(value === undefined)) {
 		this.each(function() {
-			if(!daylight.isNode(this))
+			if(!daylight.isElement(this))
 				return;
 				
 			var node = this.nodeName.toLowerCase();
@@ -956,12 +955,65 @@ daylight.fn.val = function(value) {
 		});
 		return this;
 	}
-	if(!daylight.isNode(this.o[0]))
+	if(!daylight.isElement(this.o[0]))
 		return;
 	var node = this.o[0].nodeName.toLowerCase();
 	return _value[node].get(this.o[0]);
 };
+daylight.fn.extend({
+	first : function() {
+		return this.o[0];
+	},
+	last : function() {
+		if(!this.size)
+			return undefined;
 
+		return this.o[this.size - 1];
+	},
+	children : function() {
+		var o = [];
+		this.each(function(v) {
+			if(!daylight.isElement(v))
+				return;
+				
+			var a = this.children;
+			var l = a.length;
+			for(var i = 0; i < l; ++i)
+				o[o.length] = a[i];
+		});
+		return $(o);
+	},
+	prev : function() {
+		var arr = [];
+		for(var i = 0; i < this.size; ++i) {
+			var e = this.o[i];
+			if(daylight.type(e) != "object")
+				continue;
+			while((e = e.previousSibling) != null && e.nodeType != 1) {}
+	
+			if(!e)
+				continue;
+			
+			arr.push(e);
+		};
+		return $(arr);
+	},
+	next : function() {
+		var arr = [];
+		for(var i = 0; i < this.size; ++i) {
+			var e = this.o[i];
+			if(typeof e != "object")
+				continue;
+			while((e = e.nextSibling) != null && e.nodeType != 1) {}
+			if(!e)
+				continue;
+	
+			arr[arr.length] = e;
+		}
+		return $(arr);
+	}
+
+});
 daylight.fn.extend({
 	width : function() {
 		return this.o[0].offsetWidth;
@@ -991,6 +1043,8 @@ daylight.fn.extend({
 		//contents의 위치
 	}
 });
+
+//animation Effect
 daylight.fn.extend({
 	animation : function() {
 		
