@@ -1,0 +1,57 @@
+<body>
+
+<script src="../daylight.js"></script>
+<script src="../daylight.Event.js"></script>
+<script src="../daylight.ajax.js"></script>
+<script src="unittest.js"></script>
+<script src="../../js/jquery.js"></script>
+<style>
+	th {
+		text-align: left;
+		width: 200px;
+		background: #f4f4f4;
+	}
+	th,td {
+		padding-left:10px;
+	}
+	th.result {
+		width: 100px;
+	}
+</style>
+<a href="#">GEK</a>
+	<input type="text" class="testInput" value="?" />
+<div class="">
+	<span>asdas</span>
+	<span class="tog">asdas</span>
+	<span>asdas</span>
+
+</div>
+<div class="saa">asa</div>
+<div class="parent">hellow
+	<div class="child">aa
+		<div class="child2">
+		bb
+		</div>
+	</div>
+</div>
+<table id="viewConsole">
+	<tr>
+	<th class="name">TEST NAME</th>
+	<th class="result">RESULT</th>	
+	<th class="message">MESSAGE</th>
+	<th class="function">func</th>	
+	</tr>
+</table>
+
+</body>
+<script>
+setConsole(daylight("#viewConsole"));
+this.setConsole(daylight("#viewConsole"));
+
+
+var a = daylight.ajax("http://daybrush.com/yk/board/daylightJS/test/json.php", {async : true})
+.done(function(value, req) {
+	$test("Ajax Async Test JSON").assertEqual("aaa", value.a)	
+});
+
+</script>
