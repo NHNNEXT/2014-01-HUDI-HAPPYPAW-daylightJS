@@ -47,11 +47,12 @@
 <script>
 setConsole(daylight("#viewConsole"));
 this.setConsole(daylight("#viewConsole"));
-
+var url = "http://daybrush.com/yk/board/daylightJS/test/json.php";
 
 var a = daylight.ajax("http://daybrush.com/yk/board/daylightJS/test/json.php", {async : true})
 .done(function(value, req) {
 	$test("Ajax Async Test JSON").assertEqual("aaa", value.a)	
 });
+//$test("Ajax Send", 1000).assertSpeed(function() {daylight.ajax(url);});
 
 </script>

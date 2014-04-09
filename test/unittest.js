@@ -6,12 +6,12 @@ function getTime(func, c) {
 	}
 	var end = Date.now();
 	return end - start;		
-}t = $t = $test = function(name) {
+}t = $t = $test = function(name, count) {
 	var cl = arguments.callee;
 	if (name instanceof cl) return name;
-	if (!(this instanceof cl)) return new cl(name);
+	if (!(this instanceof cl)) return new cl(name, count);
 	
-	
+	if(count)this.speedCount = count;
 	 this.name = name;
 }
 var testConsole = null;

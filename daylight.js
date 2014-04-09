@@ -223,8 +223,7 @@ daylight.extend = daylight.fn.extend = function() {
 	var length = a.length;
 	if(length == 0)
 		return this;
-		
-	var target = length == 1? this : a[0];
+	var target = this;
 	var name;
 	for(var i = 0; i <length; ++i) {
 		var options = a[i];
@@ -364,6 +363,13 @@ daylight.extend({
 			return true;
 	
 		return false;
+	},
+	isPlainObject : function(n) {
+		if(!n)
+			return false;
+		
+		if(n.constructor === Object)
+			return true;
 	}
 });
 
