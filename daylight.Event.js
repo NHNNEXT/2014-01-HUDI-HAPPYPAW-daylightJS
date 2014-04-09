@@ -61,10 +61,10 @@ var _touch = function(e) {
 	var pos = {
 		clientX : e.clientX,
 		clientY : e.clientY,
-		pageX   : 'pageX' in e ? e.pageX : e.clientX + left - body.clientLeft,//ie6 pageX 
-		pageY   : 'pageY' in e ? e.pageY : e.clientY + top - body.clientTop,//ie6 pageY
-		layerX  : 'offsetX' in e ? e.offsetX : e.layerX - 1,//ie6 layerX
-		layerY  : 'offsetY' in e ? e.offsetY : e.layerY - 1//ie6 layerY
+		pageX   : e.pageX,
+		pageY   : e.pageY,
+		layerX  : e.offsetX || e.layerX 
+		layerY  : e.offsetY || e.layerY //ie6 layerY
 	};
 	return pos;
 }, _touchOne = function(e) {
