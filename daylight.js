@@ -42,6 +42,9 @@ var _arraySum = function(arr) {
 	return a;
 }
 var _domEach = function(target, o, callback) {
+	if(target.size == 0)
+		return;
+		
 	var t = daylight.type(o, true);
 	var e;
 	switch(t) {
@@ -57,6 +60,16 @@ var _domEach = function(target, o, callback) {
 		e = o;
 	case "html":
 		e = [o];
+	}
+
+	if(target.size == 1) {
+		var self = target.o[0]
+		for(var i = 0; i < e.length; ++i) {
+			if(self == e[i])
+				continue;
+			
+			callback.call(self, self, e[i]);
+		}
 	}
 	target.each(function(self, index) {
 		for(var i = 0; i < e.length; ++i) {
@@ -234,9 +247,12 @@ daylight.extend = daylight.fn.extend = function() {
 			var src = target[name];
 			var copy = options[name];
 
+/*
+	중복제거
 			//ildan  continue;
 			if(src)
 				continue;
+*/
 			
 			target[name] = copy;
 		}
@@ -678,30 +694,42 @@ daylight.fn.find = function(query) {
 	});
 	return $(o);
 }
-daylight.fn.filter = function(e) {
-	var type = daylight.type(e);
-	var objects = this.o;
-	var length = this.size;
-	var arr = [];
-	var k = 0;
-	switch(type) {
-	case "function":
-		for(var i = 0; i < length; ++i) {
-			var a = e.call(objects[i], objects[i], i, objects);
-			a ? arr[k++] = objects[i] : null;
+daylight.fn.extend({
+	filter : function(e) {
+		var type = daylight.type(e);
+		var objects = this.o;
+		var length = this.size;
+		var arr = [];
+		var k = 0;
+		switch(type) {
+		case "function":
+			for(var i = 0; i < length; ++i) {
+				var a = e.call(objects[i], objects[i], i, objects);
+				a ? arr[k++] = objects[i] : null;
+			}
+			return arr;
 		}
+		
 		return arr;
+	},
+	map : function(func) {	
+		var objects = this.o;
+		var length = this.size;
+		var arr = [];
+		for(var i = 0; i < length; ++i)
+			arr[i] = func.call(objects[i], i, objects);
+		
+		return arr;
+	},
+	each : function(callback) {
+		var objects = this.o;
+		var length = this.size;
+		for(var i = 0; i < length; ++i) {
+			callback.call(objects[i], objects[i], i, objects);
+		}
 	}
-	
-	return arr;
-}
-daylight.fn.each = daylight.fn.forEach = function(callback) {
-	var objects = this.o;
-	var length = this.size;
-	for(var i = 0; i < length; ++i) {
-		callback.call(objects[i], objects[i], i, objects);
-	}
-}
+});
+
 daylight.fn.get = function(index) {
 	if(index < 0)
 		index = this.o.length - index;
@@ -773,6 +801,8 @@ daylight.fn.html = function(value) {
 			this.innerHTML = value;
 		});
 	}
+	if(this.size == 0)
+		return "";
 	return this.o[0].innerHTML;
 }
 
@@ -874,15 +904,6 @@ daylight.fn.index = function(object) {
 	return -1;
 }
 
-daylight.fn.map = function(func) {	
-	var objects = this.o;
-	var length = this.size;
-	var arr = [];
-	for(var i = 0; i < length; ++i)
-		arr[i] = func.call(objects[i], i, objects);
-	
-	return arr;
-}
 daylight.fn.ohtml = function(value) {
 	if(!(value === undefined)) {
 		this.each(function() {
@@ -1066,6 +1087,7 @@ daylight.fn.extend({
 daylight.parseHTML;
 daylight.fn.scrollLeft;
 
+daylight.fn.forEach = daylight.fn.each;
 daylight.each("Boolean Number String Text Function Array Date RegExp Object Error Window NodeList".split(" "), function(name, index, arr) {
 	class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });

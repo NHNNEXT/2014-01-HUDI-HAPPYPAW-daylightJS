@@ -1,6 +1,6 @@
 /*
 Setting
-isAutoSend(자동으로 보내기) : true
+autoSend(자동으로 보내기) : true
 async(비동기) : true
 Method : GET
 type : auto
@@ -9,11 +9,128 @@ var a = $.ajax("http://daybrush.com/yk/board/daylightJS/test/json.php");
 json.php는 content-type이  application/json => json형태의 데이터로 보여준다.
 
 */
+/*
+	ajax
+	script
+	jsonp
+	
+	
+*/
+//interface  init, send, statechange
+var _ajaxType = {
+	"ajax" : {
+		//초기화
+		init : function(ajax) {
+			var target = new XMLHttpRequest();
+			target.open(ajax.option.method, ajax.url, ajax.option.async);
+			ajax.target = target;
+		},
+		//보내기
+		send : function(ajax) {
+			var request = ajax.target;
+			request.send(ajax.param);
+		},
+		//해당 정보를 가져온다.
+		_get : function(ajax, request) {
+			var contentType = request.getResponseHeader("content-type");
+			switch(ajax.type) {
+			case "auto":
+				//JSON형태로 변환.
+				if(contentType === "application/json")
+					return ajax._parseJSON(request.responseText);
+				
+				//나머지는 그냥 텍스트로
+				if(!request.responseXML)
+					return request.responseText;
+		
+			case "xml":
+				//XML이면 responseXML 노드 형태로 되어있다.
+				if(request.responseXML)
+					return request.responseXML;
+				break;
+			case "text":
+				return request.responseText;
+				break;
+			case "json":
+				return ajax._parseJSON(request.responseText);
+			}	
+			
+			return request.responseText;
+		},
+		statechange : function(ajax) {
+			var request = ajax.target;
+			var self = this;
+			//state변경
+			request.onreadystatechange = function () {
+				if (request.readyState == 4) {
+					//200이 정상
+					if(request.status == 200) {
+						//done함수 있을 경우.
+						if(ajax.func.done) {
+							var value = self._get(ajax, request);
+							ajax.func.done.call(request, value, request);
+						}
+					} else {
+						if(ajax.func.fail) ajax.func.fail(request);
+					}
+					if(ajax.func.always) ajax.func.always(request);
+				}
+			};
+		}
+	},
+	"jsonp" : {
+		init : function(ajax) {
+			var head = document.getElementsByTagName("head")[0];
+			var script = document.createElement("script");
+			script.type = "text/javascript";
+			ajax.target = script;
+			
+
+		},
+		send : function(ajax) {
+			setTimeout(function() {
+				var script = ajax.target;
+				daylight.defineGlobal(ajax.callbackName, function(data) {
+					if(ajax.func.done) ajax.func.done.call(script, data, script);
+					if(ajax.func.always) ajax.func.always(script);
+					
+					window[ajax.callbackName] = undefined;
+					
+					script.parentNode.removeChild(script);
+					delete window[ajax.callbackName];
+				});
+				var e = daylight("head, body").o[0];
+				if(e) e.appendChild(script);
+				script.src = ajax.url;			
+			}, 1);
+
+		},
+		get : function() {
+		},
+		statechange : function(ajax) {
+			var script = ajax.target;
+			var self = this;
+			//state변경
+			script.onreadystatechange = function () {
+				if(this.status == "loaded") {
+					if(ajax.func.done) ajax.func.done(script);
+					if(ajax.func.always) ajax.func.always(script);
+				} 
+			};
+			script.onerror = function() {
+				if(ajax.func.fail) ajax.func.fail(script);
+				if(ajax.func.always) ajax.func.always(script);
+			};
+			script.onload = function() {
+			};
+		}
+		
+	}
+};
 daylight.ajax = function(url, option) {
 	var cl = arguments.callee;
 	if (!(this instanceof cl)) return new cl(url, option);
-	
-	this.request = new XMLHttpRequest();
+
 	//옵션 초기화
 	this.option = {
 		autoSend : this.autoSend,
@@ -40,33 +157,21 @@ daylight.ajax = function(url, option) {
 	}
 	option = this.option;
 	
-	//object형태의 url형태로 바꿔준다. 다른 방법이 있다면 formDate또는 다른 방식으로 바꿔준다...
-	this.setParameter(option.data);
-	var ajax = this;
-	var request = this.request;
-	//request오픈!!!
-	request.open(this.method, url, this.async);
+	var type = option.type === "jsonp" ? "jsonp" : "ajax";
+	var ajaxFunc = this.ajaxFunc = _ajaxType[type];//해당하는 ajax 인터페이스를 가져온다.
 	
+	//타입에 맞게 parameter랑 url을 바꿔준다.
+	this.setParameter(option.data);	
+	
+	ajaxFunc.init(this);//초기화.
+	
+	
+	ajaxFunc.statechange(this);//콜백함수 설정.
+
 	//ajax함수를 부르는 순간 보낼 것인가 안 보낼 것인가 결정.
 	if(option.autoSend)
 		this.send();
 	
-	//state변경
-	request.onreadystatechange = function (evt) {
-		if (request.readyState == 4) {
-			if(request.status == 200) {
-			//200이 정상
-				//done함수 있을 경우.
-				if(ajax.func.done) {
-					var value = ajax._get(request);
-					ajax.func.done.call(request, value, request);
-				}
-			} else {
-				if(ajax.func.fail) ajax.func.fail("", request);
-			}
-			if(ajax.func.always) ajax.func.always(request);
-		}
-	};
 }
 daylight.ajax.prototype.extend = daylight.extend;
 daylight.ajax.prototype.autoSend = true;
@@ -80,33 +185,6 @@ daylight.ajax.prototype._parseJSON = function(text) {
 	} catch (e) {
 		return {};
 	}
-}
-daylight.ajax.prototype._get = function(request) {
-	var contentType = request.getResponseHeader("content-type");
-	switch(this.type) {
-	case "auto":
-		//JSON형태로 변환.
-		if(contentType === "application/json")
-			return this._parseJSON(request.responseText);
-		
-		//나머지는 그냥 텍스트로
-		if(!request.responseXML)
-			return request.responseText;
-
-	case "xml":
-		//XML이면 responseXML 노드 형태로 되어있다.
-		if(request.responseXML)
-			return request.responseXML;
-		break;
-	case "text":
-		return request.responseText;
-		break;
-	case "json":
-		return this._parseJSON(request.responseText);
-	case "jsonp":
-		//정보 찾아보기. 모르겠다 ㅠㅠ
-		return this._parseJSON(request.responseText);
-	}	
 }
 
 
@@ -146,22 +224,33 @@ daylight.ajax.prototype.get = function() {
 	return this._get(this.request);
 }
 daylight.ajax.prototype.send = function() {
-	var req = this.request;
 	if(this.func.beforeSend)
-		this.func.beforeSend(req);
-	req.send(null);
+		this.func.beforeSend(this.target);
+		
+	this.ajaxFunc.send(this);
+	
 	return this;
 }
 
 //parameter관련 함수들
 daylight.ajax.prototype.extend({
 	setParameter : function(data) {
+
 		if(!data)
 			this.param = "";
 		else if(typeof data === "string")
 			this.param = data;
-		else
-			this.param = this.objectToParam(option.data);
+		else if(daylight.isPlainObject(data))
+			this.param = this.objectToParam(data);
+		else 
+			;//생각해 보겠음...
+			
+		if(this.option.type === "jsonp") {
+			this.setJSONP();
+			this.url += "&" + this.param;
+			return;
+		}			
+		
 	},
 	objectToParam : function(data) {
 		var param = "";
@@ -172,6 +261,16 @@ daylight.ajax.prototype.extend({
 		    param += key + "=" + param[key];
 		}
 		return param;
+	}
+});
+//jsonp 처리 관련.
+daylight.ajax.prototype.extend({
+	setJSONP : function() {
+		this.callbackName = "daylight" + parseInt(Math.random() * 1000000000);
+		var prefix = (this.url.indexOf("?") != -1) ? "&"  : "?" ;
+		var callback = "callback=" + this.callbackName;
+
+		this.url += prefix + callback;
 	}
 });
 

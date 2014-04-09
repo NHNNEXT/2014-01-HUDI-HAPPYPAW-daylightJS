@@ -35,7 +35,7 @@ var _touch = function(e) {
 		clientY : e.clientY,
 		pageX   : e.pageX,
 		pageY   : e.pageY,
-		layerX  : e.offsetX || e.layerX 
+		layerX  : e.offsetX || e.layerX,
 		layerY  : e.offsetY || e.layerY //ie6 layerY
 	};
 	return pos;
