@@ -1,41 +1,13 @@
-
-daylight.$Browser = function() {
-	var agent = userAgent;
-	var browserList = ["msie 10", "msie 9", "msie 8", "msie 7", "msie 6", "msie"];
-	var browser = {
-    ie6 : agent.indexOf('msie 6') != -1,
-    ie7 : agent.indexOf('msie 7') != -1,
-    ie8 : agent.indexOf('msie 8') != -1,
-    ie9 : agent.indexOf('msie 9') != -1,
-    ie10 : agent.indexOf('msie 10') != -1,
-    ie : agent.indexOf('msie') != -1,
-    chrome : agent.indexOf('chrome') != -1,
-    opera : !!window.opera,
-    safari : agent.indexOf('safari') != -1,
-    safari3 : agent.indexOf('applewebkir/5') != -1,
-    mac : agent.indexOf('mac') != -1,
-
-    firefox : agent.indexOf('firefox') != -1
-	};
-	var is_ie = false;
-	for(var i  in browser) {
-		if(browser[i]) {
-			return true;
-		}
-	}
-	
-	return is_ie ? "Internet Explorer" : "chrome"
-  
-}
 daylight.$Event = function(e) {
-	var cl = arguments.callee;
-	if (e instanceof cl) return e;
-	if (!(this instanceof cl)) return new cl(e);
-	
+	var callee = arguments.callee;
+	if (e instanceof callee) return e;
+	if (!(this instanceof callee)) return new callee(e);
 	
 	if(e === undefined) e = window.event;
 	var element = e.target || e.srcElement;
-	if (element.nodeType == 3) // defeat Safari bug
+
+
+	if (element.nodeType == 3) //Text
 		element = element.parentNode;
 	var currentElement = e.currentTarget || element;
 	
@@ -70,7 +42,7 @@ var _touch = function(e) {
 }, _touchOne = function(e) {
 
 	if (e.touches) {
-		var xy = (e.type == "touchend") ? _pos(e.changedTouches[0]) : _pos(e.touches[0]);
+		var xy = (e.type === "touchend") ? _pos(e.changedTouches[0]) : _pos(e.touches[0]);
 		return xy;
 	}
 	return {};
