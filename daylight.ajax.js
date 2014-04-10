@@ -9,15 +9,10 @@ var a = $.ajax("http://daybrush.com/yk/board/daylightJS/test/json.php");
 json.php는 content-type이  application/json => json형태의 데이터로 보여준다.
 
 */
-/*
-	ajax
-	script
-	jsonp
-	
-	
-*/
+
+//test private 
 //interface  init, send, statechange
-var _ajaxType = {
+var _ajaxFunc = {
 	"ajax" : {
 		//초기화
 		init : function(ajax) {
@@ -68,37 +63,37 @@ var _ajaxType = {
 						//done함수 있을 경우.
 						if(ajax.func.done) {
 							var value = self._get(ajax, request);
-							ajax.func.done.call(request, value, request);
+							ajax._done(value, request);
 						}
 					} else {
-						if(ajax.func.fail) ajax.func.fail(request);
+						ajax._fail(script);
 					}
-					if(ajax.func.always) ajax.func.always(request);
+
+					ajax._always(request);
 				}
 			};
 		}
 	},
-	"jsonp" : {
+	"script" : {
 		init : function(ajax) {
 			var head = document.getElementsByTagName("head")[0];
 			var script = document.createElement("script");
 			script.type = "text/javascript";
 			ajax.target = script;
-			
-
 		},
 		send : function(ajax) {
 			setTimeout(function() {
 				var script = ajax.target;
-				daylight.defineGlobal(ajax.callbackName, function(data) {
-					if(ajax.func.done) ajax.func.done.call(script, data, script);
-					if(ajax.func.always) ajax.func.always(script);
-					
-					window[ajax.callbackName] = undefined;
-					
-					script.parentNode.removeChild(script);
-					delete window[ajax.callbackName];
-				});
+				if(ajax.option.type === "jsonp") {
+					daylight.defineGlobal(ajax.callbackName, function(data) {
+						ajax._done(data, script);
+						ajax._always(script);
+						
+						window[ajax.callbackName] = undefined;
+						script.parentNode.removeChild(script);
+						delete window[ajax.callbackName];
+					});
+				}
 				var e = daylight("head, body").o[0];
 				if(e) e.appendChild(script);
 				script.src = ajax.url;			
@@ -112,16 +107,22 @@ var _ajaxType = {
 			var self = this;
 			//state변경
 			script.onreadystatechange = function () {
+				//loading
+				//interactive
+				//loaded
+				//complete
 				if(this.status == "loaded") {
-					if(ajax.func.done) ajax.func.done(script);
-					if(ajax.func.always) ajax.func.always(script);
 				} 
 			};
 			script.onerror = function() {
-				if(ajax.func.fail) ajax.func.fail(script);
-				if(ajax.func.always) ajax.func.always(script);
+				ajax._fail(script);
+				ajax._always(script);
 			};
 			script.onload = function() {
+				if(ajax.option.type != "jsonp") {
+					ajax._done(script.innerHTML, script);
+					ajax._always(script);
+				}
 			};
 		}
 		
@@ -157,8 +158,8 @@ daylight.ajax = function(url, option) {
 	}
 	option = this.option;
 	
-	var type = option.type === "jsonp" ? "jsonp" : "ajax";
-	var ajaxFunc = this.ajaxFunc = _ajaxType[type];//해당하는 ajax 인터페이스를 가져온다.
+	var type = option.type === "jsonp"? "script" : "ajax";//|| option.type==="script" 
+	var ajaxFunc = this.ajaxFunc = _ajaxFunc[type];//해당하는 ajax 인터페이스를 가져온다.
 	
 	//타입에 맞게 parameter랑 url을 바꿔준다.
 	this.setParameter(option.data);	
@@ -215,11 +216,26 @@ daylight.ajax.prototype.extend({
 		return this;
 	}
 });
-daylight.ajax.prototype._done = function() {
-	if(request.readyState == 4 && request.status == 200) {
-		this.text = request.responseText;
+//콜백함수 호출하는 함수
+daylight.ajax.prototype.extend({
+	_done : function(value, target) {
+		if(this.func.done)
+			this.func.done.call(target, value, target);
+	},
+	_fail : function(target) {
+		if(this.func.fail)
+			this.func.fail.call(target, target);
+	},
+	_timeout : function(target) {
+		if(this.func.timeout)
+			this.func.timeout.call(target, target);
+	},
+	_always : function(target) {
+		if(this.func.always)
+			this.func.always.call(target, target);
 	}
-}
+});
+
 daylight.ajax.prototype.get = function() {
 	return this._get(this.request);
 }
@@ -242,7 +258,9 @@ daylight.ajax.prototype.extend({
 			this.param = data;
 		else if(daylight.isPlainObject(data))
 			this.param = this.objectToParam(data);
-		else 
+		else if(window.FormData && data.constructor == FormData)
+			this.param = data;
+		else
 			;//생각해 보겠음...
 			
 		if(this.option.type === "jsonp") {

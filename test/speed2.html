@@ -44,11 +44,15 @@
 <script>
 setConsole(daylight("#viewConsole"));
 this.setConsole(daylight("#viewConsole"));
-
+$test.prototype.speedCount = 1000;
 var newfunc = function() {};
 var element = document.getElementsByClassName("name")[0];
-
-
-var compare = [{func:"", target:"object", query : "", argument:""}]
-function comparison(){}
+$test("Width").assertSpeed(function() {daylight("input").width()}, function() {jQuery("input").width()});
+$test("Width2").assertSpeed(function() {daylight(".tog").width()}, function() {jQuery(".tog").width()});
+$test("innerWidth").assertSpeed(function() {daylight("input").innerWidth()}, function() {jQuery("input").innerWidth()});
+$test("innerWidth2").assertSpeed(function() {daylight(".tog").innerWidth()}, function() {jQuery(".tog").innerWidth()});
+$test("outerWidth").assertSpeed(function() {daylight("input").outerWidth()}, function() {jQuery("input").outerWidth()});
+$test("outerWidth2").assertSpeed(function() {daylight(".tog").outerWidth()}, function() {jQuery(".tog").outerWidth()});
+$test("outerWidth(true)").assertSpeed(function() {daylight("input").outerWidth(true)}, function() {jQuery("input").outerWidth(true)});
+$test("outerWidth(true)").assertSpeed(function() {daylight(".tog").outerWidth(true)}, function() {jQuery(".tog").outerWidth(true)});
 </script>

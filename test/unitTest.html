@@ -61,7 +61,10 @@ $test('toggleClass, filter 검사').assertListEqual(daylight("span").toggleClass
 $test('val 검사 1').assertEqual(daylight("input").val(), "?");
 $test('parent 검사 1').assertEqual(daylight(".child2").parent().o[0], document.getElementsByClassName("child")[0]);
 $test('parent 검사 2').assertEqual(daylight(".child2").parent(2).o[0], document.getElementsByClassName("parent")[0]);
-
+$test('Input Width').assertEqual(daylight(".testInput").width(), daylight(".testInput").o[0].clientWidth - 2);
+$test('inner Height').assertEqual(daylight(".testInput").innerHeight(), daylight(".testInput").o[0].clientHeight);
+$test('outer Width').assertEqual(daylight(".testInput").outerWidth(), daylight(".testInput").o[0].offsetWidth);
+$test('outer Height').assertEqual(daylight(".testInput").outerHeight(true), daylight(".testInput").o[0].offsetHeight + 4);
 
 daylight(".testInput").focus(function(e) {
 	var event = daylight.$Event(e);

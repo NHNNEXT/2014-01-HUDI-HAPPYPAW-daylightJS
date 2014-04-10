@@ -795,17 +795,6 @@ daylight.fn.extend({
 	}
 });
 
-daylight.fn.html = function(value) {
-	if(!(value === undefined)) {
-		this.each(function() {
-			this.innerHTML = value;
-		});
-	}
-	if(this.size == 0)
-		return "";
-	return this.o[0].innerHTML;
-}
-
 /*
 	before
 	<p>
@@ -904,14 +893,6 @@ daylight.fn.index = function(object) {
 	return -1;
 }
 
-daylight.fn.ohtml = function(value) {
-	if(!(value === undefined)) {
-		this.each(function() {
-			this.outerHTML = value;
-		});
-	}
-	return this.o[0].outerHTML;
-}
 daylight.fn.scrollTop = function(value) {
 	if(value) {
 		this.each(function(e) {
@@ -962,31 +943,53 @@ daylight.fn.parent = function(object) {
 daylight.fn.siblings = function() {
 	var arr = [];
 };
-daylight.fn.text = function(value) {
-	if(!(value === undefined)) {
-		this.each(function() {
-			this.innerText = value;
-		});
-		return this;
+
+
+daylight.fn.extend({
+	html : function(value) {
+		if(!(value === undefined)) {
+			this.each(function() {
+				this.innerHTML = value;
+			});
+		}
+		if(this.size == 0)
+			return "";
+		return this.o[0].innerHTML;
+	},
+	text : function(value) {
+		if(!(value === undefined)) {
+			this.each(function() {
+				this.innerText = value;
+			});
+			return this;
+		}
+		return this.o[0].innerText;
+	},
+	ohtml : function(value) {
+		if(!(value === undefined)) {
+			this.each(function() {
+				this.outerHTML = value;
+			});
+		}
+		return this.o[0].outerHTML;
+	},
+	val : function(value) {
+		if(!(value === undefined)) {
+			this.each(function() {
+				if(!daylight.isElement(this))
+					return;
+					
+				var node = this.nodeName.toLowerCase();
+				_value[node].set(this, value);
+			});
+			return this;
+		}
+		if(!daylight.isElement(this.o[0]))
+			return;
+		var node = this.o[0].nodeName.toLowerCase();
+		return _value[node].get(this.o[0]);
 	}
-	return this.o[0].innerText;
-}
-daylight.fn.val = function(value) {
-	if(!(value === undefined)) {
-		this.each(function() {
-			if(!daylight.isElement(this))
-				return;
-				
-			var node = this.nodeName.toLowerCase();
-			_value[node].set(this, value);
-		});
-		return this;
-	}
-	if(!daylight.isElement(this.o[0]))
-		return;
-	var node = this.o[0].nodeName.toLowerCase();
-	return _value[node].get(this.o[0]);
-};
+});
 daylight.fn.extend({
 	first : function() {
 		return this.o[0];
@@ -1041,27 +1044,82 @@ daylight.fn.extend({
 	}
 
 });
+
+//getComputedStyle == currentStyle
 daylight.fn.extend({
-	width : function() {
-		return this.o[0].offsetWidth;
-	}
-	,height : function() {
-		return this.o[0].offsetHeight;
-	}
-	,innerWidth : function() {
+	dimension : function() {
+		var is_request = {};
+		var border = {left : null, top: null, right:null, bottom:null};
+		var padding = {left : null, top: null, right:null, bottom:null};
+		var margin = {left : null, top: null, right:null, bottom:null};
 		
-	}
-	,innerHeight : function() {
-		
-	}
-	,outerWidth : function() {
-		
-	}
-	,outerHeight : function() {
-		
+	},
+	style : function(name) {
+		var o = this.o[0];
+		if(!o)
+			return undefined;
+		if(!name)
+			return o.currentStyle || window.getComputedStyle(o) || o.style;
+			
+		if(window.getComputedStyle)
+			return getComputedStyle(o)[name]
+		else if(o.currentStyle)
+			return o.currentStyle[name];
+		else if(o.style)
+			return o.style[name];
+		else
+			return "";
 	}
 });
+//demension 관련 함수들  width, height, innerWidth, innerHeight, outerWidth, outerHeight
+["Width", "Height"].forEach(function(name) {
+	var lowerName = name.toLowerCase();
+	var requestComponent = name === "Width" ? ["left", "right"] : ["top", "bottom"];
+	daylight.fn[lowerName] = function() {
+		var currentStyle = this.style();
+		var o = this.o[0];
+		if(o["client" + name] > 0) {
+			var dimension = o["client" + name];
+			dimension -= parseFloat(currentStyle["padding-" + requestComponent[0]]);
+			dimension -= parseFloat(currentStyle["padding-" + requestComponent[1]]);
+			
+			return dimension;
+		}
+		var dimension = o["offset" + name];
+		dimension -= parseFloat(currentStyle["padding-" + requestComponent[0]]);
+		dimension -= parseFloat(currentStyle["padding-" + requestComponent[1]]);
+		dimension -= parseFloat(currentStyle["border-" + requestComponent[0] + "-width"]);
+		dimension -= parseFloat(currentStyle["border-" + requestComponent[1] + "-width"]);
 
+		return dimension;
+	}
+	daylight.fn["inner" + name] = function() {
+		var currentStyle = this.style();
+		var o = this.o[0];
+		if(o["client" + name] > 0)
+			return o["client" + name]
+
+		var dimension = o["offset" + name];
+		dimension -= parseFloat(currentStyle["border-" + requestComponent[0] + "-width"]);
+		dimension -= parseFloat(currentStyle["border-" + requestComponent[1] + "-width"]);
+		
+		return dimension;
+	}
+	daylight.fn["outer" + name] = function(bInlcudeMargin) {
+		var currentStyle = this.style();
+		var o = this.o[0];
+		var dimension = o["offset" + name];
+		if(bInlcudeMargin)
+			dimension += parseFloat(currentStyle["margin-"+requestComponent[0]]) + parseFloat(currentStyle["margin-"+requestComponent[1]]);
+		
+		return dimension;
+	}
+});
+daylight.fn.test = function() {
+	var o = this.o[0];
+	
+	this.dimension();
+}
 daylight.fn.extend({
 	position : function() {
 		//margin padding을 무시한 위치
