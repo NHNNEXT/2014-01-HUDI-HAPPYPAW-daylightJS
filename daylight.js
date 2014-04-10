@@ -1115,6 +1115,8 @@ daylight.fn.extend({
 		return dimension;
 	}
 });
+
+//테스트용 함수 ㅠㅠㅠㅠ
 daylight.fn.test = function() {
 	var o = this.o[0];
 	
@@ -1123,9 +1125,37 @@ daylight.fn.test = function() {
 daylight.fn.extend({
 	position : function() {
 		//margin padding을 무시한 위치
+		var currentStyle = this.style();
+		var pos = this.offset();
+/*
+		if(!this.o[0] || currentStyle["position"] === "fixed")
+			return pos;
+		
+*/
+		
+		return {
+			top : pos.top,
+			left : pos.left
+		}
 	}
+	//jQuery를 거의 그대로 퍼옴.
 	,offset : function() {
 		//contents의 위치
+		var element = this.o[0];		
+		var box = { top: 0, left: 0 };
+		if(!element)
+			return box;
+		
+		var win = window;
+		var doc = document;
+		var docElem = docElem = doc.documentElement;
+		if(element.getBoundingClientRect)
+			box = element.getBoundingClientRect();
+		
+		return {
+			top: box.top + win.pageYOffset - docElem.clientTop,
+			left: box.left + win.pageXOffset - docElem.clientLeft
+		};
 	}
 });
 
