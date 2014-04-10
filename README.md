@@ -11,3 +11,4 @@
 
 ### [daylight UnitTest1](http://daybrush.com/yk/board/daylightJS/test/unitTest.html)
 ### [daylight speedTest1](http://daybrush.com/yk/board/daylightJS/test/speed1.html)
+### [daylight UITest](http://daybrush.com/yk/board/daylightJS/test/uiTest.html)

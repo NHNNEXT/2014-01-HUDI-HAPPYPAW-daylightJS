@@ -541,6 +541,8 @@ daylight.template = function(obj, template) {
 				}
 				template = daylight.replace("{" + k + "}", value, template);//{key} => value
 			} else {
+				if(value === undefined)
+					value = "";
 				template = daylight.replace("{" + k + "}", value, template);//{key} => value
 			}
 		}
@@ -1032,7 +1034,7 @@ daylight.fn.extend({
 		var arr = [];
 		for(var i = 0; i < this.size; ++i) {
 			var e = this.o[i];
-			if(typeof e != "object")
+			if(!daylight.isNode(e))
 				continue;
 			while((e = e.nextSibling) != null && e.nodeType != 1) {}
 			if(!e)
@@ -1127,6 +1129,8 @@ daylight.fn.extend({
 		//margin padding을 무시한 위치
 		var currentStyle = this.style();
 		var pos = this.offset();
+		
+		//수정 요청
 /*
 		if(!this.o[0] || currentStyle["position"] === "fixed")
 			return pos;

@@ -1,0 +1,103 @@
+@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+
+.day_checkbox {
+	margin:5px;
+}
+.day_checkbox input[type=checkbox] {
+	visibility: hidden;
+	position: absolute;
+}
+.day_checkbox label {
+	position: relative;
+	display: block;
+}
+.day_checkbox input[type=checkbox]:checked + label {
+	/*체크*/
+/* 	background: #f55; */
+}
+
+
+.day_checkbox.checkbox_sample_simple_square label {
+	width: 20px;
+	height: 20px;
+	border:2px solid #333;
+
+}
+.day_checkbox.checkbox_sample_simple_square input[type=checkbox]:checked + label {
+	/*체크*/
+}
+.day_checkbox.checkbox_sample_simple_square input[type=checkbox]:checked + label:after {
+	content:" ";
+	position: relative;
+	display: block;
+	border-bottom: 2px solid #333;
+	border-right:2px solid #333;
+	width:35%;
+	height: 67%;
+	left:26%;
+	transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	
+}
+
+.day_checkbox.checkbox_sample_simple_round label {
+	width: 20px;
+	height: 20px;
+	border:2px solid #333;
+	border-radius: 50%;
+	display: block;
+}
+.day_checkbox.checkbox_sample_simple_round input[type=checkbox]:checked + label {
+	/*체크*/
+}
+.day_checkbox.checkbox_sample_simple_round input[type=checkbox]:checked + label:after {
+	content:" ";
+	position: relative;
+	display: block;
+	border-bottom: 2px solid #333;
+	border-right:2px solid #333;
+	width:30%;
+	height: 58%;
+	left:28%;
+	top:5%;
+	transform: rotate(45deg);
+	-webkit-transform: rotate(45deg);
+	
+}
+
+
+.day_checkbox.checkbox_sample_ios_on_off label {
+	width: 50px;
+	height: 30px;
+	border-radius:15px;
+	box-shadow:inset 0 0 0px 1px #d5d5d5;
+	display: block;
+	transition:all ease 0.35s;
+	-webkit-transition:left 0.35s, background 0.35s;
+	-moz-transition:left 0.35s, background 0.35s;
+	-o-transition:left 0.35s, background 0.35s;
+	-ms-transition:left 0.35s, background 0.35s;
+}
+.day_checkbox.checkbox_sample_ios_on_off label:after {
+	position: absolute;
+	content: "";
+	width: 30px;
+	height: 30px;
+	left:0%;
+	border-radius:15px;
+	box-shadow:inset 0 0 0 1px rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.2);
+	display: block;
+	background: #fff;
+	transition:all ease 0.35s;
+	-webkit-transition:all 0.35s;
+	-moz-transition:all 0.35s;
+	-o-transition:all 0.35s;
+	-ms-transition:all 0.35s;
+}
+.day_checkbox.checkbox_sample_ios_on_off input[type=checkbox]:checked + label {
+	background: #00C100;
+}
+.day_checkbox.checkbox_sample_ios_on_off input[type=checkbox]:checked + label:after {
+	left:40%;
+	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
+}
