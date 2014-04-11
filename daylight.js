@@ -41,6 +41,48 @@ var _arraySum = function(arr) {
 	}
 	return a;
 }
+_style = function(element) {
+	if(window.getComputedStyle)
+		return window.getComputedStyle(element);
+	else if(element.currentStyle)
+		return element.currentStyle;
+	else if(element.style)
+		return element.style;
+}
+_curCss = function(element, name, cssHooks) {
+	if(!element)
+		return undefined;
+	if(!name)
+		return undefined;
+	var style;
+	if(!cssHooks) {
+		if(window.getComputedStyle)
+			style = getComputedStyle(element)[name]
+		else if(element.currentStyle)
+			style = element.currentStyle[name];
+		else if(element.style)
+			style = element.style[name];
+	} else {
+		style = cssHooks[name];
+	}
+	if(style[style.length - 1] == "%") {
+		//test
+		var percentage = parseFloat(style);
+		var offsetParent = element.offsetParent;
+		var innerWidth = $(offsetParent).innerWidth();
+		var cssHooks = _style(offsetParent);
+		var border_left = _curCss(offsetParent, "border-left-width", cssHooks);
+		var border_right = _curCss(offsetParent, "border-right-width", cssHooks);
+		var padding_left = _curCss(offsetParent, "padding-left", cssHooks);
+		var padding_right = _curCss(offsetParent, "padding-right", cssHooks);
+		var width = innerWidth - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);
+		
+		return percentage * width / 100 + "px";
+	}
+	
+	return style;
+	
+}
 var _domEach = function(target, o, callback) {
 	if(target.size == 0)
 		return;
@@ -412,7 +454,9 @@ daylight.each = daylight.forEach = function(arr, callback) {
 			arr.each(callback);
 	}
 }
-
+daylight.contains = function(parent, node, isContainParent) {
+	return (isContainParent && parent === node || parent !== node )&& parent.contains(node);
+}
 
 //addClass, removeClass, hasClass
 daylight.extend({
@@ -600,6 +644,7 @@ daylight.fn.addClass = function(className) {
 			
 	});
 }
+
 daylight.fn.css = function(name, value) {
 	if(!(value === undefined)) {
 		if(typeof name == "object") {
@@ -616,7 +661,7 @@ daylight.fn.css = function(name, value) {
 		return this;
 	}
 		
-	return this.o[0].currentStyle ? this.o[0].currentStyle[name] : this.o[0].style[name];
+	return _curCss(this.o[0], name);
 }
 
 daylight.fn.drag = function(dragFunc) {
@@ -628,23 +673,31 @@ daylight.fn.drag = function(dragFunc) {
 	var mouseDown = function(e) {
 		is_drag = true;
 		prePosition = daylight.$E.cross(e);
-		dragDistance = {x : 0, y : 0};
-		console.log("DRAG START");
+		dragDistance = {stx :prePosition.x, sty : prePosition.y, x : 0, y : 0, dx:0, dy:0};
+		dragObject = e.target || e.srcElement;
+/* 		console.log("DRAG START"); */
+		dragFunc(dragObject, e, dragDistance);
 	};
 	var mouseMove = function(e) {
 		if(!is_drag)
-			return;
+			return;	
 		var position = daylight.$E.cross(e);
-		dragDistance.x += position.pageX - prePosition.pageX;
-		dragDistance.y += position.pageY - prePosition.pageY;
+		dragDistance.dx = position.pageX - prePosition.pageX;
+		dragDistance.dy = position.pageY - prePosition.pageY;
+		dragDistance.x += dragDistance.dx;
+		dragDistance.y += dragDistance.dy;
+
 		prePosition = position;
+		
+		if(dragFunc) dragFunc(dragObject, e, dragDistance);
 		e.preventDefault();
 	};
 	var mouseUp = function(e) {
 		if(!is_drag)
 			return;
 			
-		console.log("DRAG EBD");
+		console.log("DRAG END");
+		dragObject = null;
 		is_drag = false;
 	}
 	
@@ -694,7 +747,21 @@ daylight.fn.find = function(query) {
 			o[o.length] = a[i];
 		}
 	});
-	return $(o);
+	return daylight(o);
+}
+daylight.fn.get = function(index) {
+	if(index < 0)
+		index = this.o.length - index;
+	return this.o[index];
+}
+daylight.fn.has = function(selector, isContainParent) {
+	if(daylight.isElement(selector)) {
+		return this.filter(function() {
+			return daylight.contains(this, selector, isContainParent);
+		});
+	} else {
+		
+	}
 }
 daylight.fn.extend({
 	filter : function(e) {
@@ -732,11 +799,6 @@ daylight.fn.extend({
 	}
 });
 
-daylight.fn.get = function(index) {
-	if(index < 0)
-		index = this.o.length - index;
-	return this.o[index];
-}
 daylight.fn.extend({
 	getClass : function() {
 		var obj = this.o[0];
@@ -914,7 +976,7 @@ daylight.fn.template = function(o, t) {
 daylight.fn.parent = function(object) {
 	var arr = [];
 	var type = daylight.type(object);
-	var parentObjects = type === "string"? $(object).o : [];
+	var parentObjects = type === "string"? daylight(object).o : [];
 
 	if(type === "number") {
 		this.each(function(v) {
@@ -938,7 +1000,7 @@ daylight.fn.parent = function(object) {
 				arr[arr.length] = a;
 		});
 	}
-	return $(arr);
+	return daylight(arr);
 }
 
 
@@ -1013,7 +1075,7 @@ daylight.fn.extend({
 			for(var i = 0; i < l; ++i)
 				o[o.length] = a[i];
 		});
-		return $(o);
+		return daylight(o);
 	},
 	prev : function() {
 		var arr = [];
@@ -1028,7 +1090,7 @@ daylight.fn.extend({
 			
 			arr.push(e);
 		};
-		return $(arr);
+		return daylight(arr);
 	},
 	next : function() {
 		var arr = [];
@@ -1042,7 +1104,7 @@ daylight.fn.extend({
 	
 			arr[arr.length] = e;
 		}
-		return $(arr);
+		return daylight(arr);
 	}
 
 });
@@ -1088,10 +1150,11 @@ daylight.fn.extend({
 			return dimension;
 		}
 		var dimension = o["offset" + name];
-		dimension -= parseFloat(currentStyle["padding-" + requestComponent[0]]);
-		dimension -= parseFloat(currentStyle["padding-" + requestComponent[1]]);
-		dimension -= parseFloat(currentStyle["border-" + requestComponent[0] + "-width"]);
-		dimension -= parseFloat(currentStyle["border-" + requestComponent[1] + "-width"]);
+		var cssHooks = _style(o);
+		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[0], cssHooks));
+		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[1], cssHooks));
+		dimension -= parseFloat(_curCss(o, "border-" + requestComponent[0] + "-width", cssHooks));
+		dimension -= parseFloat(_curCss(o, "border-" + requestComponent[1] + "-width", cssHooks));
 
 		return dimension;
 	}
@@ -1102,8 +1165,9 @@ daylight.fn.extend({
 			return o["client" + name]
 
 		var dimension = o["offset" + name];
-		dimension -= parseFloat(currentStyle["border-" + requestComponent[0] + "-width"]);
-		dimension -= parseFloat(currentStyle["border-" + requestComponent[1] + "-width"]);
+		var cssHooks = _style(o);
+		dimension -= parseFloat(_curCss(o, "border-" + requestComponent[0] + "-width", cssHooks));
+		dimension -= parseFloat(_curCss(o, "border-" + requestComponent[1] + "-width", cssHooks));
 		
 		return dimension;
 	}
@@ -1111,9 +1175,11 @@ daylight.fn.extend({
 		var currentStyle = this.style();
 		var o = this.o[0];
 		var dimension = o["offset" + name];
-		if(bInlcudeMargin)
-			dimension += parseFloat(currentStyle["margin-"+requestComponent[0]]) + parseFloat(currentStyle["margin-"+requestComponent[1]]);
 		
+		if(bInlcudeMargin) {
+			var cssHooks = _style(o);
+			dimension += parseFloat(_curCss(o, "margin-" + requestComponent[0], cssHooks)) + parseFloat(_curCss(o, "margin-" + requestComponent[1], cssHooks));
+		}
 		return dimension;
 	}
 });

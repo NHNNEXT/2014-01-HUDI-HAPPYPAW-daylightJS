@@ -53,6 +53,7 @@ $test("daylight.isNode").assertSpeed(function() {daylight.isNode(element);});
 $test("daylight.type").assertSpeed(function() {daylight.type("HELLO");}, 50);
 $test("daylight('span')의 속도 ").assertSpeed(function() {daylight('span')}, 200);
 $test("jQuery('span')의 속도 ").assertSpeed(function() {jQuery('span')}, 200);
+$test("css속도 ").assertSpeed(function() {daylight('span').css("width")}, function() {jQuery('span').css("width")});
 $test("daylight와 jQuery toggle속도 비교").assertSpeed(function() {daylight('span').toggleClass("tog")}, function(){jQuery('span').toggleClass("tog")});
 $test("daylight와 jQuery hasClass속도 비교").assertSpeed(function() {daylight('span').hasClass("tog")}, function(){jQuery('span').hasClass("tog")});
 $test("daylight와 jQuery addClass속도 비교").assertSpeed(function() {daylight('span').addClass("tog1")}, function(){jQuery('span').addClass("tog1")});

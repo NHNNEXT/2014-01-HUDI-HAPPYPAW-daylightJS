@@ -9,9 +9,11 @@ daylight.$Event = function(e) {
 
 	if (element.nodeType == 3) //Text
 		element = element.parentNode;
+		
+		
 	var currentElement = e.currentTarget || element;
 	
-	this.element = element;
+	this.target = this.element = element;
 	this.currentElement = currentElement;
 	this.type = e.type;
 	this._event = e;

@@ -1,5 +1,8 @@
-@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+/* @import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css); */
 
+* {
+	font-family: sans-serif;
+}
 .day_checkbox {
 	margin:5px;
 }
@@ -15,14 +18,64 @@
 	/*체크*/
 /* 	background: #f55; */
 }
-
-
 .day_checkbox.checkbox_sample_simple_square label {
 	width: 20px;
 	height: 20px;
 	border:2px solid #333;
 
 }
+
+.day_progress {
+	position: relative;
+	overflow: hidden;
+	border-radius:4px;
+	background-color:#f5f5f5;
+	height: 20px;
+	margin:5px 0px;
+}
+.day_progress .progress_bar{
+	display: block;
+	float: left;
+	background-color:#4599F7;
+	height: 20px;
+	line-height: 20px;
+	text-align: center;
+	color: #fff;
+	font-size: 12px;
+}
+.day_progress .progress_bar.progress_red {
+	background-color:#C73D3B;
+}
+.day_progress .annotation {
+	display: none;
+}
+.day_slider {
+	position: relative;
+}
+.progress_striped {
+	background-image:-webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+	background-image:linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+	background-size:40px 40px
+}
+
+
+
+.day_slider {
+	width: 400px;
+	height: 10px;
+	border:1px solid #aaa;
+	border-radius: 5px;
+	margin:10px;
+}
+.day_slider .thumb{
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	background: #eee;
+	margin:-5px 0px 0px -5px;
+}
+
+/*SAMPLE   CHECKBOX*/
 .day_checkbox.checkbox_sample_simple_square input[type=checkbox]:checked + label {
 	/*체크*/
 }
@@ -73,10 +126,10 @@
 	box-shadow:inset 0 0 0px 1px #d5d5d5;
 	display: block;
 	transition:all ease 0.35s;
-	-webkit-transition:left 0.35s, background 0.35s;
-	-moz-transition:left 0.35s, background 0.35s;
-	-o-transition:left 0.35s, background 0.35s;
-	-ms-transition:left 0.35s, background 0.35s;
+	-webkit-transition:all 0.35s;
+	-moz-transition:all 0.35s;
+	-o-transition:all 0.35s;
+	-ms-transition:all 0.35s;
 }
 .day_checkbox.checkbox_sample_ios_on_off label:after {
 	position: absolute;
@@ -89,7 +142,7 @@
 	display: block;
 	background: #fff;
 	transition:all ease 0.35s;
-	-webkit-transition:all 0.35s;
+	-webkit-transition:all ease 0.35s;
 	-moz-transition:all 0.35s;
 	-o-transition:all 0.35s;
 	-ms-transition:all 0.35s;
@@ -101,3 +154,21 @@
 	left:40%;
 	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
 }
+
+
+
+
+.day_progress.progress_sample_round_red {
+	position: relative;
+	overflow: hidden;
+	background-color:#E6E6E6;
+	height: 20px;
+	border-radius:10px;
+}
+.day_progress.progress_sample_round_red .progress_bar{
+	background-color:#db3a27;
+	border-radius: 10px;
+}
+
+
+
