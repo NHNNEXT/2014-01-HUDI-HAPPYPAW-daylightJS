@@ -10,16 +10,34 @@
 <body>
 	<div id="sample" style="display:none;">
 		<div class="day_checkbox {class}">
-			<input type="checkbox" value="None" id="input_{name}" name="check" />
+			<input type="checkbox" value="None" id="input_{name}" name="check"/>
 			<label for="input_{name}"></label>
 		</div>
 		<div class="day_progress {class}">
-			  <div class="progress_bar progress_striped" data-value="40" data-minvalue="0" data-maxvalue="100" style="width: 40%">
-			    <span class="annotation">40% Complete (success)</span>
+			  <div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%">
+			    <span class="annotation">{value}% Complete</span>
 			  </div>
 		</div>
-		<div class="day_slider {class}">
-			<span class="thumb thumb_start">th</span>
+		<div class="day_slider {class}" data-value="40" data-minvalue="0" data-maxvalue="100" >
+			<span class="quantity"></span>
+			<span class="thumb thumb_start"></span>
+			{range}
+		</div>
+		<div class="day_select {class} {multiple}">
+			<select name="select_{name}" {multiple}>
+				<option value="1">1Action</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+			</select>
+			<div class="selected_text">
+				<span class="title"><span class="text">1Action</span> <i class="fa fa-angle-down caret"></i></span>
+				<ul class="select_menu">
+				<li data-value="1" class="selected">1Action</li>
+				<li data-value="2">2</li>
+				<li data-value="3">3</li>
+				</ul>
+			</div>
+
 		</div>
 	</div>
 	<div class="testCheckbox" style="max-width:500px;">
@@ -30,9 +48,13 @@
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName', {class :"checkbox_sample_simple_square"}));
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName2', {class :"checkbox_sample_simple_round"}));
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName3', {class :"checkbox_sample_ios_on_off"}));
-daylight(".testCheckbox").append(daylight.ui.progress('testName4', {class :"checkbox_sample_ios_on_off"}));
-daylight(".testCheckbox").append(daylight.ui.progress('testName5', {class :"progress_sample_round_red"}));
-daylight(".testCheckbox").append(daylight.ui.slider('testName6', {class :""}));
+daylight(".testCheckbox").append(daylight.ui.checkbox('testName3_1', {class :"checkbox_sample_ios_on_off blue"}));
+daylight(".testCheckbox").append(daylight.ui.progress('testName4', {class :"", stripe: false, value:80}));
+daylight(".testCheckbox").append(daylight.ui.progress('testName5', {class :"progress_sample_round_red",stripe:true, animation:true}));
+daylight(".testCheckbox").append(daylight.ui.slider('testName6', {class :"", type:"range"}));
+daylight(".testCheckbox").append(daylight.ui.slider('testName7', {class :"slider_sample_ios"}));
+daylight(".testCheckbox").append(daylight.ui.select('testName8', {class :""}));
+daylight(".testCheckbox").append(daylight.ui.select('testName9', {class :"", multiple:"multiple"}));
 </script>
 
 </html>

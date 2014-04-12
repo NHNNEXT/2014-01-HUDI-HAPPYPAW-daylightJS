@@ -56,12 +56,7 @@ _curCss = function(element, name, cssHooks) {
 		return undefined;
 	var style;
 	if(!cssHooks) {
-		if(window.getComputedStyle)
-			style = getComputedStyle(element)[name]
-		else if(element.currentStyle)
-			style = element.currentStyle[name];
-		else if(element.style)
-			style = element.style[name];
+		style = _style(element)[name];
 	} else {
 		style = cssHooks[name];
 	}
@@ -1121,18 +1116,7 @@ daylight.fn.extend({
 	style : function(name) {
 		var o = this.o[0];
 		if(!o)
-			return undefined;
-		if(!name)
-			return o.currentStyle || window.getComputedStyle(o) || o.style;
-			
-		if(window.getComputedStyle)
-			return getComputedStyle(o)[name]
-		else if(o.currentStyle)
-			return o.currentStyle[name];
-		else if(o.style)
 			return o.style[name];
-		else
-			return "";
 	}
 });
 //demension 관련 함수들  width, height, innerWidth, innerHeight, outerWidth, outerHeight
@@ -1144,8 +1128,9 @@ daylight.fn.extend({
 		var o = this.o[0];
 		if(o["client" + name] > 0) {
 			var dimension = o["client" + name];
-			dimension -= parseFloat(currentStyle["padding-" + requestComponent[0]]);
-			dimension -= parseFloat(currentStyle["padding-" + requestComponent[1]]);
+		var cssHooks = _style(o);
+		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[0], cssHooks));
+		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[1], cssHooks));
 			
 			return dimension;
 		}

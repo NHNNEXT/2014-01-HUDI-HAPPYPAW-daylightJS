@@ -1,4 +1,4 @@
-/* @import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css); */
+@import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
 
 * {
 	font-family: sans-serif;
@@ -17,6 +17,9 @@
 .day_checkbox input[type=checkbox]:checked + label {
 	/*체크*/
 /* 	background: #f55; */
+}
+.day_checkbox input[type=checkbox]:disabled + label {
+	opacity: 0.5;
 }
 .day_checkbox.checkbox_sample_simple_square label {
 	width: 20px;
@@ -49,18 +52,20 @@
 .day_progress .annotation {
 	display: none;
 }
-.day_slider {
-	position: relative;
-}
 .progress_striped {
 	background-image:-webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
 	background-image:linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
 	background-size:40px 40px
 }
-
-
+.progress_striped.active {
+	animation : progress_striped 2s linear infinite;
+	-webkit-animation : progress_striped 2s linear infinite;
+}
+@-webkit-keyframes progress_striped{from{background-position:40px 0}to{background-position:0 0}}
+@keyframes progress_striped{from{background-position:40px 0}to{background-position:0 0}}
 
 .day_slider {
+	position: relative;
 	width: 400px;
 	height: 10px;
 	border:1px solid #aaa;
@@ -68,12 +73,73 @@
 	margin:10px;
 }
 .day_slider .thumb{
-	width: 20px;
-	height: 20px;
+	width: 14px;
+	height: 14px;
+	position: absolute;
+	display: block;
+	background: #eee;
+	margin:-3px 0px 0px -5px;
+	border:1px solid #d3d3d3;
+}
+.day_slider .quantity {
 	position: absolute;
 	background: #eee;
-	margin:-5px 0px 0px -5px;
+	height: 100%;
 }
+
+
+.day_select select {
+	display: none;
+}
+.day_select.multiple .selected_text .title{
+	display: none;
+}
+.day_select {
+	display: inline-block;
+	position: relative;
+	margin:5px;
+	width: 200px;
+}
+.day_select .selected_text {
+	display: block;
+	position: relative;
+}
+.day_select .selected_text .title {
+	display: block;
+	border:1px solid #ccc;
+	padding:10px;
+	border-radius: 4px;
+	margin-bottom: 5px;
+}
+.day_select .selected_text .title .caret {
+	float: right;
+}
+.day_select .select_menu {
+	display: none;
+	margin:0;
+	padding: 0;
+	list-style: none;
+	border:1px solid #ccc;
+	border-radius: 4px;
+	padding:5px 0px;
+}
+
+.day_select .select_menu.open {
+	display: block;
+}
+
+.day_select .select_menu li {
+	padding:5px 6px;
+}
+
+.day_select .select_menu li:hover {
+	background: #f5f5f5;
+}
+.day_select .select_menu li.selected {
+	background: #eee;
+}
+
+
 
 /*SAMPLE   CHECKBOX*/
 .day_checkbox.checkbox_sample_simple_square input[type=checkbox]:checked + label {
@@ -119,27 +185,42 @@
 }
 
 
+/* IOS */
 .day_checkbox.checkbox_sample_ios_on_off label {
 	width: 50px;
 	height: 30px;
 	border-radius:15px;
-	box-shadow:inset 0 0 0px 1px #d5d5d5;
+	border:1px solid;
+	
+	box-shadow: #eee 0px 0px 0px 0px inset;
+	border-color:#eee;
+	background: #fff;
+
+
 	display: block;
-	transition:all ease 0.35s;
-	-webkit-transition:all 0.35s;
-	-moz-transition:all 0.35s;
-	-o-transition:all 0.35s;
-	-ms-transition:all 0.35s;
+	transition: border 0.35s, box-shadow 0.35s;
+	-webkit-transition: border 0.35s, box-shadow 0.35s;
+	
+
+}
+.day_checkbox.checkbox_sample_ios_on_off input[type=checkbox]:checked + label {
+	background: #00C100;
+	box-shadow: #00C100 0px 0px 0px 16px inset;
+	border-color:#00C100;
+
+transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
+-webkit-transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
 }
 .day_checkbox.checkbox_sample_ios_on_off label:after {
 	position: absolute;
 	content: "";
+	display: block;
 	width: 30px;
 	height: 30px;
-	left:0%;
 	border-radius:15px;
-	box-shadow:inset 0 0 0 1px rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.2);
-	display: block;
+	
+	left:0%;
+	box-shadow:0 1px 3px rgba(0,0,0,0.4);
 	background: #fff;
 	transition:all ease 0.35s;
 	-webkit-transition:all ease 0.35s;
@@ -147,12 +228,25 @@
 	-o-transition:all 0.35s;
 	-ms-transition:all 0.35s;
 }
-.day_checkbox.checkbox_sample_ios_on_off input[type=checkbox]:checked + label {
-	background: #00C100;
-}
+
 .day_checkbox.checkbox_sample_ios_on_off input[type=checkbox]:checked + label:after {
 	left:40%;
-	box-shadow: inset 0 0 0 1px rgba(19,191,17,1), 0 2px 4px rgba(0,0,0,.2);
+}
+
+.day_checkbox.checkbox_sample_ios_on_off.red input[type=checkbox]:checked + label{
+	background: #E85316;
+	box-shadow: #E85316 0px 0px 0px 16px inset;
+	border-color:#E85316;
+}
+.day_checkbox.checkbox_sample_ios_on_off.blue input[type=checkbox]:checked + label{
+	background: #3DA5F3;
+	box-shadow: #3DA5F3 0px 0px 0px 16px inset;
+	border-color:#3DA5F3;
+}
+.day_checkbox.checkbox_sample_ios_on_off.pink input[type=checkbox]:checked + label{
+	background: #F55F7E;
+	box-shadow: #F55F7E 0px 0px 0px 16px inset;
+	border-color:#F55F7E;
 }
 
 
@@ -172,3 +266,26 @@
 
 
 
+.day_slider.slider_sample_ios {
+	height: 4px;
+	background: #A7A7A7;
+	border:2px;
+	border:none;
+	margin:30px 10px;
+}
+.day_slider.slider_sample_ios .thumb{
+	width: 30px;
+	height: 30px;
+	margin-top: -13px;
+	margin-left:-14px;
+	border-radius: 15px;
+	background-color: #fff;
+	border:none;
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+	box-shadow : 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.day_slider.slider_sample_ios .quantity{
+	height: 100%;
+	background: #017afd;
+	border-radius: 10px;
+}

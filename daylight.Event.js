@@ -10,7 +10,7 @@ daylight.$Event = function(e) {
 	if (element.nodeType == 3) //Text
 		element = element.parentNode;
 		
-		
+			
 	var currentElement = e.currentTarget || element;
 	
 	this.target = this.element = element;
