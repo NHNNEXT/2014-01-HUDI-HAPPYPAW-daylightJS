@@ -2,6 +2,8 @@
 daylight.ui = {};
 daylight.ui.TEMLATE = {};
 daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
+		
 daylight.ui.checkbox = function(name, option) {
 	if(!option)
 		option = {};
@@ -23,7 +25,7 @@ daylight.ui.progress = function(name, option) {
 	if(!option.value)
 		option.value = 40;
 	
-	var template = daylight("#sample .day_progress");
+	var template = this.TEMLATE.progress;;
 	return daylight.template(option, template);	
 }
 daylight.ui.slider = function(name, option) {
