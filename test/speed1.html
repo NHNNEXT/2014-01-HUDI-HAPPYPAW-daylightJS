@@ -22,7 +22,7 @@
 	<input type="text" class="testInput" value="?" />
 	<span>asdas</span>
 	<span class="tog">asdas</span>
-	<span>asdas</span>
+	<span class="tog2">asdas</span>
 </div>
 <div class="saa">asa</div>
 <div class="parent">hellow
@@ -57,7 +57,7 @@ $test("css속도 ").assertSpeed(function() {daylight('span').css("width")}, func
 $test("daylight와 jQuery toggle속도 비교").assertSpeed(function() {daylight('span').toggleClass("tog")}, function(){jQuery('span').toggleClass("tog")});
 $test("daylight와 jQuery hasClass속도 비교").assertSpeed(function() {daylight('span').hasClass("tog")}, function(){jQuery('span').hasClass("tog")});
 $test("daylight와 jQuery addClass속도 비교").assertSpeed(function() {daylight('span').addClass("tog1")}, function(){jQuery('span').addClass("tog1")});
-$test("daylight와 jQuery removeClass속도 비교").assertSpeed(function() {daylight('span').removeClass("tog1")}, function(){jQuery('span').removeClass("tog1")});
+$test("daylight와 jQuery removeClass속도 비교").assertSpeed(function() {daylight('span').removeClass("tog1")}, function(){jQuery('span').removeClass("tog2")});
 $test("daylight와 jQuery filter속도 비교").assertSpeed(function() {daylight('span').filter(function(v, index){return true;});}, function(){jQuery('span').filter(function(v, index){return true;});});
 $test("daylight와 jQuery next속도 비교").assertSpeed(function() {daylight('span').next()}, function(){jQuery('span').next()});
 $test("daylight와 jQuery prev속도 비교").assertSpeed(function() {daylight('span').prev()}, function(){jQuery('span').prev()});

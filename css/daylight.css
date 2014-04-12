@@ -3,8 +3,57 @@
 * {
 	font-family: sans-serif;
 }
+.badge {
+	display: inline-block;
+	min-width: 10px;
+	padding: 3px 7px;
+	font-size: 12px;
+	color:#fff;
+	line-height: 1;
+	vertical-align: baseline;
+	white-space: nowrap;
+	background-color: #999;
+	text-align: center;
+	border-radius: 10px;
+}
+.pannel_callout {
+	border-left: 3px solid #eee;
+	margin:20px 0px;
+	padding:20px;
+	background: #fff;
+}
+.pannel_callout h4 {
+	margin:0px 0px 5px;
+}
+
+.pannel_callout.pannel_callout_danger {
+	border-color:#d9534f;
+	background-color:#fdf7f7;
+}
+
+.pannel_callout.pannel_callout_danger h4 {
+	color:#d9534f;
+}
+.pannel_callout.pannel_callout_warning {
+	background-color:#FBF6ED;
+	border-color:#f0ad4e;
+}
+.pannel_callout.pannel_callout_warning h4 {
+	color:#f0ad4e;
+}
+
+.highlight {
+	padding:9px 14px;
+	margin:7px 0px;
+	border: 1px solid #e1e1e8;
+	background-color:#f7f7f9;
+	border-radius: 4px;
+}
+
 .day_checkbox {
 	margin:5px;
+	display: inline-block;
+	vertical-align: top;
 }
 .day_checkbox input[type=checkbox] {
 	visibility: hidden;
@@ -21,12 +70,8 @@
 .day_checkbox input[type=checkbox]:disabled + label {
 	opacity: 0.5;
 }
-.day_checkbox.checkbox_sample_simple_square label {
-	width: 20px;
-	height: 20px;
-	border:2px solid #333;
 
-}
+
 
 .day_progress {
 	position: relative;
@@ -151,6 +196,13 @@
 
 
 /*SAMPLE   CHECKBOX*/
+
+.day_checkbox.checkbox_sample_simple_square label {
+	width: 20px;
+	height: 20px;
+	border:2px solid #333;
+
+}
 .day_checkbox.checkbox_sample_simple_square input[type=checkbox]:checked + label {
 	/*체크*/
 }

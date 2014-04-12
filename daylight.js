@@ -41,7 +41,7 @@ var _arraySum = function(arr) {
 	}
 	return a;
 }
-_style = function(element) {
+var _style = function(element) {
 	if(window.getComputedStyle)
 		return window.getComputedStyle(element);
 	else if(element.currentStyle)
@@ -49,7 +49,7 @@ _style = function(element) {
 	else if(element.style)
 		return element.style;
 }
-_curCss = function(element, name, cssHooks) {
+var _curCss = function(element, name, cssHooks) {
 	if(!element)
 		return undefined;
 	if(!name)
@@ -64,19 +64,38 @@ _curCss = function(element, name, cssHooks) {
 		//test
 		var percentage = parseFloat(style);
 		var offsetParent = element.offsetParent;
-		var innerWidth = $(offsetParent).innerWidth();
+
 		var cssHooks = _style(offsetParent);
-		var border_left = _curCss(offsetParent, "border-left-width", cssHooks);
-		var border_right = _curCss(offsetParent, "border-right-width", cssHooks);
-		var padding_left = _curCss(offsetParent, "padding-left", cssHooks);
-		var padding_right = _curCss(offsetParent, "padding-right", cssHooks);
-		var width = innerWidth - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);
+		var dimension = _curCssHook(offsetParent, name, cssHooks);
 		
-		return percentage * width / 100 + "px";
+		return percentage * dimension / 100 + "px";
 	}
 	
 	return style;
+}
+var _dimensionCssHook = function(element, component, cssHooks) {
+	var border_left = _curCss(element, "border-"+component[0]+"-width", cssHooks);
+	var border_right = _curCss(element, "border-"+component[1]+"-width", cssHooks);
+	var padding_left = _curCss(element, "padding-"+component[0], cssHooks);
+	var padding_right = _curCss(element, "padding-"+component[1], cssHooks);
+	var inner = (component[0] == "left") ? $(element).innerWidth() : $(element).innerHeight();
+	var dimension = inner - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);	
+}
+var _curCssHook = function(element, name, cssHooks) {
+	var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right", "border-left-width", "border-right-width"];
+	var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];	
+	if(lrtype.indexOf(name) != -1) {
+		var requestComponent = ["left", "right"]
+		return _dimensionCssHook(element, requestComponent, cssHooks);
+	} else if(tbtype.indexOf(name) != -1) {
+		var requestComponent = ["top", "bottom"];
+		return _dimensionCssHook(element, requestComponent, cssHooks);
+	} else if(name == "font-size") {
+		return _curCss(element.offsetParent, name);
+	}
 	
+	
+	return dimension;
 }
 var _domEach = function(target, o, callback) {
 	if(target.size == 0)
@@ -471,17 +490,13 @@ daylight.extend({
 		var arr = name.split(" ");
 		var length = arr.length;
 		var afterClassName = "";
-		var is_remove = false;
+
 		
 		for(var i = 0; i < length; ++i) {
-			if(arr[i] == className) {
-				is_remove = true;
+			var eClass = arr[i];
+			if(eClass == className)
 				continue;
-			}
-			if(afterClassName == "")
-				afterClassName = arr[i];
-			else
-				afterClassName = afterClassName + " " + arr[i];
+			afterClassName += afterClassName ? " " + eClass : eClass
 		}
 		element.className = afterClassName;
 		
@@ -625,20 +640,6 @@ daylight.fn.appendChild = function(object) {
 	}
 }
 
-daylight.fn.addClass = function(className) {
-	var obj = this;
-	this.each(function(e, index) {
-		if(daylight.hasClass(e, className))
-			return;
-	
-
-		if(this.className == "")
-			this.className = className;
-		else
-			this.className += " " + className;
-			
-	});
-}
 
 daylight.fn.css = function(name, value) {
 	if(!(value === undefined)) {
@@ -771,10 +772,10 @@ daylight.fn.extend({
 				var a = e.call(objects[i], objects[i], i, objects);
 				a ? arr[k++] = objects[i] : null;
 			}
-			return arr;
+			return daylight(arr);
 		}
 		
-		return arr;
+		return daylight(arr);
 	},
 	map : function(func) {	
 		var objects = this.o;
@@ -783,13 +784,14 @@ daylight.fn.extend({
 		for(var i = 0; i < length; ++i)
 			arr[i] = func.call(objects[i], i, objects);
 		
-		return arr;
+		return daylight(arr);
 	},
 	each : function(callback) {
 		var objects = this.o;
 		var length = this.size;
 		for(var i = 0; i < length; ++i) {
-			callback.call(objects[i], objects[i], i, objects);
+			var object = objects[i];
+			callback.call(object, object, i, objects);
 		}
 	}
 });
@@ -803,21 +805,18 @@ daylight.fn.extend({
 		}
 		return [];
 	},
+	addClass : function(className) {
+		this.each(function(e, index) {
+			daylight.addClass(e, className);
+		});
+	},
 	hasClass : function(className, index) {
 		if(!index)
 			index = 0;
 		if(!this.size)
 			return false;
 		
-		var object = this.o[index];
-		var name = object.className;
-		var arr = name.split(" ");
-		var length = arr.length;
-		for(var i = 0; i < length; ++i) {
-			if(arr[i] == className)
-				return true;
-		}
-		return false;
+		return daylight.hasClass(this.o[index], className);
 	},
 	toggleClass : function(className) {
 		//var obj = this;
@@ -832,22 +831,7 @@ daylight.fn.extend({
 	},removeClass : function(className) {
 		//var reg = new RegExp('(\\s|^)'+className+'(\\s|$)');
 		this.each(function(element) {
-			var name = element.className;
-			var arr = name.split(" ");
-			var length = arr.length;
-			var afterClassName = "";
-			var is_remove = false;
-			for(var i = 0; i < length; ++i) {
-				if(arr[i] == className) {
-					is_remove = true;
-					continue;
-				}
-				if(afterClassName == "")
-					afterClassName = arr[i];
-				else
-					afterClassName = afterClassName + " " + arr[i];
-			}
-			element.className = afterClassName;
+			daylight.removeClass(element, className);
 		});
 		
 		return this;
@@ -967,38 +951,48 @@ daylight.fn.template = function(o, t) {
 	return this;
 }
 
+daylight.fn.extend({
+	parent: function(object) {
+		var arr = [];
+		var type = daylight.type(object);
+		var parentObjects = type === "string"? daylight(object).o : [];
+	
+		if(type === "number") {
+			this.each(function(v) {
+				if(!daylight.isElement(v))
+					return;
+				var i = object;
+				while(--i >= 0 && (v = v.parentNode)) {}
+				
+				if(!v)
+					return;
+	
+				arr[arr.length] = v;
+			});
+		} else {
+			this.each(function(v) {
+				if(!daylight.isElement(v))
+					return;
+	
+				var a = v.parentNode;
+				if(a)
+					arr[arr.length] = a;
+			});
+		}
+		return daylight(arr);
+	},
+	offsetParent: function() {
+		return this.map(function() {
+			var offsetParent = this.offsetParent || docElem;
 
-daylight.fn.parent = function(object) {
-	var arr = [];
-	var type = daylight.type(object);
-	var parentObjects = type === "string"? daylight(object).o : [];
+			while ( offsetParent && ( !jQuery.nodeName( offsetParent, "html" ) && jQuery.css( offsetParent, "position" ) === "static" ) ) {
+				offsetParent = offsetParent.offsetParent;
+			}
 
-	if(type === "number") {
-		this.each(function(v) {
-			if(!daylight.isElement(v))
-				return;
-			var i = object;
-			while(--i >= 0 && (v = v.parentNode)) {}
-			
-			if(!v)
-				return;
-
-			arr[arr.length] = v;
-		});
-	} else {
-		this.each(function(v) {
-			if(!daylight.isElement(v))
-				return;
-
-			var a = v.parentNode;
-			if(a)
-				arr[arr.length] = a;
+			return offsetParent || docElem;
 		});
 	}
-	return daylight(arr);
-}
-
-
+});
 daylight.fn.siblings = function() {
 	var arr = [];
 };
@@ -1239,7 +1233,7 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 	daylight.defineGlobal(name, daylight[name]);
 });
 
-daylight.each("scroll click mousedown mousemove mouseup mouseleave focus keydown keypress keyup".split(" "), function(name, index, arr) {
+daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup".split(" "), function(name, index, arr) {
 	daylight.fn[name] = function(func) {
 		this.event(name, func);
 	}

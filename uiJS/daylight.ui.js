@@ -1,10 +1,15 @@
 //test 설계
 daylight.ui = {};
+daylight.ui.TEMLATE = {};
+daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.checkbox = function(name, option) {
 	if(!option)
 		option = {};
-	var template = daylight("#sample .day_checkbox");
-	return daylight.template({name : name, "class":option.class}, template);
+	option.name = name;	
+	if(!option.value) option.value = "";
+	if(!option.class) option.class= "";
+	var template = this.TEMLATE.checkbox;
+	return daylight.template(option, template);
 };
 daylight.ui.progress = function(name, option) {
 	if(!option)
@@ -68,7 +73,6 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 				//dist < 0 누른 곳보다 뒤에 있다.
 				//click position < thumb position
 				//min_value click_position 위에 있는 최소값
-				console.log(dist);
 				if(min_value >= Math.abs(dist) && dist <= 0 && min_index > index) {
 					min_value = dist;
 					min_object = this;
@@ -160,11 +164,11 @@ daylight.ui.select.event = function(element, e) {
 	var options = selectElement.o[0].options;
 	if(type == "click") {
 		var clickElement = e.target;
-		if(title.has(clickElement, true).length >= 1) {
+		if(title.has(clickElement, true).size >= 1) {
 			menu.toggleClass("open");
 			return;
 		}
-		if(menu.has(e.target).length < 1)
+		if(menu.has(e.target).size < 1)
 			return;
 		
 		var value = clickElement.getAttribute("data-value");
@@ -185,14 +189,26 @@ daylight("body").click(function(event) {
 	var e = daylight.$Event(event);
 	var element = e.target;
 	var es = daylight(".day_select").has(element, true);
-	for(var i = 0; i < es.length; ++i) {
-		daylight.ui.select.event(es[i], event);
+	for(var i = 0; i < es.size; ++i) {
+		daylight.ui.select.event(es.o[i], event);
 	}
 });
 daylight("body").drag(function(element, event, dragDistance) {
 	var e = daylight.$Event(event);
 	var es = daylight(".day_slider").has(element, true);
-	for(var i = 0; i < es.length; ++i) {
-		daylight.ui.slider.event(es[i], event, dragDistance);
+	for(var i = 0; i < es.size; ++i) {
+		daylight.ui.slider.event(es.o[i], event, dragDistance);
 	}
+});
+
+
+daylight(window).load(function() {
+	daylight(".data-request").each(function(e, index) {
+
+		var type = e.getAttribute("data-type");
+		var name = e.getAttribute("data-name");
+		var value = e.getAttribute("data-value");
+		var className = e.getAttribute("data-class");
+		e.outerHTML = daylight.ui[type](name, {value : value, class:className});
+	});
 });
