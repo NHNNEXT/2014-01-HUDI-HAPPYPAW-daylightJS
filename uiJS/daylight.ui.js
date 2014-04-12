@@ -156,7 +156,7 @@ daylight.ui.select.event = function(element, e) {
 	var menu = select.find(".select_menu");
 	var type = event.type;
 	var selectElement = select.find("select");
-	var title = select.find(".selected_text .title");
+	var title = select.find(".selected_text");
 	var options = selectElement.o[0].options;
 	if(type == "click") {
 		var clickElement = e.target;

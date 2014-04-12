@@ -72,7 +72,7 @@
 	border-radius: 5px;
 	margin:10px;
 }
-.day_slider .thumb{
+.day_slider .thumb {
 	width: 14px;
 	height: 14px;
 	position: absolute;
@@ -81,6 +81,9 @@
 	margin:-3px 0px 0px -5px;
 	border:1px solid #d3d3d3;
 }
+.day_slider .thumb:hover {
+	background: #dedede;
+}
 .day_slider .quantity {
 	position: absolute;
 	background: #eee;
@@ -88,30 +91,35 @@
 }
 
 
+
+
+.day_select {
+	display: inline-block;
+	position: relative;
+	margin:5px;
+	width: 200px;
+	height: 50px;
+	vertical-align: top;
+}
 .day_select select {
 	display: none;
 }
 .day_select.multiple .selected_text .title{
 	display: none;
 }
-.day_select {
-	display: inline-block;
-	position: relative;
-	margin:5px;
-	width: 200px;
-}
 .day_select .selected_text {
 	display: block;
 	position: relative;
 }
-.day_select .selected_text .title {
+.day_select .selected_text {
+	position: relative;
 	display: block;
 	border:1px solid #ccc;
 	padding:10px;
 	border-radius: 4px;
 	margin-bottom: 5px;
 }
-.day_select .selected_text .title .caret {
+.day_select .selected_text .caret {
 	float: right;
 }
 .day_select .select_menu {
@@ -138,6 +146,7 @@
 .day_select .select_menu li.selected {
 	background: #eee;
 }
+
 
 
 
@@ -288,4 +297,40 @@ transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s
 	height: 100%;
 	background: #017afd;
 	border-radius: 10px;
+}
+
+
+.day_select.select_sample_red .selected_text{
+	border-radius: 0px;
+	color:#fc756f;
+	padding-left:20px;
+}
+.day_select.select_sample_red .selected_text .caret{
+}
+.day_select.select_sample_red .select_menu{
+	border:none;
+	padding: 0;
+	margin:0;
+	display: block;
+	opacity: 0;
+	transition:all ease 0.4s;
+	-webkit-transition:all ease 0.4s;
+}
+.day_select.select_sample_red .select_menu.open{
+	opacity: 1;
+}
+.day_select.select_sample_red .select_menu li{
+	border:1px solid #eee;
+	margin:5px 0px;
+	height: 30px;
+	line-height: 30px;
+	color:#aaa;
+	padding-left:20px;
+	
+	transition:all ease 0.4s;
+	-webkit-transition:all ease 0.4s;
+}
+.day_select.select_sample_red .select_menu li:hover, .day_select.select_sample_red .select_menu li.selected{
+	background: #fc756f;
+	color:#fff;
 }
