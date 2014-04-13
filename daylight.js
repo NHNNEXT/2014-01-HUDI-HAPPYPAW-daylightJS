@@ -19,7 +19,7 @@ daylight.version = "1.0.0";
 
 
 daylight.CONSTANT = {SLOW:"slow", FAST:"fast"};
-daylight.OPTION = {speed : daylight.CONSTANT.FAST};
+daylight.OPTION = {speed : daylight.CONSTANT.SLOW};
 
 
 var CONSTANT = daylight.CONSTANT,
@@ -588,18 +588,26 @@ daylight.template = function(obj, template) {
 		for(var k in obj) {
 			var value = obj[k];
 			if(this.type(value) == "array") {//만드는 중
-				var length = value.length;
-				for(var i = 0; i < length; ++i) {
-					value[i]
-
+				var regx = new RegExp('{' + k + '}((.|\n|\r)*?){/'+ k + '}', 'g');
+				var list = template.match(regx);
+				
+				if(!list)
+					continue;
+				
+				for(var i = 0; i < list.length; ++i) {
+					var sub_template = list[i];
+					sub_template = sub_template.replace("{" + k + "}", "");
+					sub_template = sub_template.replace("{/" + k + "}", "");
+					template = template.replace(list[i], daylight.template(value, sub_template) );//{key} => value
 				}
-				template = daylight.replace("{" + k + "}", value, template);//{key} => value
+				
 			} else {
 				if(value === undefined)
 					value = "";
 				template = daylight.replace("{" + k + "}", value, template);//{key} => value
 			}
 		}
+		//console.log(template);
 		return template;
 	} else {
 		//배열이나 Dictionary 형태가 아닌 다른 것들은 키를 1로 하고 value로 바꿔준다.
@@ -818,12 +826,19 @@ daylight.fn.extend({
 		
 		return daylight.hasClass(this.o[index], className);
 	},
-	toggleClass : function(className) {
+	toggleClass : function(className, className2) {
 		//var obj = this;
 		this.each(function(e, index) {
 			var is_add = daylight.addClass(e, className);
-			if(!is_add)
+			if(!is_add) {
+				//className이 이미 있다. -> className 제거
 				daylight.removeClass(e, className, true);
+				//className2가 없다. -> className2 추가.
+				if(className2)
+					daylight.addClass(e, className2, true);
+			} else if(className2) {
+				daylight.removeClass(e, className2, true);
+			}
 				
 		});
 	

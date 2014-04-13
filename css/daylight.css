@@ -72,7 +72,6 @@
 }
 
 
-
 .day_progress {
 	position: relative;
 	overflow: hidden;
@@ -116,6 +115,7 @@
 	border:1px solid #aaa;
 	border-radius: 5px;
 	margin:10px;
+	cursor:pointer;
 }
 .day_slider .thumb {
 	width: 14px;
@@ -125,6 +125,7 @@
 	background: #eee;
 	margin:-3px 0px 0px -5px;
 	border:1px solid #d3d3d3;
+	cursor:move;
 }
 .day_slider .thumb:hover {
 	background: #dedede;
@@ -140,7 +141,7 @@
 
 .day_select {
 	display: inline-block;
-	position: relative;
+	position: relative; 
 	margin:5px;
 	width: 200px;
 	height: 50px;
@@ -155,6 +156,7 @@
 .day_select .selected_text {
 	display: block;
 	position: relative;
+	height: 18px;
 }
 .day_select .selected_text {
 	position: relative;
@@ -163,11 +165,13 @@
 	padding:10px;
 	border-radius: 4px;
 	margin-bottom: 5px;
+cursor:pointer;
 }
 .day_select .selected_text .caret {
 	float: right;
 }
 .day_select .select_menu {
+	position:relative;
 	display: none;
 	margin:0;
 	padding: 0;
@@ -175,6 +179,8 @@
 	border:1px solid #ccc;
 	border-radius: 4px;
 	padding:5px 0px;
+	background-color:#fff;
+	z-index:2;
 }
 
 .day_select .select_menu.open {
@@ -183,6 +189,7 @@
 
 .day_select .select_menu li {
 	padding:5px 6px;
+	cursor: pointer;
 }
 
 .day_select .select_menu li:hover {
@@ -269,8 +276,8 @@
 	box-shadow: #00C100 0px 0px 0px 16px inset;
 	border-color:#00C100;
 
-transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
--webkit-transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
+	transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
+	-webkit-transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s;
 }
 .day_checkbox.checkbox_sample_ios_on_off label:after {
 	position: absolute;
@@ -361,16 +368,28 @@ transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s
 }
 .day_select.select_sample_red .select_menu{
 	border:none;
+	background-color: transparent;
 	padding: 0;
 	margin:0;
 	display: block;
+	
 	opacity: 0;
+	-webkit-opacity: 0;
+	
+	
 	transition:all ease 0.4s;
-	-webkit-transition:all ease 0.4s;
+	-webkit-transition:-webkit-opacity ease 0.4s;
+
+
+}
+.day_select.select_sample_red .select_menu.hidden {
+	visibility: hidden;
 }
 .day_select.select_sample_red .select_menu.open{
 	opacity: 1;
+	-webkit-opacity: 1;
 }
+@-webkit-keyframes select_menu_opacity{from{opacity:0;}to{opacity:1;}}
 .day_select.select_sample_red .select_menu li{
 	border:1px solid #eee;
 	margin:5px 0px;
@@ -378,7 +397,6 @@ transition: border 0.35s, box-shadow 0.35s, background-color 1.2000000000000002s
 	line-height: 30px;
 	color:#aaa;
 	padding-left:20px;
-	
 	transition:all ease 0.4s;
 	-webkit-transition:all ease 0.4s;
 }

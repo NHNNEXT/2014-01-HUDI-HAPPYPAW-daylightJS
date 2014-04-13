@@ -48,7 +48,7 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 	var quantity = slider.find(".quantity");
 	var width = slider.width();
 
-	if(type === "mousedown") {
+	if(type === "mousedown" || type === "touchstart") {
 		var x = slider.offset().left;
 		var percentage = (event.pos().pageX - x) * 100 / width;
 		var etarget = daylight(event.target);
@@ -153,6 +153,21 @@ daylight.ui.select = function(name, option) {
 	if(!option)
 		option = {};
 	option.name = name;
+	if(!option.multiple) option.multiple = "";
+	if(!option.options)
+		option.options = [];
+	
+	for(var i = 0; i < option.options.length; ++i) {
+		var opt = option.options[i];
+		if(typeof opt != "object")
+			option.options[i] = {text : opt, value : opt};
+		else if(opt.value === undefined)
+			opt.text = opt.value;
+		else if(opt.text === undefined)
+			opt.value = opt.text;
+	}
+	option.selected_text = option.options[0] ? option.options[0].text : "";
+	
 	var template = daylight("#sample .day_select");
 	return daylight.template(option, template);
 }
@@ -167,7 +182,7 @@ daylight.ui.select.event = function(element, e) {
 	if(type == "click") {
 		var clickElement = e.target;
 		if(title.has(clickElement, true).size >= 1) {
-			menu.toggleClass("open");
+			menu.toggleClass("open", "hidden");
 			return;
 		}
 		if(menu.has(e.target).size < 1)
@@ -179,10 +194,13 @@ daylight.ui.select.event = function(element, e) {
 		for(var i = 0; i < options.length; ++i) {
 			var option = options[i];
 			option.selected = option.value === value;
-			if(option.selected)
+			if(option.selected) {
+				console.log("selected");
 				title.find(".text").text(option.innerText);
+			}
 		}
 		menu.removeClass("open");
+		menu.addClass("hidden");
 	}
 	
 	//for(var i = 0; i < 
