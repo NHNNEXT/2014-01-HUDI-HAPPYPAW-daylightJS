@@ -1,5 +1,7 @@
 @import url(http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
-
+body {
+	position: relative;
+}
 * {
 	font-family: sans-serif;
 }
@@ -138,7 +140,6 @@
 
 
 
-
 .day_select {
 	display: inline-block;
 	position: relative; 
@@ -165,7 +166,7 @@
 	padding:10px;
 	border-radius: 4px;
 	margin-bottom: 5px;
-cursor:pointer;
+	cursor:pointer;
 }
 .day_select .selected_text .caret {
 	float: right;
@@ -199,8 +200,36 @@ cursor:pointer;
 	background: #eee;
 }
 
+/*DRAG*/
+.day_drag {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	border: 1px solid #eee;
+	background: #fff;
+}
+.day_draggable {
+	cursor: move;
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-color:#fff;
+}
 
 
+/*RESIZE*/
+.day_resize {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	border: 1px solid #eee;
+	background: #fff;
+}
+.day_resize .day_resizable {
+	cursor: move;	
+}
 
 /*SAMPLE   CHECKBOX*/
 
@@ -383,7 +412,7 @@ cursor:pointer;
 
 }
 .day_select.select_sample_red .select_menu.hidden {
-	visibility: hidden;
+	visibility: collapse;
 }
 .day_select.select_sample_red .select_menu.open{
 	opacity: 1;

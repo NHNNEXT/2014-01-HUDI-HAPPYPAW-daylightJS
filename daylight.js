@@ -277,6 +277,8 @@ daylight.object = function(arr) {
 		}
 	}	
 }
+
+
 //daylight.object의 프로토타입은 Array이다. JQuery가 느린 원인 중 하나. 하지만 매우 편하게 사용할 수 있다.
 daylight.object.prototype = [];
 
@@ -321,8 +323,21 @@ daylight.type = function(obj, expand) {
 	if(!expand)
 		return type == "object" ? obj.daylight || class2type[toString.call(obj)] || "object" : type;
 	
-	return type == "object" ? obj instanceof HTMLElement ? "html" : obj.daylight || class2type[toString.call(obj)] || "object" : type;
-	
+	return type == "object" ? obj instanceof HTMLElement ? "html" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
+}
+daylight.css = function(element, name, value) {
+	if(value !== undefined && typeof value != "boolean") {
+		element.style[name] = value;
+		return value;
+	}
+	if(value === true) {
+		var returnValue = parseFloat(_curCss(element, name));
+		if(!returnValue)
+			return 0;
+			
+		return returnValue;
+	}
+	return _curCss(element, name);
 }
 
 //define 관련 함수들 모음
@@ -408,7 +423,15 @@ daylight.index = daylight.indexOf = function(arr, object) {
 }
 
 
-daylight.extend({	
+daylight.extend({
+	nodeName : function(element, compare) {
+		var nodeName = element.nodeName;
+		
+		if(compare !== undefined)//비교 대상이 있으면 비교값을 리턴 true, false;
+			return nodeName === compare;
+			
+		return nodeName;//비교 대상이 없으면 노드 이름만 반환.
+	},
 	/**
 * @func : daylight.isNode(Node)
 * @description : 해당 객체가 Node인지 확인
@@ -656,7 +679,7 @@ daylight.fn.css = function(name, value) {
 				for(var key in name) {
 					e.style[key] = name[key];
 				}
-			});			
+			});
 		} else {
 			this.forEach(function(e) {
 				e.style[name] = value;
@@ -677,7 +700,7 @@ daylight.fn.drag = function(dragFunc) {
 	var mouseDown = function(e) {
 		is_drag = true;
 		prePosition = daylight.$E.cross(e);
-		dragDistance = {stx :prePosition.x, sty : prePosition.y, x : 0, y : 0, dx:0, dy:0};
+		dragDistance = {stx :prePosition.pageX, sty : prePosition.pageY, x : 0, y : 0, dx:0, dy:0};
 		dragObject = e.target || e.srcElement;
 /* 		console.log("DRAG START"); */
 		dragFunc(dragObject, e, dragDistance);
@@ -726,7 +749,7 @@ daylight.fn.addEvent = daylight.fn.event = function(key, func) {
 	}
 }
 daylight.fn.equal = function(object) {
-	var type = daylight.type(object);
+	var type = daylight.type(object, true);
 	if(type == "html" && this.size == 1 && object == this.o[0]) {
 		return true;
 	} else if(type == "daylight" &&  this.size == object.size) {
@@ -763,9 +786,12 @@ daylight.fn.has = function(selector, isContainParent) {
 		return this.filter(function() {
 			return daylight.contains(this, selector, isContainParent);
 		});
-	} else {
-		
+	} else if(typeof selector === "string"){
+		return this.filter(function() {
+			return daylight.contains(this, this.querySelector(selector));
+		});		
 	}
+	return [];
 }
 daylight.fn.extend({
 	filter : function(e) {
@@ -1000,7 +1026,7 @@ daylight.fn.extend({
 		return this.map(function() {
 			var offsetParent = this.offsetParent || docElem;
 
-			while ( offsetParent && ( !jQuery.nodeName( offsetParent, "html" ) && jQuery.css( offsetParent, "position" ) === "static" ) ) {
+			while ( offsetParent && ( !daylight.nodeName( offsetParent, "html" ) && offsetParent.style && offsetParent.style.position === "static" ) ) {
 				offsetParent = offsetParent.offsetParent;
 			}
 
@@ -1187,20 +1213,34 @@ daylight.fn.test = function() {
 daylight.fn.extend({
 	position : function() {
 		//margin padding을 무시한 위치
-		var currentStyle = this.style();
-		var pos = this.offset();
-		
-		//수정 요청
-/*
-		if(!this.o[0] || currentStyle["position"] === "fixed")
-			return pos;
-		
-*/
-		
-		return {
-			top : pos.top,
-			left : pos.left
+
+		var offsetParent, offset,
+			elem = this.o[0],
+			parentOffset = { top: 0, left: 0 };
+
+		// Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is its only offset parent
+		if ( elem.style.position === "fixed" ) {
+			offset = elem.getBoundingClientRect();
+		} else {
+			offsetParent = this.offsetParent();
+			offset = this.offset();
+			if ( !daylight.nodeName( offsetParent.o[0], "html" ) ) {
+				parentOffset = offsetParent.offset();
+			}
+
+			// Add offsetParent borders
+			parentOffset.top += daylight.css( offsetParent.o[0], "borderTopWidth", true );
+			parentOffset.left += daylight.css( offsetParent.o[0], "borderLeftWidth", true );
+			parentOffset.top -= daylight.css( offsetParent.o[0], "paddingTop", true );
+			parentOffset.left -= daylight.css( offsetParent.o[0], "paddingLeft", true );
 		}
+
+		// Subtract parent offsets and element margins
+		return {
+			top: offset.top - parentOffset.top - daylight.css( elem, "marginTop", true ),
+			left: offset.left - parentOffset.left - daylight.css( elem, "marginLeft", true )
+		};
+
 	}
 	//jQuery를 거의 그대로 퍼옴.
 	,offset : function() {
@@ -1248,7 +1288,7 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 	daylight.defineGlobal(name, daylight[name]);
 });
 
-daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup".split(" "), function(name, index, arr) {
+daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart".split(" "), function(name, index, arr) {
 	daylight.fn[name] = function(func) {
 		this.event(name, func);
 	}

@@ -52,6 +52,7 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 		var x = slider.offset().left;
 		var percentage = (event.pos().pageX - x) * 100 / width;
 		var etarget = daylight(event.target);
+		dragDistance.element = element;
 		if(etarget.hasClass("thumb")) {
 			dragDistance.target = etarget;
 			dragDistance.index = thumbs.index(etarget);
@@ -73,7 +74,7 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 					
 				var dist = percentage - left;
 				//dist < 0 누른 곳보다 뒤에 있다.
-				//click position < thumb position
+				//click position < thumb 
 				//min_value click_position 위에 있는 최소값
 				if(min_value >= Math.abs(dist) && dist <= 0 && min_index > index) {
 					min_value = dist;
@@ -100,6 +101,10 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 		dragDistance.stleft = percentage * width / 100;
 		
 	}
+	if(dragDistance.element != element)
+		return;
+		
+	
 	var thumb = dragDistance.target;
 	if(!thumb)
 		return;
@@ -156,7 +161,7 @@ daylight.ui.select = function(name, option) {
 	if(!option.multiple) option.multiple = "";
 	if(!option.options)
 		option.options = [];
-	
+	var is_selected_one = false;
 	for(var i = 0; i < option.options.length; ++i) {
 		var opt = option.options[i];
 		if(typeof opt != "object")
@@ -165,9 +170,14 @@ daylight.ui.select = function(name, option) {
 			opt.text = opt.value;
 		else if(opt.text === undefined)
 			opt.value = opt.text;
+		
+		if(opt.selected === undefined)
+			opt.selected = "";
+		else
+			is_selected_one = true;
 	}
 	option.selected_text = option.options[0] ? option.options[0].text : "";
-	
+	if(!is_selected_one &&  option.options[0]) option.options[0].selected = "selected";
 	var template = daylight("#sample .day_select");
 	return daylight.template(option, template);
 }
@@ -202,8 +212,114 @@ daylight.ui.select.event = function(element, e) {
 		menu.removeClass("open");
 		menu.addClass("hidden");
 	}
+}
+daylight.ui.drag = function(name, option) {
+	if(!option)
+		option = {};
+	option.name = name;
 	
-	//for(var i = 0; i < 
+	
+	var template = daylight("#sample .day_drag");
+	return daylight.template(option, template);
+}
+daylight.ui.drag.event = function(element, e, dragDistance) {
+	var element_object = daylight(element);
+	var event = daylight.$Event(e);
+
+	if(element_object.size == 0)
+		return;
+
+	if(event.type == "touchstart" || event.type == "mousedown") {
+		var draggable_object = daylight(event.target);
+		
+	
+		if(draggable_object.size == 0)
+			return;
+		
+
+		if(!draggable_object.hasClass("day_draggable"))
+			return;
+
+
+			
+		dragDistance.target = element_object;
+		var position = element_object.position();
+		dragDistance.element = element;
+		dragDistance.stleft = position.left;
+		dragDistance.sttop = position.top;
+		
+
+	}
+	if(!dragDistance.target || dragDistance.target.size == 0)
+		return;
+	if(dragDistance.element != element)
+		return;
+
+	var drag_target = dragDistance.target;
+	drag_target.css("left", dragDistance.x + dragDistance.stleft);
+	drag_target.css("top",  dragDistance.y + dragDistance.sttop);
+	
+	//x : 이동한 좌표의 크기
+	//y : 이동한 좌표의 크기
+	//stx , sty 내가 처음에 누른 위치 : 페이지 기준
+	//stleft, sttop : 상대기준으로 position
+	//stx - stleft 간격 x
+	//sty - sttop : 간격 y
+	e.preventDefault();
+}
+daylight.ui.resize = function(name, option) {
+	if(!option)
+		option = {};
+	option.name = name;
+	
+	
+	var template = daylight("#sample .day_resize");
+	return daylight.template(option, template);
+}
+daylight.ui.resize.event = function(element, e, dragDistance) {
+	var element_object = daylight(element);
+	var event = daylight.$Event(e);
+
+	if(element_object.size == 0)
+		return;
+
+	if(event.type == "touchstart" || event.type == "mousedown") {
+		var resizable_object = daylight(event.target);
+		
+	
+		if(resizable_object.size == 0)
+			return;
+		
+
+		if(!resizable_object.hasClass("day_resizable"))
+			return;
+			
+		dragDistance.target = element_object;
+		dragDistance.element = element;
+		dragDistance.width = element_object.width();
+		dragDistance.height = element_object.height();
+	}
+	if(!dragDistance.target || dragDistance.target.size == 0)
+		return;
+	if(dragDistance.element != element)
+		return;
+	var is_resizable_width = false,
+		is_resizable_height = false;
+	var resize_target = dragDistance.target;
+	
+	
+	if(resize_target.hasClass("resizable_ns"))
+		is_resizable_height = true;
+	else if(resize_target.hasClass("resizable_ew"))
+		is_resizable_width = true;
+	else
+		is_resizable_width = is_resizable_height = true;
+		
+	
+
+	if(is_resizable_width) resize_target.css("width", dragDistance.x + dragDistance.width);
+	if(is_resizable_height) resize_target.css("height",  dragDistance.y + dragDistance.height);
+	e.preventDefault();
 }
 daylight("body").click(function(event) {
 	var e = daylight.$Event(event);
@@ -219,12 +335,27 @@ daylight("body").drag(function(element, event, dragDistance) {
 	for(var i = 0; i < es.size; ++i) {
 		daylight.ui.slider.event(es.o[i], event, dragDistance);
 	}
+	es = daylight(".day_drag").has(element, true);
+	for(var i = 0; i < es.size; ++i) {
+		daylight.ui.drag.event(es.o[i], event, dragDistance);
+	}
+	es = daylight(".day_resize").has(element);
+	for(var i = 0; i < es.size; ++i) {
+		daylight.ui.resize.event(es.o[i], event, dragDistance);
+	}
 });
 
-
+daylight("body").dragstart(function(e) {
+	var event = daylight.$Event(e);
+	var element = event.target;
+	es = daylight(".day_draggable, .day_resizable").has(element, true);
+	if(es.size > 0) {
+		e.preventDefault();
+		return false;
+	}
+});
 daylight(window).load(function() {
 	daylight(".data-request").each(function(e, index) {
-
 		var type = e.getAttribute("data-type");
 		var name = e.getAttribute("data-name");
 		var value = e.getAttribute("data-value");

@@ -30,9 +30,20 @@
 			<span class="selected_text"><span class="text">{selected_text}</span> <i class="fa fa-angle-down caret"></i></span>
 			<ul class="select_menu hidden">
 			{options}
-			<li data-value="{value}">{text}</li>
+			<li data-value="{value}" class="{selected}">{text}</li>
 			{/options}
 			</ul>
+		</div>
+		<div class="day_drag day_draggable {class}">
+		<!-- draggable_inner : 부모안에서 밖에 움직일 수 없다.-->
+		111?
+		</div>
+		<div class="day_resize day_drag resizable_ns {class}">
+			<!-- resizable_ns : 상하로 밖에 바꿀 수 없다.-->
+			<!-- resizable_ew : 좌우로 밖에 바꿀 수 없다.-->
+			<!-- resizable_inner : 부모안에서 밖에 바꿀 수 없다.-->
+			111
+			<img src="../images/resize.png" width="30" height="30" class="day_resizable" />
 		</div>
 	</div>
 	<div class="testCheckbox" style="max-width:500px;">
@@ -48,8 +59,10 @@ daylight(".testCheckbox").append(daylight.ui.progress('testName4', {class :"", s
 daylight(".testCheckbox").append(daylight.ui.progress('testName5', {class :"progress_sample_round_red",stripe:true, animation:true}));
 daylight(".testCheckbox").append(daylight.ui.slider('testName6', {class :"", type:"range"}));
 daylight(".testCheckbox").append(daylight.ui.slider('testName7', {class :"slider_sample_ios"}));
-//daylight(".testCheckbox").append(daylight.ui.select('testName8', {class :""}));
+daylight(".testCheckbox").append(daylight.ui.select('testName8', {class :"", options:[1,2,3]}));
 daylight(".testCheckbox").append(daylight.ui.select('testName9', {class :"select_sample_red", multiple:"multiple", options:["안녕하세요", "..?", "ㅁㅁㅁㅁㅁ"]}));
+daylight(".testCheckbox").append(daylight.ui.drag('testName10', {class :""}));
+daylight(".testCheckbox").append(daylight.ui.resize('testName11', {class :""}));
 </script>
 
 </html>
