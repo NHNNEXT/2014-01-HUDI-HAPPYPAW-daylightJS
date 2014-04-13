@@ -1,7 +1,8 @@
 //test 설계
 daylight.ui = {};
 daylight.ui.TEMLATE = {};
-daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}"/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMLATE.radio = '<div class="day_radio {class}"><input type="radio" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.TEMLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
 		
 daylight.ui.checkbox = function(name, option) {
@@ -11,6 +12,15 @@ daylight.ui.checkbox = function(name, option) {
 	if(!option.value) option.value = "";
 	if(!option.class) option.class= "";
 	var template = this.TEMLATE.checkbox;
+	return daylight.template(option, template);
+};
+daylight.ui.radio = function(name, option) {
+	if(!option)
+		option = {};
+	option.name = name;	
+	if(!option.value) option.value = "";
+	if(!option.class) option.class= "";
+	var template = this.TEMLATE.radio;
 	return daylight.template(option, template);
 };
 daylight.ui.progress = function(name, option) {
@@ -231,41 +241,49 @@ daylight.ui.drag.event = function(element, e, dragDistance) {
 
 	if(event.type == "touchstart" || event.type == "mousedown") {
 		var draggable_object = daylight(event.target);
-		
-	
+			
 		if(draggable_object.size == 0)
 			return;
-		
 
 		if(!draggable_object.hasClass("day_draggable"))
 			return;
 
-
-			
 		dragDistance.target = element_object;
-		var position = element_object.position();
 		dragDistance.element = element;
+		var position = element_object.position();
 		dragDistance.stleft = position.left;
 		dragDistance.sttop = position.top;
 		
-
 	}
 	if(!dragDistance.target || dragDistance.target.size == 0)
 		return;
 	if(dragDistance.element != element)
 		return;
-
-	var drag_target = dragDistance.target;
-	drag_target.css("left", dragDistance.x + dragDistance.stleft);
-	drag_target.css("top",  dragDistance.y + dragDistance.sttop);
 	
-	//x : 이동한 좌표의 크기
-	//y : 이동한 좌표의 크기
-	//stx , sty 내가 처음에 누른 위치 : 페이지 기준
-	//stleft, sttop : 상대기준으로 position
-	//stx - stleft 간격 x
-	//sty - sttop : 간격 y
 	e.preventDefault();
+	
+	var drag_target = dragDistance.target;
+	var x = dragDistance.x + dragDistance.stleft;
+	var y = dragDistance.y + dragDistance.sttop;
+	if(drag_target.hasClass("draggable_inner")) {
+		var parent = drag_target.offsetParent();
+		var width = parent.innerWidth();
+		var height = parent.innerHeight();
+		
+		if(x < 0)
+			x = 0;
+		else if(x + drag_target.outerWidth() > width)
+			x = width - drag_target.outerWidth();
+		
+		if(y < 0)
+			y = 0;
+		else if(y + drag_target.outerHeight() > height)
+			y = height - drag_target.outerHeight();
+
+	}
+	drag_target.css("left", x);
+	drag_target.css("top", y);
+	
 }
 daylight.ui.resize = function(name, option) {
 	if(!option)
@@ -314,11 +332,23 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 		is_resizable_width = true;
 	else
 		is_resizable_width = is_resizable_height = true;
-		
 	
 
 	if(is_resizable_width) resize_target.css("width", dragDistance.x + dragDistance.width);
 	if(is_resizable_height) resize_target.css("height",  dragDistance.y + dragDistance.height);
+	
+	if(resize_target.hasClass("resizable_inner")) {
+		var parent = resize_target.offsetParent();
+		var width = parent.innerWidth();
+		var height = parent.innerHeight();
+		var pos = resize_target.position();
+		if(pos.left + resize_target.outerWidth() > width)
+			resize_target.css("width", width - pos.left - (resize_target.outerWidth() - resize_target.innerWidth()));
+		
+		if(pos.top + resize_target.outerHeight() > height)
+			resize_target.css("height", height - pos.top - (resize_target.outerHeight() - resize_target.innerHeight()));
+
+	}
 	e.preventDefault();
 }
 daylight("body").click(function(event) {

@@ -722,8 +722,6 @@ daylight.fn.drag = function(dragFunc) {
 	var mouseUp = function(e) {
 		if(!is_drag)
 			return;
-			
-		console.log("DRAG END");
 		dragObject = null;
 		is_drag = false;
 	}
