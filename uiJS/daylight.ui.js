@@ -291,7 +291,6 @@ daylight.ui.resize = function(name, option) {
 		option = {};
 	option.name = name;
 	
-	
 	var template = daylight("#sample .day_resize");
 	return daylight.template(option, template);
 }
@@ -299,21 +298,11 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	var element_object = daylight(element);
 	var event = daylight.$Event(e);
 
-/*
-	if(element_object.size == 0)
-		return;
-		
-*/
 	if(element == event.target)
 		return;
 	
 	if(event.type == "touchstart" || event.type == "mousedown") {
 		var resizable_object = daylight(event.target);
-		
-/*
-		if(resizable_object.size == 0)
-			return;
-*/
 		
 		if(!resizable_object.hasClass("day_resizable"))
 			return;
@@ -333,7 +322,6 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 		is_resizable_height = false;
 	var resize_target = dragDistance.target;
 	
-	
 	if(resize_target.hasClass("resizable_ns"))
 		is_resizable_height = true;
 	else if(resize_target.hasClass("resizable_ew"))
@@ -341,7 +329,6 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	else
 		is_resizable_width = is_resizable_height = true;
 	
-
 	if(is_resizable_width) resize_target.css("width", dragDistance.x + dragDistance.width);
 	if(is_resizable_height) resize_target.css("height",  dragDistance.y + dragDistance.height);
 	
@@ -394,7 +381,6 @@ daylight(window).load(function() {
 			try {
 				option = JSON.parse(option);
 			} catch (e) {
-				//console.log("ERR" + e);
 				option = {};
 			}
 		}

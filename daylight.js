@@ -15,7 +15,7 @@ var daylight = function(query, parent) {
 window.light = window.$ = window.dlight = window.daylight = daylight;
 
 daylight.document = document;
-daylight.version = "1.0.0";
+daylight.version = "0.0.1";
 
 
 daylight.CONSTANT = {SLOW:"slow", FAST:"fast"};
@@ -42,25 +42,18 @@ var _arraySum = function(arr) {
 	return a;
 }
 var _style = function(element) {
-	if(window.getComputedStyle)
-		return window.getComputedStyle(element);
-	else if(element.currentStyle)
-		return element.currentStyle;
-	else if(element.style)
-		return element.style;
+	return window.getComputedStyle && window.getComputedStyle(element) || element.currentStyle || element.style;
 }
 var _curCss = function(element, name, cssHooks) {
-	if(!element)
-		return undefined;
-	if(!name)
-		return undefined;
+	if(!element || !name)
+		return;
 	var style;
 	if(!cssHooks) {
 		style = _style(element)[name];
 	} else {
 		style = cssHooks[name];
 	}
-	if(style[style.length - 1] == "%") {
+	if(style[style.length - 1] === "%") {
 		//test
 		var percentage = parseFloat(style);
 		var offsetParent = element.offsetParent;
@@ -68,6 +61,7 @@ var _curCss = function(element, name, cssHooks) {
 		var cssHooks = _style(offsetParent);
 		var dimension = _curCssHook(offsetParent, name, cssHooks);
 		
+		//%로 된 css 속성을 절대값 pixel로 바꿔준다. 크롬은 알아서 픽셀로 바꿔준다.
 		return percentage * dimension / 100 + "px";
 	}
 	
@@ -78,14 +72,22 @@ var _dimensionCssHook = function(element, component, cssHooks) {
 	var border_right = _curCss(element, "border-"+component[1]+"-width", cssHooks);
 	var padding_left = _curCss(element, "padding-"+component[0], cssHooks);
 	var padding_right = _curCss(element, "padding-"+component[1], cssHooks);
-	var inner = (component[0] == "left") ? $(element).innerWidth() : $(element).innerHeight();
+	var inner = (component[0] === "left") ? $(element).innerWidth() : $(element).innerHeight();
 	var dimension = inner - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);	
+	//console.log("Dimension");
+	return dimension;
 }
+
 var _curCssHook = function(element, name, cssHooks) {
+	//content width에 따라 바뀔 수 있는 속성
 	var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right", "border-left-width", "border-right-width"];
+	
+	//content height에 따라 바뀔 수 있는 속성
 	var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];	
+	
+	
 	if(lrtype.indexOf(name) != -1) {
-		var requestComponent = ["left", "right"]
+		var requestComponent = ["left", "right"];
 		return _dimensionCssHook(element, requestComponent, cssHooks);
 	} else if(tbtype.indexOf(name) != -1) {
 		var requestComponent = ["top", "bottom"];
@@ -94,11 +96,15 @@ var _curCssHook = function(element, name, cssHooks) {
 		return _curCss(element.offsetParent, name);
 	}
 	
-	
-	return dimension;
+	//%를 쓸 수 있는 css 속성이 있는지 확인할 수가 없다 ;;; 조사해보자 ㅠㅠ
+	return 0;
 }
-var _domEach = function(target, o, callback) {
-	if(target.size == 0)
+/*
+	
+	
+*/
+var _domEach = function(dObject, o, callback) {
+	if(dObject.size == 0)
 		return;
 		
 	var t = daylight.type(o, true);
@@ -118,23 +124,25 @@ var _domEach = function(target, o, callback) {
 		e = [o];
 	}
 
-	if(target.size == 1) {
-		var self = target.o[0]
-		for(var i = 0; i < e.length; ++i) {
+	if(dObject.size == 1) {
+		var self = dObject.o[0], lenth =  e.length;
+		for(var i = 0; i < length; ++i) {
 			if(self == e[i])
 				continue;
 			
 			callback.call(self, self, e[i]);
 		}
+	} else {
+		target.each(function(self, index) {
+			var length = e.lenth;
+			for(var i = 0; i < length; ++i) {
+				if(self == e[i])
+					continue;
+				
+				callback.call(self, self, daylight.clone(e[i]));
+			}
+		});
 	}
-	target.each(function(self, index) {
-		for(var i = 0; i < e.length; ++i) {
-			if(self == e[i])
-				continue;
-			
-			callback.call(self, self, daylight.clone(e[i]));
-		}
-	});
 }
 //Array's IndexOf
 var arr = [];
@@ -174,20 +182,26 @@ var _value = {
 				return result[0];
 		},
 		set : function(element, key) {
-			var result = [];
 			var options = element && element.options;			
+			if(!options)
+				return;
+			
+			var result = [];
 			var type = daylight.type(key);
-
+			var length = options.length;
+			if(!length)
+				return;
+			//isSelected => X
 			switch(type) {
 			case "number":
-				for(var i = 0; i < options.length; ++i) {
+				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					opt.selected = false;
 				}
 				options[key].selected = true;
 				break;
 			case "string":
-				for(var i = 0; i < options.length; ++i) {
+				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					var value = (opt.value || opt.text);
 					if(value == key)
@@ -197,7 +211,7 @@ var _value = {
 				}
 				break;
 			case "array":
-				for(var i = 0; i < options.length; ++i) {
+				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					var value = (opt.value || opt.text);
 					if(key.indexOf(value) >= 0)
@@ -207,65 +221,61 @@ var _value = {
 				}
 			}
 		}
-	}
-	,input : {
+	},
+	input : {
 		get : function(element, is_value) {
 			var type = element.type;
 			if(!_value[type])
 				return element.value;
 			else
 				return _value[type].get(element, is_value);
-		}
-		,set : function(element, key) {
+		},
+		set : function(element, key) {
 			var type = element.type;
 			if(!_value[type])
 				element.value = key;
 			else
 				_value[type].set(element, key);	
 		}
-	}
-	,textarea : {
+	},
+	textarea : {
 		get : function(element) {
 			return element.innerText;
-		}
-		,set : function(element, key) {
+		},
+		set : function(element, key) {
 			element.innerText = key;
 		}
-	}
-	,radio : {
+	},
+	radio : {
 		get : function(element, is_value) {
 			if(is_value || element.checked) return element.value;
-			return undefined;	
-		}
-		,set : function(element, key) {
+			return;	
+		},
+		set : function(element, key) {
 			var type = daylight.type(key);
 			if(type == "array")
-				element.checked = key.indexOf(element.value) >= 0 ? true : false; 
-			else if(element.value === key)
-				element.checked = true;
-			else 
-				element.checked = false;
+				element.checked = !!(key.indexOf(element.value) >= 0); 
+			else
+				element.checked = (element.value === key);
 		}		
-	}
-	,checkbox : {
+	},
+	checkbox : {
 		get : function(element, is_value) {
 			if(is_value || element.checked) return element.value;
-			return undefined;	
-		}
-		,set : function(element, key) {
+			return;	
+		},
+		set : function(element, key) {
 			var type = daylight.type(key);
 			if(type == "array")
-				element.checked = key.indexOf(element.value) >= 0 ? true : false; 
-			else if(element.value === key)
-				element.checked = true;
+				element.checked = !!(key.indexOf(element.value) >= 0);
 			else 
-				element.checked = false;
+				element.checked = element.value === key;
 		}
 	}
 	
 };
 
-daylight.object = function(arr) {
+daylight.Object = function(arr) {
 	var size = this.size = arr.length;
 	this.o = this.objects = arr;
 	
@@ -279,11 +289,11 @@ daylight.object = function(arr) {
 }
 
 
-//daylight.object의 프로토타입은 Array이다. JQuery가 느린 원인 중 하나. 하지만 매우 편하게 사용할 수 있다.
-daylight.object.prototype = [];
+//daylight.Object의 프로토타입은 Array이다. JQuery가 느린 원인 중 하나. 하지만 매우 편하게 사용할 수 있다.
+daylight.Object.prototype = [];
 
 //프로토타입을 daylight.fn으로 묶는다.
-daylight.fn = daylight.object.prototype;
+daylight.fn = daylight.Object.prototype;
 
 //daylight object라는 것을 인식
 daylight.fn.daylight = "daylight";
@@ -318,6 +328,7 @@ daylight.extend = daylight.fn.extend = function() {
 }
 
 //daylight만의 타입  Array, String 등 구분가능.
+//jQuery jQuery.type 참고.
 daylight.type = function(obj, expand) {
 	var type = typeof obj;
 	if(!expand)
@@ -330,10 +341,11 @@ daylight.css = function(element, name, value) {
 		element.style[name] = value;
 		return value;
 	}
+	//자동 parseFloat을 해준다.
 	if(value === true) {
 		var returnValue = parseFloat(_curCss(element, name));
-		if(!returnValue)
-			return 0;
+		if(!returnValue)//returnValue가 NaN 일경우 returnValue == NaN이 false다 ㅠㅠㅠ NaN일 경우 비교문에서는 false로 나온다.. ㅠㅠㅠ
+			return 0;//auto인 경우?
 			
 		return returnValue;
 	}
@@ -566,7 +578,7 @@ daylight.extend({
 /**
 * @func : daylight.init(query)
 * @param : query(CSS Query)
-* @return : new daylight.object
+* @return : new daylight.Object
 */
 daylight.$ = daylight.init = function(query, option) {
 	var objects;
@@ -585,7 +597,7 @@ daylight.$ = daylight.init = function(query, option) {
 	default:
 		objects = [query];
 	}
-	return new this.object(objects, option);
+	return new this.Object(objects, option);
 }
 /**
 * @func : daylight.template(object, template)
@@ -657,7 +669,7 @@ daylight.fn.attr = function(name, value) {
 	if(typeof o == "object")	
 		return  o.getAttribute ? o.getAttribute(name) : o[name];
 	else
-		return undefined;
+		return;
 
 }
 daylight.fn.appendChild = function(object) {
@@ -674,7 +686,7 @@ daylight.fn.appendChild = function(object) {
 
 daylight.fn.css = function(name, value) {
 	if(!(value === undefined)) {
-		if(typeof name == "object") {
+		if(typeof name === "object") {
 			this.forEach(function(e) {
 				for(var key in name) {
 					e.style[key] = name[key];
@@ -748,11 +760,11 @@ daylight.fn.addEvent = daylight.fn.event = function(key, func) {
 }
 daylight.fn.equal = function(object) {
 	var type = daylight.type(object, true);
-	if(type == "html" && this.size == 1 && object == this.o[0]) {
+	if(type === "html" && this.size === 1 && object === this.o[0]) {
 		return true;
-	} else if(type == "daylight" &&  this.size == object.size) {
+	} else if(type === "daylight" &&  this.size === object.size) {
 		for(var i = 0; i < object.size; ++i) {
-			if(this.index(object.o[i]) == -1)
+			if(this.index(object.o[i]) === -1)
 				return false;
 
 		}
@@ -792,17 +804,17 @@ daylight.fn.has = function(selector, isContainParent) {
 	return [];
 }
 daylight.fn.extend({
-	filter : function(e) {
-		var type = daylight.type(e);
+	filter : function(func) {
+		var type = daylight.type(func);
 		var objects = this.o;
 		var length = this.size;
 		var arr = [];
-		var k = 0;
 		switch(type) {
 		case "function":
 			for(var i = 0; i < length; ++i) {
-				var a = e.call(objects[i], objects[i], i, objects);
-				a ? arr[k++] = objects[i] : null;
+				var o = objects[i];
+				var a = func.call(o, o, i, objects);
+				if(a)arr[arr.length] = o;
 			}
 			return daylight(arr);
 		}
@@ -949,7 +961,7 @@ daylight.fn.extend({
 
 daylight.fn.extend({
 	isEmpty : function() {
-		return this.size == 0;
+		return this.size === 0;
 	}, isElement : function(index) {
 		if(index) {
 			if(daylight.isElement(this.o[i]))
@@ -966,7 +978,7 @@ daylight.fn.extend({
 
 daylight.fn.index = function(object) {
 	var type = daylight.type(object);
-	if(type == "daylight")
+	if(type === "daylight")
 		object = object.o[0];
 	for(var i = 0; i < this.size; ++i) {
 		if(this.o[i] === object)
@@ -1044,7 +1056,7 @@ daylight.fn.extend({
 				this.innerHTML = value;
 			});
 		}
-		if(this.size == 0)
+		if(this.size === 0)
 			return "";
 		return this.o[0].innerHTML;
 	},
@@ -1088,7 +1100,7 @@ daylight.fn.extend({
 	},
 	last : function() {
 		if(!this.size)
-			return undefined;
+			return;
 
 		return this.o[this.size - 1];
 	},
