@@ -1,7 +1,7 @@
 //test 설계
 daylight.ui = {};
 daylight.ui.TEMLATE = {};
-daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}"/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}" {checked}/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.TEMLATE.radio = '<div class="day_radio {class}"><input type="radio" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.TEMLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
 		
@@ -11,6 +11,7 @@ daylight.ui.checkbox = function(name, option) {
 	option.name = name;	
 	if(!option.value) option.value = "";
 	if(!option.class) option.class= "";
+	option.checked = option.checked ? "checked" : "";
 	var template = this.TEMLATE.checkbox;
 	return daylight.template(option, template);
 };
@@ -298,17 +299,22 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	var element_object = daylight(element);
 	var event = daylight.$Event(e);
 
+/*
 	if(element_object.size == 0)
 		return;
-
+		
+*/
+	if(element == event.target)
+		return;
+	
 	if(event.type == "touchstart" || event.type == "mousedown") {
 		var resizable_object = daylight(event.target);
 		
-	
+/*
 		if(resizable_object.size == 0)
 			return;
+*/
 		
-
 		if(!resizable_object.hasClass("day_resizable"))
 			return;
 			
@@ -317,6 +323,8 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 		dragDistance.width = element_object.width();
 		dragDistance.height = element_object.height();
 	}
+	
+	
 	if(!dragDistance.target || dragDistance.target.size == 0)
 		return;
 	if(dragDistance.element != element)
@@ -361,27 +369,16 @@ daylight("body").click(function(event) {
 });
 daylight("body").drag(function(element, event, dragDistance) {
 	var e = daylight.$Event(event);
-	var es = daylight(".day_slider").has(element, true);
+	var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
 	for(var i = 0; i < es.size; ++i) {
-		daylight.ui.slider.event(es.o[i], event, dragDistance);
-	}
-	es = daylight(".day_drag").has(element, true);
-	for(var i = 0; i < es.size; ++i) {
-		daylight.ui.drag.event(es.o[i], event, dragDistance);
-	}
-	es = daylight(".day_resize").has(element);
-	for(var i = 0; i < es.size; ++i) {
-		daylight.ui.resize.event(es.o[i], event, dragDistance);
-	}
-});
-
-daylight("body").dragstart(function(e) {
-	var event = daylight.$Event(e);
-	var element = event.target;
-	es = daylight(".day_draggable, .day_resizable").has(element, true);
-	if(es.size > 0) {
-		e.preventDefault();
-		return false;
+		var element = es.o[i];
+		var funcName = [];
+		var _callFuncName = [];
+		if(daylight.hasClass(element, "day_slider")) _callFuncName.push("slider");
+		if(daylight.hasClass(element, "day_drag")) _callFuncName.push("drag");
+		if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
+		for(var j = 0; j < _callFuncName.length; ++j)
+			daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
 	}
 });
 daylight(window).load(function() {
@@ -390,6 +387,19 @@ daylight(window).load(function() {
 		var name = e.getAttribute("data-name");
 		var value = e.getAttribute("data-value");
 		var className = e.getAttribute("data-class");
-		e.outerHTML = daylight.ui[type](name, {value : value, class:className});
+		var option = e.getAttribute("data-option");
+		if(!option)
+			option = {};
+		else {
+			try {
+				option = JSON.parse(option);
+			} catch (e) {
+				//console.log("ERR" + e);
+				option = {};
+			}
+		}
+		if(value) option.value = value;
+		if(className) option.class = className;
+		e.outerHTML = daylight.ui[type](name, option);
 	});
 });

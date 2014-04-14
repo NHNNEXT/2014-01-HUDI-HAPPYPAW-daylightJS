@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width" />
 <link rel="stylesheet" tsype="text/css" href="../css/daylight.css" />
 <script src="../daylight.js" type="text/javascript"></script>
 <script src="../daylight.Event.js" type="text/javascript"></script>
@@ -54,14 +54,14 @@
 	day_drag 움직일 대상, ,  day_draggable 드래그를 할 대상 (day_drag와 같은 위치나 하위 노드에 있어야한다.)
 	day_resize 크기를 바꿀 대상, day_resizable 리사이즈 버튼/요청시킬 대상 (day_resize의 하위 노드에 있어야한다.)
 	-->
-	<div class="parent_test" style="width:300px;height:300px;border:1px solid black;position:relative;">
+	<div class="parent_test" style="width:300px;height:300px;border:1px solid black;position:relative;margin-top:180px;">
 		<div class="day_resize day_drag day_draggable draggable_inner resizable_inner">
 			111
-			<img src="../images/resize.png" width="30" height="30" class="day_resizable"style="position:absolute;right:0;bottom:0;" />
+			<img src="../images/resize.png" width="30" height="30" class="day_resizable" style="position:absolute;right:0;bottom:0;" />
 		</div>
 	</div>
 	
-		<div class="day_drag day_draggable draggable_inner resizable_inner">
+		<div class="day_drag day_draggable resizable_inner">
 			222
 		</div>
 </body>
@@ -77,7 +77,7 @@ daylight(".testCheckbox").append(daylight.ui.progress('testName5', {class :"prog
 daylight(".testCheckbox").append(daylight.ui.slider('testName6', {class :"", type:"range"}));
 daylight(".testCheckbox").append(daylight.ui.slider('testName7', {class :"slider_sample_ios"}));
 daylight(".testCheckbox").append(daylight.ui.select('testName8', {class :"", options:[1,2,3]}));
-daylight(".testCheckbox").append(daylight.ui.select('testName9', {class :"select_sample_red", multiple:"multiple", options:["안녕하세요", "..?", "ㅁㅁㅁㅁㅁ"]}));
+daylight(".testCheckbox").append(daylight.ui.select('testName9', {class :"select_sample_red", multiple:"multiple", options:["Daybrush", "ㅋㅋㅋㅋㅋ", "@@@@@"]}));
 //daylight(".testCheckbox").append(daylight.ui.drag('testName10', {class :""}));
 //daylight(".testCheckbox").append(daylight.ui.resize('testName11', {class :""}));
 </script>
