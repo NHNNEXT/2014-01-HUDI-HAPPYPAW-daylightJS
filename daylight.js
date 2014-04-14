@@ -1,3 +1,15 @@
+//
+//1. 공통 (convention)
+// private한 것은 prefix에 (_)언더바를 잘 사용할 것.
+// 함수는 동사_명사형태로 이름지을 것.
+// 생성자는 첫글자를 대문자로 시작해서 일반 메서드와 구별할 수 있게 할 것.
+// object 의 prefix에는 'o' 나 hashtable을 의미하는 'ht' 를 붙이는 게 좋겠음.
+// array 에는 'a'를 prefix로 붙이는 게 좋겠음.
+
+// framework 소스를 그대로 퍼오는 것보다 착안해서 구현하는 게 좋겠음. 
+// chaining 을 지원하는 건 꽤 중요함. 
+// 
+
 (function(window) {
 
 var document = window.document || document;
@@ -15,7 +27,7 @@ var daylight = function(query, parent) {
 window.light = window.$ = window.dlight = window.daylight = daylight;
 
 daylight.document = document;
-daylight.version = "1.0.0";
+daylight.version = "1.0.0";  //1.0.0 은 major버전.minor버전.trivial버전 을 의미하는데..출시전단계면 Major버전을 1 로 하진 않을 듯 ^^(이미 출시?)
 
 
 daylight.CONSTANT = {SLOW:"slow", FAST:"fast"};
@@ -50,6 +62,8 @@ var _style = function(element) {
 		return element.style;
 }
 var _curCss = function(element, name, cssHooks) {
+	//62 ~ 66 라인은 그냥 || 연산자를 사용해서 같이 return 처리. 참고로 return false나 null이 더 좋음. undefiend는 자바스크립트가 
+	//사용하는 type이라고 생각하는 게 좋고. 이걸 코드에서 사용하는 건 좋지 않음.
 	if(!element)
 		return undefined;
 	if(!name)
@@ -67,21 +81,30 @@ var _curCss = function(element, name, cssHooks) {
 
 		var cssHooks = _style(offsetParent);
 		var dimension = _curCssHook(offsetParent, name, cssHooks);
-		
+		//100이 의미하는게 뭐지? 이런 데이터는 외부상수로 빼던가 . 주석으로 설명을 꼭 달아둘 것. 
+		//전체적으로 주석을 아끼지 말것 (주석은 배포단게에서 없에주는 툴이 있으니 그때 다 날라감.)
 		return percentage * dimension / 100 + "px";
 	}
 	
 	return style;
 }
 var _dimensionCssHook = function(element, component, cssHooks) {
+	//한번을 초과해서 사용하는 변수는 항상 담아두기 
+	//var sLeft = component[0];
+	//var sRign = component[1];
+	// var border_left = _curCss(element, "border-" + sLeft + "-width", cssHooks);
+
 	var border_left = _curCss(element, "border-"+component[0]+"-width", cssHooks);
 	var border_right = _curCss(element, "border-"+component[1]+"-width", cssHooks);
 	var padding_left = _curCss(element, "padding-"+component[0], cssHooks);
 	var padding_right = _curCss(element, "padding-"+component[1], cssHooks);
+	//비교는 확실하지 않은 경우는 ==보다는 === 를 사용하는 습관.
+	//$(element) 도 변수에 담아두는 게 좋았을 뻔. 
 	var inner = (component[0] == "left") ? $(element).innerWidth() : $(element).innerHeight();
 	var dimension = inner - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);	
 }
 var _curCssHook = function(element, name, cssHooks) {
+	//아래 두 개는 뭔가 의미 있어보이는 데... 두개의 Array가 하나의 Object에 포함해서 var totalType = {lrtype : [] , tbtype : []} 이렇게 의미적으로 합치는 게 어떨뻔 ?
 	var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right", "border-left-width", "border-right-width"];
 	var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];	
 	if(lrtype.indexOf(name) != -1) {
@@ -93,11 +116,14 @@ var _curCssHook = function(element, name, cssHooks) {
 	} else if(name == "font-size") {
 		return _curCss(element.offsetParent, name);
 	}
+	//else문이 없어서..방어적인 코드가 아닐지도 모름. 확인필요.
 	
 	
 	return dimension;
 }
 var _domEach = function(target, o, callback) {
+	//함수에서 바로 오류를 뱉어야 하는 경우 아래처럼 빨리 return해주는 거 좋음. 
+	//불필요한 연산이 없어짐. 
 	if(target.size == 0)
 		return;
 		
@@ -120,6 +146,7 @@ var _domEach = function(target, o, callback) {
 
 	if(target.size == 1) {
 		var self = target.o[0]
+		//javascript 의 for 문의 length는 미리 변수에 할당하고 사용하는 게 좋음. (안그러면 매 loop 에서 그 길이를 계산함)
 		for(var i = 0; i < e.length; ++i) {
 			if(self == e[i])
 				continue;
@@ -144,6 +171,7 @@ if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (element) {
 		var length = arr.length;
 		
+		//미리 길이를 구한 거 잘 했음. 
 		for(var i = 0; i < length; ++i) {
 			if(arr[i] == object)
 				return i;
@@ -179,9 +207,20 @@ var _value = {
 			var type = daylight.type(key);
 
 			switch(type) {
+				//아래 case 3가지에는 중복되는 코드가 있는데..(for 루프로직 부터 ) 함수로 빼는 것도 좋겠는데? 
+				//함수라는 게 재사용은 아니지만 일회용 innerfunction을 사용해도 됨.
+				/* Ex.
+				 set : function() {
+				   _execLoop();
+				   funciton _execLoop (){
+				   	//어쩌구
+				   }
+				 }
+				*/
 			case "number":
 				for(var i = 0; i < options.length; ++i) {
 					var opt = options[i];
+					//boolean type이면 isSelected 라는 이름이 더 좋겠음. 
 					opt.selected = false;
 				}
 				options[key].selected = true;
@@ -207,6 +246,12 @@ var _value = {
 				}
 			}
 		}
+	//이건 별건 아닌데 줄바꿈을 할 때 오류가 나는 상황이 발생할 수 있기때문에 
+	// } 
+	// ,
+	// 보다
+	// },
+	// 처럼 ,까지 쓰고 줄바꿈하는 게 좀더 좋음.
 	}
 	,input : {
 		get : function(element, is_value) {
@@ -235,11 +280,14 @@ var _value = {
 	,radio : {
 		get : function(element, is_value) {
 			if(is_value || element.checked) return element.value;
+			//아래 statement는 있으나마나..javascript는 반환값이 없으면 기본값이 undefined
 			return undefined;	
 		}
 		,set : function(element, key) {
 			var type = daylight.type(key);
 			if(type == "array")
+				//아래 코드는 이렇게 구현가능 (!! : is not NOT ^^)
+				//element.checked = !! (key.indexOf(element.value) >= 0); 
 				element.checked = key.indexOf(element.value) >= 0 ? true : false; 
 			else if(element.value === key)
 				element.checked = true;
@@ -250,6 +298,7 @@ var _value = {
 	,checkbox : {
 		get : function(element, is_value) {
 			if(is_value || element.checked) return element.value;
+			//아래 statement는 있으나마나..javascript는 반환값이 없으면 기본값이 undefined
 			return undefined;	
 		}
 		,set : function(element, key) {
@@ -265,6 +314,7 @@ var _value = {
 	
 };
 
+//object가 생성자(constructor)라면 대문자로 시작해주는 게 보기 좋음.
 daylight.object = function(arr) {
 	var size = this.size = arr.length;
 	this.o = this.objects = arr;
@@ -318,9 +368,11 @@ daylight.extend = daylight.fn.extend = function() {
 }
 
 //daylight만의 타입  Array, String 등 구분가능.
+//type 말고 이름을 checkType이런이름으로 사용하는 게 어떨지
 daylight.type = function(obj, expand) {
 	var type = typeof obj;
 	if(!expand)
+		//자바스크립트 type check는 toString.call이 사실상 가장 정확한 방법인데 잘 사용했음.
 		return type == "object" ? obj.daylight || class2type[toString.call(obj)] || "object" : type;
 	
 	return type == "object" ? obj instanceof HTMLElement ? "html" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
@@ -332,8 +384,11 @@ daylight.css = function(element, name, value) {
 	}
 	if(value === true) {
 		var returnValue = parseFloat(_curCss(element, name));
-		if(!returnValue)
-			return 0;
+		if(!returnValue
+			//0이라면 false를 의미한거임? 이걸 사용하는 쪽에서의 상황을 잘 봐야 함. )
+			// 0 == false  --> true
+			// 0 === false  --> ???? 뭔지 알지?
+			return 0;  
 			
 		return returnValue;
 	}
@@ -341,6 +396,7 @@ daylight.css = function(element, name, value) {
 }
 
 //define 관련 함수들 모음
+//와우 멋진데.
 daylight.extend( {
 	//해당 함수를 선언합니다.
 	define : function(object, name, func) {
