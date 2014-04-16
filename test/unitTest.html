@@ -54,8 +54,8 @@
 <script>
 setConsole(daylight("#viewConsole"));
 this.setConsole(daylight("#viewConsole"));
-$test('daylight("span").size == 3').assertEqual(daylight("span").size, 3);
-$test('daylight("span").next().size == 2').assertEqual(daylight("span").next().size, 2);
+$test('daylight("span").size == 3').assertEqual(daylight("span").size(), 3);
+$test('daylight("span").next().size == 2').assertEqual(daylight("span").next().size(), 2);
 $test('span 검색').assertListEqual(daylight("span").o, document.getElementsByTagName("span"));
 $test('클래스 있는지 검사').assertTrue(daylight(".saa").hasClass("saa"));
 $test('html 있는지 검사').assertEqual(daylight(".saa").ohtml(), '<div class="saa">asa</div>');

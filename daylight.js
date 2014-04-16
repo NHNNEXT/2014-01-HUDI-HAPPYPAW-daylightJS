@@ -7,6 +7,12 @@ var hasOwn = class2type.hasOwnProperty;
 var navigator = window.navigator || navigator;
 var userAgent = navigator.userAgent;
 
+
+if(!document.querySelector) {
+	alert("지원하지 않는 브라우저입니다.");
+	return;
+}
+
 var daylight = function(query, parent) {
 	return daylight.init(query, parent);
 };
@@ -15,11 +21,12 @@ var daylight = function(query, parent) {
 window.light = window.$ = window.dlight = window.daylight = daylight;
 
 daylight.document = document;
-daylight.version = "0.0.1";
+
+daylight.version = "0.1.1";
 
 
 daylight.CONSTANT = {SLOW:"slow", FAST:"fast"};
-daylight.OPTION = {speed : daylight.CONSTANT.SLOW};
+daylight.OPTION = {speed : daylight.CONSTANT.FAST};
 
 
 var CONSTANT = daylight.CONSTANT,
@@ -44,22 +51,19 @@ var _arraySum = function(arr) {
 var _style = function(element) {
 	return window.getComputedStyle && window.getComputedStyle(element) || element.currentStyle || element.style;
 }
-var _curCss = function(element, name, cssHooks) {
+var _curCss = function(element, name, pre_styles) {
 	if(!element || !name)
 		return;
-	var style;
-	if(!cssHooks) {
-		style = _style(element)[name];
-	} else {
-		style = cssHooks[name];
-	}
+	//pre_styles
+	//element에 대해 미리 정의한 style들의 모음.
+	var style = pre_styles && pre_styles[name] || _style(element)[name];
+	//한 스타일 속성  style.length - 1 = 문자 끝자리가 %
 	if(style[style.length - 1] === "%") {
-		//test
 		var percentage = parseFloat(style);
-		var offsetParent = element.offsetParent;
+		var offset_parent = element.offsetParent;
 
-		var cssHooks = _style(offsetParent);
-		var dimension = _curCssHook(offsetParent, name, cssHooks);
+		var element_styles = _style(offset_parent);
+		var dimension = _curCssHook(offset_parent, name, element_styles);
 		
 		//%로 된 css 속성을 절대값 pixel로 바꿔준다. 크롬은 알아서 픽셀로 바꿔준다.
 		return percentage * dimension / 100 + "px";
@@ -67,31 +71,30 @@ var _curCss = function(element, name, cssHooks) {
 	
 	return style;
 }
-var _dimensionCssHook = function(element, component, cssHooks) {
-	var border_left = _curCss(element, "border-"+component[0]+"-width", cssHooks);
-	var border_right = _curCss(element, "border-"+component[1]+"-width", cssHooks);
-	var padding_left = _curCss(element, "padding-"+component[0], cssHooks);
-	var padding_right = _curCss(element, "padding-"+component[1], cssHooks);
+var _dimensionCssHook = function(element, component, pre_styles) {
+	var border_left = _curCss(element, "border-"+component[0]+"-width", pre_styles);
+	var border_right = _curCss(element, "border-"+component[1]+"-width", pre_styles);
+	var padding_left = _curCss(element, "padding-"+component[0], pre_styles);
+	var padding_right = _curCss(element, "padding-"+component[1], pre_styles);
 	var inner = (component[0] === "left") ? $(element).innerWidth() : $(element).innerHeight();
 	var dimension = inner - parseFloat(border_left) - parseFloat(border_right) - parseFloat(padding_left) - parseFloat(padding_right);	
 	//console.log("Dimension");
 	return dimension;
 }
 
-var _curCssHook = function(element, name, cssHooks) {
+var _curCssHook = function(element, name, pre_styles) {
 	//content width에 따라 바뀔 수 있는 속성
 	var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right", "border-left-width", "border-right-width"];
-	
 	//content height에 따라 바뀔 수 있는 속성
 	var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding-top", "padding-bottom", "border-top-width", "border-bottom-width"];	
 	
 	
 	if(lrtype.indexOf(name) != -1) {
 		var requestComponent = ["left", "right"];
-		return _dimensionCssHook(element, requestComponent, cssHooks);
+		return _dimensionCssHook(element, requestComponent, pre_styles);
 	} else if(tbtype.indexOf(name) != -1) {
 		var requestComponent = ["top", "bottom"];
-		return _dimensionCssHook(element, requestComponent, cssHooks);
+		return _dimensionCssHook(element, requestComponent, pre_styles);
 	} else if(name == "font-size") {
 		return _curCss(element.offsetParent, name);
 	}
@@ -104,7 +107,7 @@ var _curCssHook = function(element, name, cssHooks) {
 	
 */
 var _domEach = function(dObject, o, callback) {
-	if(dObject.size == 0)
+	if(dObject.length == 0)
 		return;
 		
 	var t = daylight.type(o, true);
@@ -124,7 +127,7 @@ var _domEach = function(dObject, o, callback) {
 		e = [o];
 	}
 
-	if(dObject.size == 1) {
+	if(dObject.length == 1) {
 		var self = dObject.o[0], lenth =  e.length;
 		for(var i = 0; i < length; ++i) {
 			if(self == e[i])
@@ -169,17 +172,14 @@ var _value = {
 			var result = [];
 			var options = element && element.options;
 			var opt;
-			
-			for (var i=0, iLen=options.length; i<iLen; i++) {
+			length=options.length
+			for (var i=0; i < length; ++i) {
 				opt = options[i];
 				
 				if (opt.selected)
 					result[result.length] = (opt.value || opt.text);
 			}
-			if(result.length > 1)
-				return result;
-			else
-				return result[0];
+			return result.length > 1 ? result : result[0];
 		},
 		set : function(element, key) {
 			var options = element && element.options;			
@@ -204,20 +204,14 @@ var _value = {
 				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					var value = (opt.value || opt.text);
-					if(value == key)
-						opt.selected = true;
-					else
-						opt.selected = false;
+					opt.selected = value == key;
 				}
 				break;
 			case "array":
 				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					var value = (opt.value || opt.text);
-					if(key.indexOf(value) >= 0)
-						opt.selected = true;
-					else
-						opt.selected = false;
+					opt.selected = (key.indexOf(value) >= 0);
 				}
 			}
 		}
@@ -276,9 +270,9 @@ var _value = {
 };
 
 daylight.Object = function(arr) {
-	var size = this.size = arr.length;
+	var size = arr.length;
 	this.o = this.objects = arr;
-	
+	this.length = size;
 	//옵션 설정하면 제이쿼리랑 비슷하게 사용 가능 하지만 느려짐.
 	if(OPTION.speed == CONSTANT.SLOW) {
 		this.length = size;
@@ -490,7 +484,7 @@ daylight.replace = function(from, to, str) {
 	return str.split(from).join(to);	
 }
 
-daylight.each = daylight.forEach = function(arr, callback) {
+daylight.each = function(arr, callback) {
 	var type = daylight.type(arr, true);
 	if(type === "array" || type === "nodelist") {
 		var length = arr.length;
@@ -503,6 +497,14 @@ daylight.each = daylight.forEach = function(arr, callback) {
 			arr.each(callback);
 	}
 }
+daylight.has = function(element, object, isContainParent) {
+	var is_element = daylight.isElement(object);
+	var is_selector = (typeof object === "string");
+	return is_element && daylight.contains(element, object, isContainParent) ||	
+			is_selector && daylight.contains(element, element.querySelector(object));
+
+}
+
 daylight.contains = function(parent, node, isContainParent) {
 	return (isContainParent && parent === node || parent !== node )&& parent.contains(node);
 }
@@ -571,6 +573,23 @@ daylight.extend({
 		else
 			element.className += " " + className;
 			
+		return true;
+	},
+	toggleClass : function(element, className, className2) {		
+		var is_add = daylight.addClass(element, className);
+		if(!is_add) {
+			//className이 이미 있다. -> className 제거
+			daylight.removeClass(element, className, true);
+			
+			//className2가 없다. -> className2 추가.
+			if(className2)
+				daylight.addClass(element, className2);
+				
+			return false;
+		} else if(className2) {
+			//className이 추가되었다. className2이 있다.
+			daylight.removeClass(element, className2, true);
+		}
 		return true;
 	}
 });
@@ -747,7 +766,7 @@ daylight.fn.drag = function(dragFunc) {
 	this.addEvent("touchmove", mouseMove);
 	this.addEvent("touchend", mouseUp);
 }
-daylight.fn.addEvent = daylight.fn.event = function(key, func) {
+daylight.fn.addEvent = daylight.fn.on = function(key, func) {
 	if(func) {
 		this.forEach(function(e) {
 			if(e.addEventListener){
@@ -760,10 +779,10 @@ daylight.fn.addEvent = daylight.fn.event = function(key, func) {
 }
 daylight.fn.equal = function(object) {
 	var type = daylight.type(object, true);
-	if(type === "html" && this.size === 1 && object === this.o[0]) {
+	if(type === "html" && this.length === 1 && object === this.o[0]) {
 		return true;
-	} else if(type === "daylight" &&  this.size === object.size) {
-		for(var i = 0; i < object.size; ++i) {
+	} else if(type === "daylight" &&  this.length === object.length) {
+		for(var i = 0; i < object.length; ++i) {
 			if(this.index(object.o[i]) === -1)
 				return false;
 
@@ -791,23 +810,11 @@ daylight.fn.get = function(index) {
 		index = this.o.length - index;
 	return this.o[index];
 }
-daylight.fn.has = function(selector, isContainParent) {
-	if(daylight.isElement(selector)) {
-		return this.filter(function() {
-			return daylight.contains(this, selector, isContainParent);
-		});
-	} else if(typeof selector === "string"){
-		return this.filter(function() {
-			return daylight.contains(this, this.querySelector(selector));
-		});		
-	}
-	return [];
-}
 daylight.fn.extend({
 	filter : function(func) {
 		var type = daylight.type(func);
 		var objects = this.o;
-		var length = this.size;
+		var length = this.length;
 		var arr = [];
 		switch(type) {
 		case "function":
@@ -821,9 +828,21 @@ daylight.fn.extend({
 		
 		return daylight(arr);
 	},
-	map : function(func) {	
+	has: function(selector, isContainParent) {
+		if(daylight.isElement(selector)) {
+			return this.filter(function() {
+				return daylight.contains(this, selector, isContainParent);
+			});
+		} else if(typeof selector === "string"){
+			return this.filter(function() {
+				return daylight.contains(this, this.querySelector(selector));
+			});		
+		}
+		return daylight([]);
+	},
+	map: function(func) {	
 		var objects = this.o;
-		var length = this.size;
+		var length = this.length;
 		var arr = [];
 		for(var i = 0; i < length; ++i)
 			arr[i] = func.call(objects[i], i, objects);
@@ -832,7 +851,7 @@ daylight.fn.extend({
 	},
 	each : function(callback) {
 		var objects = this.o;
-		var length = this.size;
+		var length = this.length;
 		for(var i = 0; i < length; ++i) {
 			var object = objects[i];
 			callback.call(object, object, i, objects);
@@ -857,27 +876,22 @@ daylight.fn.extend({
 	hasClass : function(className, index) {
 		if(!index)
 			index = 0;
-		if(!this.size)
+		if(!this.length)
 			return false;
 		
 		return daylight.hasClass(this.o[index], className);
 	},
 	toggleClass : function(className, className2) {
 		//var obj = this;
+		if(this.length == 0)
+			return;
+		
+		//if(this.size == 1)
+		//	return daylight.toggleClass(this.o[0], className, className2);
+			
 		this.each(function(e, index) {
-			var is_add = daylight.addClass(e, className);
-			if(!is_add) {
-				//className이 이미 있다. -> className 제거
-				daylight.removeClass(e, className, true);
-				//className2가 없다. -> className2 추가.
-				if(className2)
-					daylight.addClass(e, className2, true);
-			} else if(className2) {
-				daylight.removeClass(e, className2, true);
-			}
-				
+			daylight.toggleClass(e, className, className2);
 		});
-	
 		return this;
 	},removeClass : function(className) {
 		//var reg = new RegExp('(\\s|^)'+className+'(\\s|$)');
@@ -961,7 +975,7 @@ daylight.fn.extend({
 
 daylight.fn.extend({
 	isEmpty : function() {
-		return this.size === 0;
+		return this.length === 0;
 	}, isElement : function(index) {
 		if(index) {
 			if(daylight.isElement(this.o[i]))
@@ -980,11 +994,16 @@ daylight.fn.index = function(object) {
 	var type = daylight.type(object);
 	if(type === "daylight")
 		object = object.o[0];
-	for(var i = 0; i < this.size; ++i) {
+	
+	var length = this.length;
+	for(var i = 0; i <length; ++i) {
 		if(this.o[i] === object)
 			return i;
 	}
 	return -1;
+}
+daylight.fn.size = function() {
+	return this.length;
 }
 
 daylight.fn.scrollTop = function(value) {
@@ -992,6 +1011,7 @@ daylight.fn.scrollTop = function(value) {
 		this.each(function(e) {
 			e.scrollTop = value;
 		});
+		return this;
 	} else {
 		return this.o[0].scrollTop;
 	}
@@ -1056,7 +1076,7 @@ daylight.fn.extend({
 				this.innerHTML = value;
 			});
 		}
-		if(this.size === 0)
+		if(this.length === 0)
 			return "";
 		return this.o[0].innerHTML;
 	},
@@ -1099,10 +1119,10 @@ daylight.fn.extend({
 		return this.o[0];
 	},
 	last : function() {
-		if(!this.size)
+		if(!this.length)
 			return;
 
-		return this.o[this.size - 1];
+		return this.o[this.length - 1];
 	},
 	children : function() {
 		var o = [];
@@ -1119,7 +1139,8 @@ daylight.fn.extend({
 	},
 	prev : function() {
 		var arr = [];
-		for(var i = 0; i < this.size; ++i) {
+		var length = this.length;
+		for(var i = 0; i < length; ++i) {
 			var e = this.o[i];
 			if(daylight.type(e) != "object")
 				continue;
@@ -1134,7 +1155,8 @@ daylight.fn.extend({
 	},
 	next : function() {
 		var arr = [];
-		for(var i = 0; i < this.size; ++i) {
+		var length = this.length;
+		for(var i = 0; i < length; ++i) {
 			var e = this.o[i];
 			if(!daylight.isNode(e))
 				continue;
@@ -1300,7 +1322,7 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 
 daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart".split(" "), function(name, index, arr) {
 	daylight.fn[name] = function(func) {
-		this.event(name, func);
+		this.on(name, func);
 	}
 });
 

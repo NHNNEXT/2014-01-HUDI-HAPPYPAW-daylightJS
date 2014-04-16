@@ -1,3 +1,6 @@
+/*
+여기는 대부분 Jindo Framework의 jindo.$Event를 가져옴.. 필요한 것만 골라서 고칠 예정.
+*/
 daylight.$Event = function(e) {
 	var callee = arguments.callee;
 	if (e instanceof callee) return e;

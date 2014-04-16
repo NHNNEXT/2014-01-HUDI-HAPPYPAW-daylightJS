@@ -142,19 +142,19 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 	&& (!prev || !(prev = parseFloat(prev.style.left)) || (prev <= leftPercentage)))
 		thumb.css("left", leftPercentage + "%");
 
-	
-	if(thumbs.size == 1) {
+	var size = thumbs.size();
+	if(size == 1) {
 		var min = slider.attr("data-minvalue");
 		var max = slider.attr("data-maxvalue");
 		var value = parseFloat(max) * leftPercentage / 100 + parseFloat(min) * (1 - leftPercentage/ 100);
 		slider.attr("data-value", parseInt(value));
 		quantity.css("width", parseInt(value) + "%");
-	} else if(thumbs.size > 1) {
+	} else if(size > 1) {
 		var min = slider.attr("data-minvalue");
 		var max = slider.attr("data-maxvalue");
 		var value = parseFloat(max) * leftPercentage / 100 + parseFloat(min) * (1 - leftPercentage/ 100);
 		var start = parseFloat(thumbs.o[0].style.left);
-		var end = parseFloat(thumbs.o[thumbs.size - 1].style.left);
+		var end = parseFloat(thumbs.o[size - 1].style.left);
 		if(!start)
 			start = 0;
 		if(!end)
@@ -202,11 +202,11 @@ daylight.ui.select.event = function(element, e) {
 	var options = selectElement.o[0].options;
 	if(type == "click") {
 		var clickElement = e.target;
-		if(title.has(clickElement, true).size >= 1) {
+		if(title.has(clickElement, true).size() >= 1) {
 			menu.toggleClass("open", "hidden");
 			return;
 		}
-		if(menu.has(e.target).size < 1)
+		if(menu.has(e.target).size() < 1)
 			return;
 		
 		var value = clickElement.getAttribute("data-value");
@@ -237,13 +237,13 @@ daylight.ui.drag.event = function(element, e, dragDistance) {
 	var element_object = daylight(element);
 	var event = daylight.$Event(e);
 
-	if(element_object.size == 0)
+	if(element_object.size() == 0)
 		return;
 
 	if(event.type == "touchstart" || event.type == "mousedown") {
 		var draggable_object = daylight(event.target);
 			
-		if(draggable_object.size == 0)
+		if(draggable_object.size() == 0)
 			return;
 
 		if(!draggable_object.hasClass("day_draggable"))
@@ -256,7 +256,7 @@ daylight.ui.drag.event = function(element, e, dragDistance) {
 		dragDistance.sttop = position.top;
 		
 	}
-	if(!dragDistance.target || dragDistance.target.size == 0)
+	if(!dragDistance.target || dragDistance.target.size() == 0)
 		return;
 	if(dragDistance.element != element)
 		return;
@@ -314,7 +314,7 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	}
 	
 	
-	if(!dragDistance.target || dragDistance.target.size == 0)
+	if(!dragDistance.target || dragDistance.target.size() == 0)
 		return;
 	if(dragDistance.element != element)
 		return;
@@ -350,21 +350,22 @@ daylight("body").click(function(event) {
 	var e = daylight.$Event(event);
 	var element = e.target;
 	var es = daylight(".day_select").has(element, true);
-	for(var i = 0; i < es.size; ++i) {
+	for(var i = 0; i < es.size(); ++i) {
 		daylight.ui.select.event(es.o[i], event);
 	}
 });
 daylight("body").drag(function(element, event, dragDistance) {
 	var e = daylight.$Event(event);
 	var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
-	for(var i = 0; i < es.size; ++i) {
+	for(var i = 0; i < es.size(); ++i) {
 		var element = es.o[i];
 		var funcName = [];
 		var _callFuncName = [];
 		if(daylight.hasClass(element, "day_slider")) _callFuncName.push("slider");
 		if(daylight.hasClass(element, "day_drag")) _callFuncName.push("drag");
 		if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
-		for(var j = 0; j < _callFuncName.length; ++j)
+		var length = _callFuncName.length;
+		for(var j = 0; j < length; ++j)
 			daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
 	}
 });
