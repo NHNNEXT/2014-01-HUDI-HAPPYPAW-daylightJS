@@ -1,10 +1,10 @@
-<body>
+ƒ<body>
 
 <script src="../daylight.js"></script>
 <script src="../daylight.Event.js"></script>
 <script src="../daylight.ajax.js"></script>
 <script src="unittest.js"></script>
-<script src="../../js/jquery.js"></script>
+<script src="../../daybrush_board/js/jquery.js"></script>
 <style>
 	th {
 		text-align: left;
@@ -61,4 +61,6 @@ jQuery.ajax({ url : "http://dday.me/younkue/test/jsonp.php",
 
 $test("daylight jsonp Speed", 20).assertSpeed(function() {daylight.ajax("http://dday.me/younkue/test/jsonp.php", {type:"jsonp"});});
 //$test("jQuery jsonp Speed", 100).assertSpeed(function() {jQuery.ajax("http://dday.me/younkue/test/jsonp.php", {type:"jsonp"});});
+
+
 </script>

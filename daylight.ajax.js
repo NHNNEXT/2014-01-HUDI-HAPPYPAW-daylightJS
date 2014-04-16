@@ -23,6 +23,12 @@ var _ajaxFunc = {
 		//보내기
 		send : function(ajax) {
 			var request = ajax.target;
+			
+			if(typeof ajax.param === "string") {
+				var length = ajax.param.split("&").length;
+				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				request.setRequestHeader("Content-length", length);
+			}
 			request.send(ajax.param);
 		},
 		//해당 정보를 가져온다.
@@ -66,9 +72,8 @@ var _ajaxFunc = {
 							ajax._done(value, request);
 						}
 					} else {
-						ajax._fail(script);
+						ajax._fail(request);
 					}
-
 					ajax._always(request);
 				}
 			};
@@ -219,6 +224,7 @@ daylight.ajax.prototype.extend({
 //콜백함수 호출하는 함수
 daylight.ajax.prototype.extend({
 	_done : function(value, target) {
+	
 		if(this.func.done)
 			this.func.done.call(target, value, target);
 	},
@@ -276,7 +282,7 @@ daylight.ajax.prototype.extend({
 		    if (param != "")
 		        param += "&";
 	
-		    param += key + "=" + param[key];
+		    param += key + "=" + data[key];
 		}
 		return param;
 	}
