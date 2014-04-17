@@ -28,7 +28,6 @@ var _ajaxFunc = {
 				var length = ajax.param.split("&").length;
 				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				request.setRequestHeader("Content-length", length);
-				alert(ajax.param);
 				
 			}
 			request.send(ajax.param);
