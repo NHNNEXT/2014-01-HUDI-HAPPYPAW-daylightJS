@@ -24,10 +24,12 @@ var _ajaxFunc = {
 		send : function(ajax) {
 			var request = ajax.target;
 			
-			if(typeof ajax.param === "string") {
+			if(typeof ajax.param === "string" &&  ajax.param != "") {
 				var length = ajax.param.split("&").length;
 				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				request.setRequestHeader("Content-length", length);
+				alert(ajax.param);
+				
 			}
 			request.send(ajax.param);
 		},
@@ -77,6 +79,10 @@ var _ajaxFunc = {
 					ajax._always(request);
 				}
 			};
+			request.timeout = 5000;
+			request.ontimeout = function() {
+				ajax._timeout(request);
+			}
 		}
 	},
 	"script" : {
@@ -273,7 +279,10 @@ daylight.ajax.prototype.extend({
 			this.setJSONP();
 			this.url += "&" + this.param;
 			return;
-		}			
+		} else if(this.option.method === "GET") {
+			var prefix = (this.url.indexOf("?") != -1) ? "&"  : "?" ;
+			this.url += prefix + this.param;
+		}
 		
 	},
 	objectToParam : function(data) {

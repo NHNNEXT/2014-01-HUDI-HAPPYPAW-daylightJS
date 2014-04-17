@@ -806,8 +806,14 @@ daylight.fn.find = function(query) {
 	return daylight(o);
 }
 daylight.fn.get = function(index) {
-	if(index < 0)
-		index = this.o.length - index;
+	if(index === undefined)
+		return this.o;
+	var length = this.length;	
+	if(length == 0)
+		return null;
+		
+	while(index < 0) {index = length + index;}
+	while(index >= this.length) {index = index - length;}
 	return this.o[index];
 }
 daylight.fn.extend({

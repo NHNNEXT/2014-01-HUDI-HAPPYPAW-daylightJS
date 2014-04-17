@@ -49,8 +49,7 @@ setConsole(daylight("#viewConsole"));
 this.setConsole(daylight("#viewConsole"));
 var url = "http://daybrush.com/yk/board/daylightJS/test/json.php";
 
-var a = daylight.ajax("http://daybrush.com/yk/board/daylightJS/test/json.php", {async : true})
-.done(function(value, req) {
+var a = daylight.ajax(url).done(function(value, req) {
 	$test("Ajax Async Test JSON").assertEqual("aaa", value.a);
 });
 jQuery.ajax({ url : "http://dday.me/younkue/test/jsonp.php",
@@ -58,7 +57,7 @@ jQuery.ajax({ url : "http://dday.me/younkue/test/jsonp.php",
     jsonp : "callback"}).done(function(value, req) {
 	$test("JQuery Ajax JSONP Test").assertEqual("aaa", value.a)	
 });
-
+daylight.ajax("http://10.73.42.193:8080/nyam/app/addHistory", {data:{qrcode:"111", id:"121001"}, method:"GET"});
 $test("daylight jsonp Speed", 20).assertSpeed(function() {daylight.ajax("http://dday.me/younkue/test/jsonp.php", {type:"jsonp"});});
 //$test("jQuery jsonp Speed", 100).assertSpeed(function() {jQuery.ajax("http://dday.me/younkue/test/jsonp.php", {type:"jsonp"});});
 
