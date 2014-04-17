@@ -26,8 +26,7 @@ var _ajaxFunc = {
 			if(typeof ajax.param === "string" &&  ajax.param != "") {
 				var length = ajax.param.split("&").length;
 				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				request.setRequestHeader("Content-length", length);
-				
+				request.setRequestHeader("Content-length", ajax.param.length);
 			}
 			request.send(ajax.param);
 		},
@@ -267,7 +266,7 @@ daylight.ajax.prototype.extend({
 		else if(typeof data === "string")
 			this.param = data;
 		else if(daylight.isPlainObject(data))
-			this.param = this.objectToParam(data);
+			this.param = this.objectToParam(data, this.option.method);
 		else if(window.FormData && data.constructor == FormData)
 			this.param = data;
 		else
@@ -283,13 +282,13 @@ daylight.ajax.prototype.extend({
 		}
 		
 	},
-	objectToParam : function(data) {
+	objectToParam : function(data, method) {
 		var param = "";
 		for (var key in data) {
 		    if (param != "")
 		        param += "&";
 	
-		    param += key + "=" + data[key];
+		    param += key + "=" + ((method=== "POST") ? encodeURI(data[key]) : data[key]);
 		}
 		return param;
 	}
