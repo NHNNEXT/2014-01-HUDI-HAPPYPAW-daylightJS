@@ -23,7 +23,6 @@ var _ajaxFunc = {
 		//보내기
 		send : function(ajax) {
 			var request = ajax.target;
-			
 			if(typeof ajax.param === "string" &&  ajax.param != "") {
 				var length = ajax.param.split("&").length;
 				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
