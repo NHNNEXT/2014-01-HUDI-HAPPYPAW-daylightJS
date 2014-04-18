@@ -33,7 +33,7 @@ var _ajaxFunc = {
 		//해당 정보를 가져온다.
 		_get : function(ajax, request) {
 			var contentType = request.getResponseHeader("content-type");
-			switch(ajax.type) {
+			switch(ajax.option.type) {
 			case "auto":
 				//JSON형태로 변환.
 				if(contentType === "application/json")
