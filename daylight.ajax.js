@@ -37,7 +37,7 @@ var _ajaxFunc = {
 			case "auto":
 				//JSON형태로 변환.
 				if(contentType === "application/json")
-					return ajax._parseJSON(request.responseText);
+					return daylight.parseJSON(request.responseText);
 				
 				//나머지는 그냥 텍스트로
 				if(!request.responseXML)
@@ -52,7 +52,7 @@ var _ajaxFunc = {
 				return request.responseText;
 				break;
 			case "json":
-				return ajax._parseJSON(request.responseText);
+				return daylight.parseJSON(request.responseText);
 			}	
 			
 			return request.responseText;
@@ -187,14 +187,6 @@ daylight.ajax.prototype.autoSend = true;
 daylight.ajax.prototype.method = "GET";
 daylight.ajax.prototype.type = "auto";
 daylight.ajax.prototype.async = true;
-
-daylight.ajax.prototype._parseJSON = function(text) {
-	try {
-		return JSON.parse(text);
-	} catch (e) {
-		return {};
-	}
-}
 
 
 //callback함수 모음.

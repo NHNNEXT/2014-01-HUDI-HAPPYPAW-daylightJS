@@ -4,7 +4,7 @@ daylight.ui.TEMLATE = {};
 daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}" {checked}/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.TEMLATE.radio = '<div class="day_radio {class}"><input type="radio" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
 daylight.ui.TEMLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
-		
+daylight.ui.TEMLATE.slider = '<div class="day_slider {class}" data-value="40" data-minvalue="0" data-maxvalue="100" ><span class="quantity"></span><span class="thumb thumb_start"></span>{range}</div>';
 daylight.ui.checkbox = function(name, option) {
 	if(!option)
 		option = {};
@@ -33,10 +33,10 @@ daylight.ui.progress = function(name, option) {
 	if(option.stripe)
 		option.striped = "progress_striped";
 		
-	if(!option.value)
+	if(option.value === undefined)
 		option.value = 40;
 	
-	var template = this.TEMLATE.progress;;
+	var template = this.TEMLATE.progress;
 	return daylight.template(option, template);	
 }
 daylight.ui.slider = function(name, option) {
@@ -47,7 +47,7 @@ daylight.ui.slider = function(name, option) {
 	if(option.type === "range") {
 		option.range = '<span class="thumb thumb_end"></span>';
 	}
-	var template = daylight("#sample .day_slider");
+	var template =  this.TEMLATE.slider;
 	return daylight.template(option, template);	
 }
 //test Naming
@@ -346,36 +346,37 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	}
 	e.preventDefault();
 }
-daylight("body").click(function(event) {
-	var e = daylight.$Event(event);
-	var element = e.target;
-	var es = daylight(".day_select").has(element, true);
-	for(var i = 0; i < es.size(); ++i) {
-		daylight.ui.select.event(es.o[i], event);
-	}
-});
-daylight("body").drag(function(element, event, dragDistance) {
-	var e = daylight.$Event(event);
-	var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
-	for(var i = 0; i < es.size(); ++i) {
-		var element = es.o[i];
-		var funcName = [];
-		var _callFuncName = [];
-		if(daylight.hasClass(element, "day_slider")) _callFuncName.push("slider");
-		if(daylight.hasClass(element, "day_drag")) _callFuncName.push("drag");
-		if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
-		var length = _callFuncName.length;
-		for(var j = 0; j < length; ++j)
-			daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
-	}
-});
+
 daylight(window).load(function() {
-	daylight(".data-request").each(function(e, index) {
-		var type = e.getAttribute("data-type");
-		var name = e.getAttribute("data-name");
-		var value = e.getAttribute("data-value");
-		var className = e.getAttribute("data-class");
-		var option = e.getAttribute("data-option");
+	daylight("body").click(function(event) {
+		var e = daylight.$Event(event);
+		var element = e.target;
+		var es = daylight(".day_select").has(element, true);
+		for(var i = 0; i < es.size(); ++i) {
+			daylight.ui.select.event(es.o[i], event);
+		}
+	});
+	daylight("body").drag(function(element, event, dragDistance) {
+		var e = daylight.$Event(event);
+		var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
+		for(var i = 0; i < es.size(); ++i) {
+			var element = es.o[i];
+			var funcName = [];
+			var _callFuncName = [];
+			if(daylight.hasClass(element, "day_slider")) _callFuncName.push("slider");
+			if(daylight.hasClass(element, "day_drag")) _callFuncName.push("drag");
+			if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
+			var length = _callFuncName.length;
+			for(var j = 0; j < length; ++j)
+				daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
+		}
+	});
+	daylight(".data-request").each(function(element, index) {
+		var type = element.getAttribute("data-type");
+		var name = element.getAttribute("data-name");
+		var value = element.getAttribute("data-value");
+		var className = element.getAttribute("data-class");
+		var option = element.getAttribute("data-option");
 		if(!option)
 			option = {};
 		else {
@@ -387,6 +388,6 @@ daylight(window).load(function() {
 		}
 		if(value) option.value = value;
 		if(className) option.class = className;
-		e.outerHTML = daylight.ui[type](name, option);
+		element.outerHTML = daylight.ui[type](name, option);
 	});
 });

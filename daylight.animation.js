@@ -1,21 +1,35 @@
+window.requestAnimFrame = (function(){
+  return  window.requestAnimationFrame       ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame    ||
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+})();
+
 daylight.animation = {
 		//actionList : Dictionary(Object)
 		CONSTANT : {
 			browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
-			transformList : {"left":"translateX(?)", "top":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
+			transformList : {"gleft":"translateX(?)", "gtop":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
 			browserEffectCSS : {"origin" : "transform-origin:?"}
 		},
 		css : function(actionList, prefix) {
 			var CONSTANT = daylight.animation.CONSTANT;
 			var transformList = [];
 			var browserEffectList = [];
+			var otherList = [];
 			var style = "";
 			
 			for(var action in actionList) {
 				if(action in CONSTANT.transformList)
 					transformList.push(action);
-				if(action in CONSTANT.browserEffectCSS)
-					browserEffectList.push(action);				
+				else if(action in CONSTANT.browserEffectCSS)
+					browserEffectList.push(action);
+				else if(typeof actionList[action] === "function")
+					continue;
+				else 
+					otherList.push(action);
 			}
 			if(transformList.length > 0) {
 				var transformStyle = "{prefix}transform:";
@@ -33,28 +47,33 @@ daylight.animation = {
 					var action = browserEffectList[j];
 					var replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
 					browserEffectStyle += " " + replaceMotion;
-				browserEffectStyle += ";\n";
+					browserEffectStyle += ";\n";
 				}
 				style += browserEffectStyle;
 			}
-			var cssStyle = "";
-			if(!prefix) {
-				for(var i = 0; i < CONSTANT.browserPrefix.length; ++i) {
-					cssStyle += daylight.replace("{prefix}", CONSTANT.browserPrefix[i], style);
+			if(otherList.length > 0) {
+				var otherStyle = "" ;
+				for(var j = 0; j < otherList.length; ++j) {
+					var action = otherList[j];
+					otherStyle += action+":"+actionList[action];
+					otherStyle += ";\n";
 				}
-			} else {
-				cssStyle += daylight.replace("{prefix}", CONSTANT.browserPrefix[0], style);
-				cssStyle += daylight.replace("{prefix}", prefix, style);
+				style += otherStyle;
 			}
+			var cssStyle = daylight.replace("{prefix}", CONSTANT.browserPrefix[1], style);
 			return cssStyle;
 		}
 		,timeline : function(query) {
 			console.log("NEW TIMELINE");
 			this.query = query;
-			this.object = $(query);
+			var object = this.object = daylight(query);
 			this.layers = [];
 			this.totalTime = 0;
 			this.animationType = "ease";
+			this.count = "infinite";
+			
+			object.scroll(function(e) {e.preventDefault();});
+			
 		}	
 		,layer : function(query) {
 			this.query = query;
@@ -65,7 +84,8 @@ daylight.animation = {
 			
 			this.id = id;
 			this.object = $(query);
-			this.is_unusable = (this.object.size !=1);
+			this.timeSchedule = {};
+			this.is_unusable = (this.object.size() !=1);
 		}
 };
 daylight.animation.timeline.prototype.hasLayer = function(layer) {
@@ -86,7 +106,7 @@ daylight.animation.timeline.prototype.hasLayer = function(layer) {
 	}
 	return false;
 }
-	daylight.animation.timeline.prototype.getLayer = function(layer) {
+daylight.animation.timeline.prototype.getLayer = function(layer) {
 	var layers = this.layers;
 	var is_string = (typeof layer == "string");
 	for(var i = 0; i < layers.length; ++i) {
@@ -166,6 +186,28 @@ daylight.animation.timeline.prototype.addMotion = function(layer, motion) {
 	if(motion.endTime && this.totalTime < motion.endTime) {
 		this.totalTime = motion.endTime;
 	}
+	var prevMotion = {motion:{}, startTime:0, endTime:0};
+	daylight.each(layerObject.motions, function(o, index) {
+		if(o.endTime === motion.startTime)
+			motion.startTime += 0.00001;
+			
+		if(o.endTime < motion.startTime && o.endTime > prevMotion.endTime) {
+			daylight.each(o.end, function(value, key) {
+				prevMotion.motion[key] = value;
+			});
+		} 
+	});
+	
+	daylight.each(prevMotion.motion, function(value, key){
+		if(!motion.start)
+			motion.start = {};
+		if(!motion.start[key])
+			motion.start[key] = value;
+			
+		if(!motion.end[key])
+			motion.end[key] = value;
+	});
+
 	layerObject.motions.push(motion);
 }
 daylight.animation.timeline.prototype.init = function() {
@@ -175,34 +217,41 @@ daylight.animation.timeline.prototype.init = function() {
 	var length = layers.length;
 	var totalTime = this.totalTime;
 	var styleHTML = '<style class="daylightAnimationStyle">\n';
-
-	
+	var CONSTANT = daylight.animation.CONSTANT;
 	for(var i = 0; i < length; ++i) {
 		var layerObject = layers[i];
 		var query = layerObject.layer.query;
 		var id = layerObject.layer.id;
 		var motions = layerObject.motions;
-		var timeSchedule = {};
-		
+		layers[i].timeSchedule = {};
+		var timeSchedule = layers[i].timeSchedule;
+		var finalMotion = {startTime:0, endTime : 0}
 		for(var j = 0; j < motions.length; ++j) {
 			var motion = motions[j];
 			var startTime = motion.startTime;
 			var endTime = motion.endTime;
-			timeSchedule[startTime] = motion.start;
-
-			if(!(endTime === undefined))
+			if(startTime !== undefined)
+				timeSchedule[startTime] = motion.start;
+				
+			if(endTime !== undefined)
 				timeSchedule[endTime] = motion.end;
-		}	
-		styleHTML += "@-webkit-keyframes daylightAnimation"+id+" {";
+				
+			if(finalMotion.endTime < endTime)
+				finalMotion = motion;
+		}
+		if(!timeSchedule[totalTime]) {
+			timeSchedule[totalTime] = finalMotion.end;
+		}
+		styleHTML += "@-webkit-keyframes daylightAnimation"+id+" {\n";
 		for(var time in timeSchedule) {
 			var percentage = parseFloat(time) * 100 / totalTime;
-			styleHTML += percentage +"% {";
+			styleHTML += percentage +"% {\n";
 			
 			var motion = timeSchedule[time];
 			styleHTML += daylight.animation.css(motion);
-			styleHTML += "}";
+			styleHTML += "}\n";
 		}
-		styleHTML += "}";
+		styleHTML += "}\n";
 		
 		//console.log(layerObject);
 		if(layerObject.init) {
@@ -210,25 +259,67 @@ daylight.animation.timeline.prototype.init = function() {
 			styleHTML += daylight.animation.css(layerObject.init);
 			styleHTML += "}\n";
 		}
-		styleHTML += query + ".animationStart {";
-		styleHTML += "-webkit-animation: daylightAnimation"+id+" "+totalTime+"s infinite " +this.getAnimationType()+ ";\n";
+		styleHTML += query + ".animationStart {\n";
+		styleHTML += "-webkit-animation: daylightAnimation"+id+" "+totalTime+"s " + this.getCount() + " " +this.getAnimationType()+ ";\n";
+		styleHTML += "-webkit-animation-fill-mode: forwards;\n";
 		styleHTML += "}\n";
 	}
-		styleHTML += query + ".animationPause {";
+		styleHTML += query + ".animationPause {\n";
 		styleHTML += "-webkit-animation-play-state:paused;\n";
 		styleHTML += "}\n";
 	styleHTML += '</style>';
 	
 	var style = $(".daylightAnimationStyle");
 	
-	if(!style.isNull())//removeStyle
-		style.get(0).parentNode.removeChild(style.get(0));
-	$("body").get(0).insertAdjacentHTML("afterend", styleHTML);
+	if(!style.isEmpty())//removeStyle
+		style.parent().remove(style.get(0));
+	$("head").append(styleHTML);
+}
+daylight.animation.timeline.prototype.timer = function() {
+
+	var self = this;
+		
+	var time = Date.now();
+	var spendTime = this.spendTime = (time - this.startTime) / 1000 % this.totalTime;
+	var count = parseInt((time - this.startTime) / 1000 / this.totalTime);
+	var layers = this.layers;
+	
+	if(spendTime > this.totalTime)
+		return;	
+
+	//console.log(spendTime);
+	daylight.each(layers, function(layer, index) {
+		var schedule = layer.timeSchedule;
+		daylight.each(schedule, function(motion, time) {
+			if(!motion)
+				return;
+			if(motion.count === undefined)
+				motion.count = count - 1;
+			
+			if(count <= motion.count)
+				return;
+			
+			if(time > spendTime)
+				return;
+			
+			daylight.each(motion, function(action, name) {
+				if(typeof action !== "function")
+					return;
+				console.log("function");
+				action(self);
+			});
+			motion.count++;
+		});
+	});
+	requestAnimFrame(this.timer.bind(this));
 }
 daylight.animation.timeline.prototype.start = function() {
 	console.log("START TIMELINE");
 	$(".daylightAnimationLayer").addClass("animationStart");
 	$(".daylightAnimationLayer").removeClass("animationPause");
+	this.startTime = Date.now();
+	this.spendTime = 0;
+	requestAnimFrame(this.timer.bind(this));
 }
 daylight.animation.timeline.prototype.pause = function() {
 	console.log("PAUSE TIMELINE");
@@ -238,3 +329,4 @@ daylight.animation.timeline.prototype.showAnimationBar = function() {
 	
 }
 daylight.defineGetterSetter(daylight.animation.timeline, "animationType");
+daylight.defineGetterSetter(daylight.animation.timeline, "count");
