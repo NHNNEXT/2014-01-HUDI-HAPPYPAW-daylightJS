@@ -286,35 +286,46 @@ daylight.animation.timeline.prototype.timer = function() {
 	
 	if(spendTime > this.totalTime)
 		return;	
-
-	//console.log(spendTime);
+		
+	var is_finish = false;
+	
 	daylight.each(layers, function(layer, index) {
 		var schedule = layer.timeSchedule;
 		daylight.each(schedule, function(motion, time) {
 			if(!motion)
 				return;
 			if(motion.count === undefined)
-				motion.count = count - 1;
-			
-			if(count <= motion.count)
+				motion.count = 0;
+			//test
+			if(count < motion.count)
 				return;
 			
-			if(time > spendTime)
+			if(time > spendTime && (motion.count == count))
 				return;
-			
+			motion.count++;
 			daylight.each(motion, function(action, name) {
 				if(typeof action !== "function")
 					return;
 				console.log("function");
-				action(self);
+				action(self, parseFloat(time));
 			});
-			motion.count++;
+			is_finish = count === 1;
 		});
+		//count 0일 떄
+		//spendTime을 지난 것만 찾자
+		
+		
+		//count 1일 때 
+		//motion.count가 0인 것을 찾자.
 	});
+	if(is_finish) {
+		console.log("FINISHED");
+		return;
+	}
 	requestAnimFrame(this.timer.bind(this));
 }
 daylight.animation.timeline.prototype.start = function() {
-	console.log("START TIMELINE");
+	console.log("START TIMELINE totalTime : " + this.totalTime);
 	$(".daylightAnimationLayer").addClass("animationStart");
 	$(".daylightAnimationLayer").removeClass("animationPause");
 	this.startTime = Date.now();
