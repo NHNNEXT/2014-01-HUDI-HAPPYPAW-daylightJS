@@ -346,6 +346,64 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	}
 	e.preventDefault();
 }
+daylight.ui.chart = function(name, option) {
+	if(!option)
+		option = {};
+	option.name = name;
+	if(!option.type)
+		option.type="circle";
+		
+	var data = option.data;
+	var total = 0;
+	for(var i  = 0; i < data.length; ++i) {
+		var type = daylight.checkType(data[i]);
+		if(type == "array") {
+			total += data[i][1];
+			var name = data[i][0];
+			var value = data[i].length == 1 ? name : data[i][1];
+			data[i] = {name: name, value: value, scale : data[i][2]};
+		}
+	}
+
+	if(option.type == "circle") {
+		for(var i  = 0; i < data.length; ++i) {
+			data[i].pie = [];
+			angle = 360 * data[i].value / total;
+			if(angle >180) {
+				data[i].pie.push({angle1 : 180});
+				data[i].pie.push({angle1 : angle});
+			}else {		
+				data[i].pie.push({angle1 : angle});
+			}
+			data[i].angle = angle;
+			data[i].startAngle = i == 0 ? 0 : data[i - 1].startAngle + data[i - 1].angle;
+			data[i].color = ["#5491F6", "#DF4A78", "#BF3944", "#DF423F", "#FE9F28","#FFC500", "#D4E14E", "#5376C4"][i];
+			data[i].slice = data[i].angle < 180 ? "slice" : "";
+			if(!data[i].scale)
+				data[i].scale = 1;
+		}
+	} else if(option.type === "bar-y") {
+		option.axis = [];
+		var min = option.min || 0;
+		var max = option.max || total;
+		var piece = option.piece || 10;
+
+		for(var i = 0; i <= piece; ++i) {
+			var value = min * i / piece  + max * (piece - i) / piece;
+			option.axis.push({"axis_value": value});
+		}
+		for(var i  = 0; i < data.length; ++i) {
+				data[i].percentage = parseInt(1000 *  data[i].value / max) / 10 ;
+		}
+		option.width = 100 / data.length * 0.6;
+		option.margin = 100 / data.length * 0.2;
+		option.dist = 100 / piece;
+		
+	}
+	return daylight.template(option, $("#sample .day-chart.chart-" + option.type));
+}
+
+
 
 daylight(window).load(function() {
 	daylight("body").click(function(event) {
@@ -369,6 +427,7 @@ daylight(window).load(function() {
 			var length = _callFuncName.length;
 			for(var j = 0; j < length; ++j)
 				daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
+				
 		}
 	});
 	daylight(".data-request").each(function(element, index) {

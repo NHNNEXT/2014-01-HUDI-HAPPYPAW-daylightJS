@@ -758,7 +758,7 @@ daylight.fn.css = function(name, value) {
 		
 	return _curCss(this.o[0], name);
 }
-
+//Event
 daylight.fn.extend({
 	drag : function(dragFunc) {
 		var dragObject = null;
@@ -817,6 +817,15 @@ daylight.fn.extend({
 			});
 		}
 		return this;
+	},
+	ready : function(func) {
+		this.each(function() {
+			this.onreadystatechange = function (e) {
+				if (this.readyState == "interactive") {
+					func.call(this, e);
+				}
+			}
+		});
 	}
 });
 daylight.fn.equal = function(object) {
@@ -1471,7 +1480,7 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 });
 */
 
-daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart".split(" "), function(name, index, arr) {
+daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart resize".split(" "), function(name, index, arr) {
 	daylight.fn[name] = function(func) {
 		this.on(name, func);
 	}

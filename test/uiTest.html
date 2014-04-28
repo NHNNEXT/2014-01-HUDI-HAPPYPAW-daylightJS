@@ -45,6 +45,41 @@
 			111
 			<img src="../images/resize.png" width="30" height="30" class="day_resizable"  />
 		</div>
+		<div class="day-chart chart-circle">
+			<div class="day-chart-data-labels">
+				{data}
+				<div class="label">
+					<span class="label-color" style="background:{color}"></span><span class="label-title">{name}</span>
+				</div>			
+				{/data}
+			</div>
+			
+			<div class="day-chart-pies">
+			{data}
+			<div class="day-chart-data {slice}"  data="{value}" style="-webkit-transform:rotate({startAngle}deg) scale({scale});">
+				{pie}
+				<div class="pie" style="-webkit-transform:rotate({angle1}deg); background:{color};"></div>
+				{/pie}
+			</div>
+			{/data}
+			</div>
+		</div>
+		<div class="day-chart chart-bar-y">
+			<ul class="axis">
+			{axis}
+				<li style="height:{dist}%">
+					<span>{axis_value}</span>
+				</li>
+			{/axis}
+			</ul>
+			{data}
+			<div class="bar" style="width:{width}%; margin:0px {margin}%">
+
+				<div class="title">{name}</div>
+				<div class="value" style="height:{percentage}%;"><div class="label">{value}</div></div>
+			</div>
+			{/data}
+		</div>
 	</div>
 	<div class="testCheckbox" style="max-width:500px;">
 	</div>
@@ -65,11 +100,13 @@
 			222
 		</div>
 </body>
-<script src="../uiJS/daylight.ui.js" type="text/javascript"></script>
+<script src="../daylight.ui.js" type="text/javascript"></script>
 <script>
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName', {class :"checkbox_sample_simple_square"}));
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName2', {class :"checkbox_sample_simple_round"}));
 daylight(".testCheckbox").append(daylight.ui.checkbox('testName5', {class :"checkbox_sample_ios_on_off blue", value:"3"}));
+daylight(".testCheckbox").append(daylight.ui.checkbox('sky_blue', {class :"checkbox_sample_red_sky_on_off", value:"3"}));
+
 daylight(".testCheckbox").append(daylight.ui.radio('testName3', {class :"checkbox_sample_ios_on_off", value:"1"}));
 daylight(".testCheckbox").append(daylight.ui.radio('testName3', {class :"checkbox_sample_ios_on_off blue", value:"2"}));
 daylight(".testCheckbox").append(daylight.ui.progress('testName4', {class :"", stripe: false, value:80}));
@@ -78,6 +115,8 @@ daylight(".testCheckbox").append(daylight.ui.slider('testName6', {class :"", typ
 daylight(".testCheckbox").append(daylight.ui.slider('testName7', {class :"slider_sample_ios"}));
 daylight(".testCheckbox").append(daylight.ui.select('testName8', {class :"", options:[1,2,3]}));
 daylight(".testCheckbox").append(daylight.ui.select('testName9', {class :"select_sample_red", multiple:"multiple", options:["Daybrush", "ㅋㅋㅋㅋㅋ", "@@@@@"]}));
+daylight(".testCheckbox").append(daylight.ui.chart('testName9', {type:"circle", data:[["name1", 10, 1.05], ["name2", 5], ["name3", 4],["name4", 3],["name5", 2],["name6", 2],["name7", 2]]   }));
+daylight(".testCheckbox").append(daylight.ui.chart('testName9', {type:"bar-y", data:[["name1", 40], ["name2", 80], ["name3", 20],["name4", 31],["name5", 22],["name6", 32],["name7", 42]] , min:0, max:100, piece : 5  }));
 </script>
 
 

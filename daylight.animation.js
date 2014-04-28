@@ -14,7 +14,7 @@ daylight.animation = {
 			transformList : {"gleft":"translateX(?)", "gtop":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
 			browserEffectCSS : {"origin" : "transform-origin:?"}
 		},
-		css : function(actionList, prefix) {
+		objectToCSS : function(actionList, prefix) {
 			var CONSTANT = daylight.animation.CONSTANT;
 			var transformList = [];
 			var browserEffectList = [];
@@ -73,6 +73,10 @@ daylight.animation = {
 			this.count = "infinite";
 			
 			object.scroll(function(e) {e.preventDefault();});
+			
+			object.on("click", function(e) {
+				this.webkitRequestFullScreen();	
+			});
 			
 		}	
 		,layer : function(query) {
@@ -157,6 +161,15 @@ daylight.animation.timeline.prototype.setLayer = function(layer, initMotion) {
 		return;
 	}
 	layerObject.init = initMotion;
+}
+daylight.animation.timeline.prototype.addAction = function(layer, option) {
+	var startTime = option.startTime;
+	var endTime = option.endTime;
+	var action = option.action;
+	//fade-in
+	//fade-out
+	//move, zoom(not scale)
+	//disolve(targe포함)
 }
 daylight.animation.timeline.prototype.addMotion = function(layer, motion) {
 	if(!layer) {
@@ -248,7 +261,7 @@ daylight.animation.timeline.prototype.init = function() {
 			styleHTML += percentage +"% {\n";
 			
 			var motion = timeSchedule[time];
-			styleHTML += daylight.animation.css(motion);
+			styleHTML += daylight.animation.objectToCSS(motion, "-webkit-");
 			styleHTML += "}\n";
 		}
 		styleHTML += "}\n";
@@ -256,7 +269,7 @@ daylight.animation.timeline.prototype.init = function() {
 		//console.log(layerObject);
 		if(layerObject.init) {
 			styleHTML += query + "{";
-			styleHTML += daylight.animation.css(layerObject.init);
+			styleHTML += daylight.animation.objectToCSS(layerObject.init);
 			styleHTML += "}\n";
 		}
 		styleHTML += query + ".animationStart {\n";
@@ -309,7 +322,7 @@ daylight.animation.timeline.prototype.timer = function() {
 				console.log("function");
 				action(self, parseFloat(time));
 			});
-			is_finish = count === 1;
+			is_finish = self.getCount() === "infinite" ? false :  count >= self.getCount();
 		});
 		//count 0일 떄
 		//spendTime을 지난 것만 찾자
@@ -341,3 +354,6 @@ daylight.animation.timeline.prototype.showAnimationBar = function() {
 }
 daylight.defineGetterSetter(daylight.animation.timeline, "animationType");
 daylight.defineGetterSetter(daylight.animation.timeline, "count");
+
+
+daylight.extend(daylight.animation);
