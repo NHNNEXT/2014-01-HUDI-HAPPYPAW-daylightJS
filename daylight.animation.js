@@ -9,6 +9,7 @@ window.requestAnimFrame = (function(){
 
 daylight.animation = {
 		//actionList : Dictionary(Object)
+		//CONSTANT라는 객체명은 언어의 예약어 같은 느낌이라 좀 별로지만, 대문자로 구분한 건 좋고, 아래 prefix와 같은걸 분리한 건 참 좋네. */
 		CONSTANT : {
 			browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
 			transformList : {"gleft":"translateX(?)", "gtop":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
@@ -45,6 +46,7 @@ daylight.animation = {
 				var browserEffectStyle = "" ;
 				for(var j = 0; j < browserEffectList.length; ++j) {
 					var action = browserEffectList[j];
+					//요런코드 좋네. ? 괜찮다. ㅋㅋ
 					var replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
 					browserEffectStyle += " " + replaceMotion;
 					browserEffectStyle += ";\n";
@@ -52,8 +54,12 @@ daylight.animation = {
 				style += browserEffectStyle;
 			}
 			if(otherList.length > 0) {
+				//위에 browserEffectStyle도 그렇고 여기 otherStyle도 그렇고 결국 위에 선언한 것이랑 같거든(hosting이라는 개념) 그래서 변수 선언을 함수 위쪽에 해도 됨.
+				// (알겠지만 javascript에는 블록 유효범위가 없음)
 				var otherStyle = "" ;
 				for(var j = 0; j < otherList.length; ++j) {
+					//for문 아래 새로 선언되는 action 은 도대체 뭐임?? 위에도 선언한 action을 또 선언함 것임. 
+					//이걸보면 hosting개념을 모르는 것으로 보임..
 					var action = otherList[j];
 					otherStyle += action+":"+actionList[action];
 					otherStyle += ";\n";
@@ -79,22 +85,24 @@ daylight.animation = {
 			});
 			
 		}	
+		//함수이름을 이렇게 명사를 사용하는 거 정말 가독성 떨어짐. 뭐하는 함수지?
 		,layer : function(query) {
 			this.query = query;
 			var id = query;
+			//이런거야 말로 chaining 을 왜 안쓰는거지?
 			id = daylight.replace(" ", "", id);
 			id = daylight.replace(".", "", id);
 			id = daylight.replace("#", "", id);
 			
 			this.id = id;
-			this.object = $(query);
+			this.object = $(query); //object 라는 이름...정말 쓰지말기. this.array 와 같은 느낌. 사실 query도 jquery와 헷갈림.
 			this.timeSchedule = {};
 			this.is_unusable = (this.object.size() !=1);
 		}
 };
 daylight.animation.timeline.prototype.hasLayer = function(layer) {
 	var layers = this.layers;
-	var is_string = (typeof layer == "string");
+	var is_string = (typeof layer == "string"); //그런데 new String("this is string....~~~"); 이렇게 선언한 변수를 typeof 로 검사하면 어떻게 될까?
 	for(var i = 0; i < layers.length; ++i) {
 		var layerObject = layers[i];
 		if(!is_string && layerObject.layer.object.equal(layer.object))
@@ -129,8 +137,10 @@ daylight.animation.timeline.prototype.addLayer = function(query, initMotion) {
 	var layer = (query instanceof daylight.animation.layer) ? query : new daylight.animation.layer(query);
 	
 	if(layer.is_unusable) {
+		//프레임웍수준에서 alert을 뱉는다고???!! alert은 항상 좋지 않은 UX임. 
+		//이런 오류메시지도 key/value 해쉬맵으로 객체에 담아두면 어떨까? 로직과 데이터의 분리는 항상 중요함.
 		alert("객체가 2개 이상 발견하거나 발견하지 못했습니다.");
-		console.log(layer);
+		console.log(layer); //console.log는 모든 브라우저에 있나? 없다면 어떻게 해야히지???
 		return null;
 	}
 	if(this.hasLayer(layer)) {
@@ -146,6 +156,7 @@ daylight.animation.timeline.prototype.addLayer = function(query, initMotion) {
 	layer.object.addClass("daylightAnimationLayer");
 	this.layers.push({layer:layer, init:initMotion, motions:[]});
 	
+	//함수는 addLayer인데 결국..id를 반환하네. (추가만 하는 함수인줄 알앗는데.)
 	return layer.id;
 }
 daylight.animation.timeline.prototype.setLayer = function(layer, initMotion) {
@@ -223,14 +234,19 @@ daylight.animation.timeline.prototype.addMotion = function(layer, motion) {
 
 	layerObject.motions.push(motion);
 }
+//init은 가볍게. 
+//이 하위에 있는 로직은 함수로 몇개단위로 분리할 수 없는걸까? 
+//단락을 나누고 단락별로 함수로 분리하고 그 함수를 호출해보자.
 daylight.animation.timeline.prototype.init = function() {
 	console.log("INIT TIMELINE");
 
 	var layers = this.layers;
-	var length = layers.length;
+	var length = layers.length; //length 말고 layerLen 이 더 낫겄다.
 	var totalTime = this.totalTime;
 	var styleHTML = '<style class="daylightAnimationStyle">\n';
 	var CONSTANT = daylight.animation.CONSTANT;
+
+	//이런거 forEach 같은 함수가 더 어울리면 그걸 쓰는것도 좋겠음. 
 	for(var i = 0; i < length; ++i) {
 		var layerObject = layers[i];
 		var query = layerObject.layer.query;
@@ -239,6 +255,8 @@ daylight.animation.timeline.prototype.init = function() {
 		layers[i].timeSchedule = {};
 		var timeSchedule = layers[i].timeSchedule;
 		var finalMotion = {startTime:0, endTime : 0}
+		//여기도..이런거 forEach 같은 함수가 더 어울리면 그걸 쓰는것도 좋겠음. 
+		//또는 finalMotion이나 motions함수 인자로 받는 함수 하나 받아서 처리할 수 없을까? 이렇게 for문 아래 for문 으로 중첩된 코드 말고..
 		for(var j = 0; j < motions.length; ++j) {
 			var motion = motions[j];
 			var startTime = motion.startTime;
@@ -255,6 +273,7 @@ daylight.animation.timeline.prototype.init = function() {
 		if(!timeSchedule[totalTime]) {
 			timeSchedule[totalTime] = finalMotion.end;
 		}
+		//-webkit-keyframes 과 같은 것도 로직에서 분리해두는 게 어떨까?
 		styleHTML += "@-webkit-keyframes daylightAnimation"+id+" {\n";
 		for(var time in timeSchedule) {
 			var percentage = parseFloat(time) * 100 / totalTime;
@@ -307,8 +326,9 @@ daylight.animation.timeline.prototype.timer = function() {
 		daylight.each(schedule, function(motion, time) {
 			if(!motion)
 				return;
-			if(motion.count === undefined)
+			if(motion.count === undefined) //이게 객체 안에 어떤 값이 있는지를 보는 거면. hasOwnproperty가 더 좋음(정확히는 for in을 사용하고 그 안에서 hasOwnproperty를 사용하는 것이 추천됨)
 				motion.count = 0;
+			}
 			//test
 			if(count < motion.count)
 				return;

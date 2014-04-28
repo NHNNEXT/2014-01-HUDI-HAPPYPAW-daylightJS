@@ -1,6 +1,9 @@
 /*
 여기는 대부분 Jindo Framework의 jindo.$Event를 가져옴.. 필요한 것만 골라서 고칠 예정.
 */
+//근데 가져올거면 뭔지 이해하도록 하고, 가져왔으면 jindo에서 가져온 것을 명확히 코드 상단에 주석으로 표시할 것. (어떤 부분을 가져왔는지. 출처 표기하기 )
+//그러고 보니 daylight의 라이센스는 뭘쓰지?? 
+//
 daylight.$Event = function(e) {
 	var callee = arguments.callee;
 	if (e instanceof callee) return e;

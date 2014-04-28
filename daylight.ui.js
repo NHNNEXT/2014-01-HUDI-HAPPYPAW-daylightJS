@@ -51,8 +51,10 @@ daylight.ui.slider = function(name, option) {
 	return daylight.template(option, template);	
 }
 //test Naming
+//코드에 thumb, quantity같은 거 있는거 보니 다 test 코드(demo 코드) 같은데 맞지? 그럼 상관없지만 클래스명이 코드에 있는 건 이해안됨.
+//이 컴포넌트에서 미리 정의된 클래스명 인가? 
 daylight.ui.slider.event = function(element, e, dragDistance) {
-	var event = daylight.$Event(e);
+	var event = daylight.$Event(e); //event와 같은 이름처럼 제발 예약어 같은 단어는 사용하지 말기.
 	var slider = daylight(element);
 	var type = event.type;
 	var thumbs = slider.find(".thumb");
@@ -74,7 +76,7 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 			var min_left = 0;
 					
 			var max_value = 10000;
-			var max_object = null;
+			var max_object = null; //빈객체면 그냥 max_object = {}
 			var max_index = -10000;
 			var max_left = 0;
 			
@@ -87,6 +89,8 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 				//dist < 0 누른 곳보다 뒤에 있다.
 				//click position < thumb 
 				//min_value click_position 위에 있는 최소값
+
+				//아래 if문 두 개는 함수로 분리할 수도 있는 수준. 그러면서 중복도 없애고.
 				if(min_value >= Math.abs(dist) && dist <= 0 && min_index > index) {
 					min_value = dist;
 					min_object = this;
@@ -112,6 +116,8 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 		dragDistance.stleft = percentage * width / 100;
 		
 	}
+
+	//return해서 빠져 나갈 코드가 있다면 위로 옮겨서 먼저 체크하고 바로 빠져나가도록 하는 게 더 좋을듯.
 	if(dragDistance.element != element)
 		return;
 		
@@ -150,6 +156,7 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 		slider.attr("data-value", parseInt(value));
 		quantity.css("width", parseInt(value) + "%");
 	} else if(size > 1) {
+		//아래 세줄은 위에 조건문안에 두 줄과 같네?? 하나로 묶을 수도 있을 듯. 
 		var min = slider.attr("data-minvalue");
 		var max = slider.attr("data-maxvalue");
 		var value = parseFloat(max) * leftPercentage / 100 + parseFloat(min) * (1 - leftPercentage/ 100);
@@ -314,11 +321,12 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	}
 	
 	
+	//앞서 말했지만 return으로 처리되는 건 위로 올려서 먼저 탈출하게 하자
 	if(!dragDistance.target || dragDistance.target.size() == 0)
 		return;
 	if(dragDistance.element != element)
 		return;
-	var is_resizable_width = false,
+	var is_resizable_width = false, //길지만 이런 이름들이 더 좋음.
 		is_resizable_height = false;
 	var resize_target = dragDistance.target;
 	
@@ -346,7 +354,10 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 	}
 	e.preventDefault();
 }
+//전반적으로 하드코딩된 데이터들이 너무 많고 함수로 좀더 분리해서 그 함수를 호출하는 식으로 구조 변경하면 좋겠음.
+//
 daylight.ui.chart = function(name, option) {
+	//var option  = option  || {} 와 같은걸까? 
 	if(!option)
 		option = {};
 	option.name = name;
@@ -355,8 +366,8 @@ daylight.ui.chart = function(name, option) {
 		
 	var data = option.data;
 	var total = 0;
-	for(var i  = 0; i < data.length; ++i) {
-		var type = daylight.checkType(data[i]);
+	for(var i  = 0; i < data.length; ++i) { //자꾸 보여서 또 말하지만 length는 JAVA와 달리 javascript는 매번 계산함으로 미리 계산해둬야 함,
+		var type = daylight.checkType(data[i]); //아 check하는 거 뺀거 좋은데.
 		if(type == "array") {
 			total += data[i][1];
 			var name = data[i][0];
@@ -370,13 +381,14 @@ daylight.ui.chart = function(name, option) {
 			data[i].pie = [];
 			angle = 360 * data[i].value / total;
 			if(angle >180) {
-				data[i].pie.push({angle1 : 180});
+				data[i].pie.push({angle1 : 180}); //angle1 은 뭐임..?
 				data[i].pie.push({angle1 : angle});
 			}else {		
 				data[i].pie.push({angle1 : angle});
 			}
 			data[i].angle = angle;
 			data[i].startAngle = i == 0 ? 0 : data[i - 1].startAngle + data[i - 1].angle;
+			//으악~!! 이런 데이터가 여기에 갑자기 등장하다니... 밖으로 빼기.
 			data[i].color = ["#5491F6", "#DF4A78", "#BF3944", "#DF423F", "#FE9F28","#FFC500", "#D4E14E", "#5376C4"][i];
 			data[i].slice = data[i].angle < 180 ? "slice" : "";
 			if(!data[i].scale)
@@ -395,7 +407,7 @@ daylight.ui.chart = function(name, option) {
 		for(var i  = 0; i < data.length; ++i) {
 				data[i].percentage = parseInt(1000 *  data[i].value / max) / 10 ;
 		}
-		option.width = 100 / data.length * 0.6;
+		option.width = 100 / data.length * 0.6; //별 의미 없는 0.6 , 0.2 이게 뭘 뜻하는지 하나도 모르겠음...주석으로 설명으로 좀더 달아두던가..
 		option.margin = 100 / data.length * 0.2;
 		option.dist = 100 / piece;
 		
