@@ -1,32 +1,44 @@
 //test 설계
 daylight.ui = {};
-daylight.ui.TEMLATE = {};
-daylight.ui.TEMLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}" {checked}/><label for="input_{name}_{value}"></label></div>';
-daylight.ui.TEMLATE.radio = '<div class="day_radio {class}"><input type="radio" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
-daylight.ui.TEMLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
-daylight.ui.TEMLATE.slider = '<div class="day_slider {class}" data-value="40" data-minvalue="0" data-maxvalue="100" ><span class="quantity"></span><span class="thumb thumb_start"></span>{range}</div>';
+daylight.ui.TEMPLATE = {};
+daylight.ui.TEMPLATE.checkbox = '<div class="day_checkbox {class}"><input type="checkbox" value="{value}" id="input_{name}_{value}" name="input_{name}" value="{value}" {checked}/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMPLATE.radio = '<div class="day_radio {class}"><input type="radio" value="{value}" id="input_{name}_{value}" name="input_{name}"/><label for="input_{name}_{value}"></label></div>';
+daylight.ui.TEMPLATE.progress = '<div class="day_progress {class}"><div class="progress_bar {striped} {active}" data-value="{value}" data-minvalue="0" data-maxvalue="100" style="width: {value}%"><span class="annotation">{value}% Complete</span></div></div>';
+daylight.ui.TEMPLATE.slider = '<div class="day_slider {class}" data-value="40" data-minvalue="0" data-maxvalue="100" ><span class="quantity"></span><span class="thumb thumb_start"></span>{range}</div>';
+daylight.ui.TEMPLATE.chart = {};
+daylight.ui.TEMPLATE.chart.circle= '<div class="day-chart chart-circle">			<div class="day-chart-data-labels">				{data}				<div class="label">					<span class="label-color" style="background:{color}"></span><span class="label-title">{name}</span>				</div>							{/data}			</div>			<div class="day-chart-pies">			{data}			<div class="day-chart-data {slice}"  data="{value}" style="-webkit-transform:rotate({startAngle}deg) scale({scale});">				{pie}				<div class="pie" style="-webkit-transform:rotate({angle1}deg); background:{color};"></div>				{/pie}			</div>			{/data}			</div>		</div>';
+
+daylight.ui.EVENT = {};
+daylight.ui.EVENT.resize = new Event('resize');
+daylight.ui.EVENT.drag = new Event('drag');
+daylight.ui.EVENT.change = new Event('change');
+//daylight.ui.EVENT.drag = new Event('drag');
+
+
+daylight.ui.templateHTML = function(option, template) {
+	var temp = daylight.template(option, template);
+	var element = daylight.parseHTML(temp);
+	return element[0];
+}
 daylight.ui.checkbox = function(name, option) {
-	if(!option)
-		option = {};
-	option.name = name;	
-	if(!option.value) option.value = "";
-	if(!option.class) option.class= "";
+	option = option || {};
+	option.name = name;
+	if(!option.hasOwnProperty("value")) option.value = "";
+	if(!option.hasOwnProperty("class")) option.class= "";
 	option.checked = option.checked ? "checked" : "";
-	var template = this.TEMLATE.checkbox;
-	return daylight.template(option, template);
+	var template = this.TEMPLATE.checkbox;
+	return this.templateHTML(option, template);
 };
 daylight.ui.radio = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;	
-	if(!option.value) option.value = "";
-	if(!option.class) option.class= "";
-	var template = this.TEMLATE.radio;
-	return daylight.template(option, template);
+	if(!option.hasOwnProperty("value")) option.value = "";
+	if(!option.hasOwnProperty("class")) option.class= "";
+	var template = this.TEMPLATE.radio;
+	return this.templateHTML(option, template);
 };
 daylight.ui.progress = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
 	if(option.animation)
 		option.active = "active";
@@ -36,33 +48,32 @@ daylight.ui.progress = function(name, option) {
 	if(option.value === undefined)
 		option.value = 40;
 	
-	var template = this.TEMLATE.progress;
-	return daylight.template(option, template);	
+	var template = this.TEMPLATE.progress;
+	return this.templateHTML(option, template);
 }
 daylight.ui.slider = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
 	option.range = "";
 	if(option.type === "range") {
 		option.range = '<span class="thumb thumb_end"></span>';
 	}
-	var template =  this.TEMLATE.slider;
-	return daylight.template(option, template);	
+	var template =  this.TEMPLATE.slider;
+	return this.templateHTML(option, template);
 }
 //test Naming
 daylight.ui.slider.event = function(element, e, dragDistance) {
-	var event = daylight.$Event(e);
+	var o_event = daylight.$Event(e);
 	var slider = daylight(element);
-	var type = event.type;
+	var type = o_event.type;
 	var thumbs = slider.find(".thumb");
 	var quantity = slider.find(".quantity");
 	var width = slider.width();
 
 	if(type === "mousedown" || type === "touchstart") {
 		var x = slider.offset().left;
-		var percentage = (event.pos().pageX - x) * 100 / width;
-		var etarget = daylight(event.target);
+		var percentage = (o_event.pos().pageX - x) * 100 / width;
+		var etarget = daylight(o_event.target);
 		dragDistance.element = element;
 		if(etarget.hasClass("thumb")) {
 			dragDistance.target = etarget;
@@ -166,17 +177,17 @@ daylight.ui.slider.event = function(element, e, dragDistance) {
 	}
 }
 daylight.ui.select = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
-	if(!option.multiple) option.multiple = "";
-	if(!option.options)
-		option.options = [];
 	var is_selected_one = false;
-	for(var i = 0; i < option.options.length; ++i) {
-		var opt = option.options[i];
+	
+	if(!option.multiple) option.multiple = "";	
+	var options = option.options = option.options || [];
+	var optionsLen = options.length;
+	for(var i = 0; i < optionsLen; ++i) {
+		var opt = options[i];
 		if(typeof opt != "object")
-			option.options[i] = {text : opt, value : opt};
+			options[i] = {text : opt, value : opt};
 		else if(opt.value === undefined)
 			opt.text = opt.value;
 		else if(opt.text === undefined)
@@ -187,16 +198,23 @@ daylight.ui.select = function(name, option) {
 		else
 			is_selected_one = true;
 	}
-	option.selected_text = option.options[0] ? option.options[0].text : "";
-	if(!is_selected_one &&  option.options[0]) option.options[0].selected = "selected";
+	option.selected_text = options[0] ? options[0].text : "";
+	if(!is_selected_one &&  options[0]) options[0].selected = "selected";
 	var template = daylight("#sample .day_select");
-	return daylight.template(option, template);
+	
+	var element = this.templateHTML(option, template);
+	
+	$(element).find("select").on("change", function() {
+		this.dispatchEvent(daylight.ui.EVENT.change);
+		//daylight.ui.select.event(this);
+	});
+	return element;
 }
 daylight.ui.select.event = function(element, e) {
-	var event = daylight.$Event(e);
+	var o_event = daylight.$Event(e);
 	var select = daylight(element);
 	var menu = select.find(".select_menu");
-	var type = event.type;
+	var type = o_event.type;
 	var selectElement = select.find("select");
 	var title = select.find(".selected_text");
 	var options = selectElement.o[0].options;
@@ -225,23 +243,21 @@ daylight.ui.select.event = function(element, e) {
 	}
 }
 daylight.ui.drag = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
-	
 	
 	var template = daylight("#sample .day_drag");
 	return daylight.template(option, template);
 }
 daylight.ui.drag.event = function(element, e, dragDistance) {
 	var element_object = daylight(element);
-	var event = daylight.$Event(e);
+	var o_event = daylight.$Event(e);
 
 	if(element_object.size() == 0)
 		return;
 
-	if(event.type == "touchstart" || event.type == "mousedown") {
-		var draggable_object = daylight(event.target);
+	if(o_event.type == "touchstart" || o_event.type == "mousedown") {
+		var draggable_object = daylight(o_event.target);
 			
 		if(draggable_object.size() == 0)
 			return;
@@ -249,11 +265,12 @@ daylight.ui.drag.event = function(element, e, dragDistance) {
 		if(!draggable_object.hasClass("day_draggable"))
 			return;
 
-		dragDistance.target = element_object;
+		dragDistance.target = element_object;//바뀌는 대상
 		dragDistance.element = element;
+		dragDistance.change_target = draggable_object;
 		var position = element_object.position();
-		dragDistance.stleft = position.left;
-		dragDistance.sttop = position.top;
+		dragDistance.stleft = parseFloat(element_object.css("left")) || position.left;
+		dragDistance.sttop = parseFloat(element_object.css("top")) || position.top;
 		
 	}
 	if(!dragDistance.target || dragDistance.target.size() == 0)
@@ -287,8 +304,7 @@ daylight.ui.drag.event = function(element, e, dragDistance) {
 	
 }
 daylight.ui.resize = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
 	
 	var template = daylight("#sample .day_resize");
@@ -296,28 +312,34 @@ daylight.ui.resize = function(name, option) {
 }
 daylight.ui.resize.event = function(element, e, dragDistance) {
 	var element_object = daylight(element);
-	var event = daylight.$Event(e);
+	var o_event = daylight.$Event(e);
 
-	if(element == event.target)
+	/*
+if(element == o_event.target)
 		return;
+*/
 	
-	if(event.type == "touchstart" || event.type == "mousedown") {
-		var resizable_object = daylight(event.target);
+	if(o_event.type == "touchstart" || o_event.type == "mousedown") {
+		var resizable_object = daylight(o_event.target);
 		
 		if(!resizable_object.hasClass("day_resizable"))
 			return;
 			
 		dragDistance.target = element_object;
 		dragDistance.element = element;
+		dragDistance.change_target = resizable_object;
 		dragDistance.width = element_object.width();
 		dragDistance.height = element_object.height();
+		dragDistance.is_resizable = true;
 	}
-	
-	
+	if(!dragDistance.is_resizable)
+		return;
+		
 	if(!dragDistance.target || dragDistance.target.size() == 0)
 		return;
 	if(dragDistance.element != element)
 		return;
+		
 	var is_resizable_width = false,
 		is_resizable_height = false;
 	var resize_target = dragDistance.target;
@@ -328,60 +350,94 @@ daylight.ui.resize.event = function(element, e, dragDistance) {
 		is_resizable_width = true;
 	else
 		is_resizable_width = is_resizable_height = true;
-	
-	if(is_resizable_width) resize_target.css("width", dragDistance.x + dragDistance.width);
-	if(is_resizable_height) resize_target.css("height",  dragDistance.y + dragDistance.height);
-	
-	if(resize_target.hasClass("resizable_inner")) {
-		var parent = resize_target.offsetParent();
-		var width = parent.innerWidth();
-		var height = parent.innerHeight();
-		var pos = resize_target.position();
-		if(pos.left + resize_target.outerWidth() > width)
-			resize_target.css("width", width - pos.left - (resize_target.outerWidth() - resize_target.innerWidth()));
-		
-		if(pos.top + resize_target.outerHeight() > height)
-			resize_target.css("height", height - pos.top - (resize_target.outerHeight() - resize_target.innerHeight()));
 
+	dragDistance.element.dispatchEvent(daylight.ui.EVENT.resize);
+	
+	//var x = dragDistance.x
+	var currentStyle = resize_target.css();
+	
+	//test
+	var transform = currentStyle["transform"] || currentStyle["-webkit-transform"];
+	var x = dragDistance.x;
+	var y = dragDistance.y;
+	if(transform.indexOf("matrix") != -1) {
+		var matrix = daylight.parseJSON(transform.replace("matrix(", "[").replace(")", "]"));
+		var m = matrix;
+		var a = [dragDistance.x , dragDistance.y, 0];
+		mat2d.invert(m,m);
+		var xy = [m[0] * a[0] + m[2] * a[1] + m[4] * a[2], m[1] * a[0] + m[3] * a[1] + m[5] * a[2]];
+		x = xy[0];
+		y = xy[1];
+		console.log(x, y);
 	}
+	if(is_resizable_width) resize_target.css("width", x + dragDistance.width);
+	if(is_resizable_height) resize_target.css("height",  y + dragDistance.height);
+	
 	e.preventDefault();
+	
+	if(!resize_target.hasClass("resizable_inner"))
+		return;
+		
+	var parent = resize_target.offsetParent();
+	var width = parent.innerWidth();
+	var height = parent.innerHeight();
+	var pos = resize_target.position();
+	if(pos.left + resize_target.outerWidth() > width)
+		resize_target.css("width", width - pos.left - (resize_target.outerWidth() - resize_target.innerWidth()));
+	
+	if(pos.top + resize_target.outerHeight() > height)
+		resize_target.css("height", height - pos.top - (resize_target.outerHeight() - resize_target.innerHeight()));
+
+
 }
 daylight.ui.chart = function(name, option) {
-	if(!option)
-		option = {};
+	option = option || {};
 	option.name = name;
 	if(!option.type)
 		option.type="circle";
 		
-	var data = option.data;
+	var datas = option.data;
 	var total = 0;
-	for(var i  = 0; i < data.length; ++i) {
-		var type = daylight.checkType(data[i]);
+	var datasLength = datas.length;
+	for(var i  = 0; i < datasLength; ++i) {
+		var data = datas[i];
+		var type = daylight.checkType(data);
 		if(type == "array") {
-			total += data[i][1];
-			var name = data[i][0];
-			var value = data[i].length == 1 ? name : data[i][1];
-			data[i] = {name: name, value: value, scale : data[i][2]};
+			total += data[1];
+			var name = data[0];
+			var value = data.length == 1 ? name : data[1];
+			datas[i] = {name: name, value: value, scale :data[2]};
+		} else if(type === "number") {
+			total += data;
+			var name = data;
+			var value = data;
+			datas[i] = {name: name, value: value, scale :0};			
 		}
 	}
 
 	if(option.type == "circle") {
-		for(var i  = 0; i < data.length; ++i) {
-			data[i].pie = [];
-			angle = 360 * data[i].value / total;
+		for(var i  = 0; i < datasLength; ++i) {
+			var data = datas[i];
+			data.pie = [];
+			angle = 360 *data.value / total;
 			if(angle >180) {
-				data[i].pie.push({angle1 : 180});
-				data[i].pie.push({angle1 : angle});
-			}else {		
-				data[i].pie.push({angle1 : angle});
+				data.pie.push({angle1 : 180});
+				data.pie.push({angle1 : angle});
+			}else {
+				data.pie.push({angle1 : angle});
 			}
-			data[i].angle = angle;
-			data[i].startAngle = i == 0 ? 0 : data[i - 1].startAngle + data[i - 1].angle;
-			data[i].color = ["#5491F6", "#DF4A78", "#BF3944", "#DF423F", "#FE9F28","#FFC500", "#D4E14E", "#5376C4"][i];
-			data[i].slice = data[i].angle < 180 ? "slice" : "";
-			if(!data[i].scale)
-				data[i].scale = 1;
+			data.angle = angle;
+			data.startAngle = i == 0 ? 0 : datas[i - 1].startAngle + datas[i - 1].angle;
+
+			//test용.
+			data.color = ["#5491F6", "#DF4A78", "#BF3944", "#DF423F", "#FE9F28","#FFC500", "#D4E14E", "#5376C4"][i];
+
+			data.slice =data.angle < 180 ? "slice" : "";
+			if(!data.scale)
+				data.scale = 1;
+				
 		}
+		return daylight.template(option, daylight.ui.TEMPLATE.chart.circle);
 	} else if(option.type === "bar-y") {
 		option.axis = [];
 		var min = option.min || 0;
@@ -392,31 +448,32 @@ daylight.ui.chart = function(name, option) {
 			var value = min * i / piece  + max * (piece - i) / piece;
 			option.axis.push({"axis_value": value});
 		}
-		for(var i  = 0; i < data.length; ++i) {
-				data[i].percentage = parseInt(1000 *  data[i].value / max) / 10 ;
+		for(var i  = 0; i < datasLength; ++i) {
+			var data = datas[i];
+			data.percentage = parseInt(1000 * data.value / max) / 10 ;
 		}
-		option.width = 100 / data.length * 0.6;
-		option.margin = 100 / data.length * 0.2;
-		option.dist = 100 / piece;
-		
+		option.width = 100 / datasLength * 0.6;//가로 크기를 60%로 설정 하지만 60%도 상당히 크다.. max-width를 정하자.
+		option.margin = 100 / datasLength * 0.2;//좌우 마진을 20%로 설정
+		option.dist = 100 / piece;//y축의 간격이다. 갯수만큼 나눈다.
 	}
 	return daylight.template(option, $("#sample .day-chart.chart-" + option.type));
 }
 
 
 
-daylight(window).load(function() {
-	daylight("body").click(function(event) {
-		var e = daylight.$Event(event);
-		var element = e.target;
+daylight(document).ready(function() {
+	daylight("body").click(function(e) {
+		var o_event = daylight.$Event(e);
+		var element = o_event.target;
 		var es = daylight(".day_select").has(element, true);
 		for(var i = 0; i < es.size(); ++i) {
-			daylight.ui.select.event(es.o[i], event);
+			daylight.ui.select.event(es.o[i], e);
 		}
 	});
-	daylight("body").drag(function(element, event, dragDistance) {
-		var e = daylight.$Event(event);
+	daylight("body").drag(function(element, e, dragDistance) {
+		var o_event = daylight.$Event(e);
 		var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
+
 		for(var i = 0; i < es.size(); ++i) {
 			var element = es.o[i];
 			var funcName = [];
@@ -426,7 +483,7 @@ daylight(window).load(function() {
 			if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
 			var length = _callFuncName.length;
 			for(var j = 0; j < length; ++j)
-				daylight.ui[_callFuncName[j]].event(element, event, dragDistance);
+				daylight.ui[_callFuncName[j]].event(element, e, dragDistance);
 				
 		}
 	});
@@ -436,15 +493,7 @@ daylight(window).load(function() {
 		var value = element.getAttribute("data-value");
 		var className = element.getAttribute("data-class");
 		var option = element.getAttribute("data-option");
-		if(!option)
-			option = {};
-		else {
-			try {
-				option = JSON.parse(option);
-			} catch (e) {
-				option = {};
-			}
-		}
+		option = daylight.parseJSON(option);
 		if(value) option.value = value;
 		if(className) option.class = className;
 		element.outerHTML = daylight.ui[type](name, option);
