@@ -28,17 +28,23 @@ daylight.animation = {
 		//actionList : Dictionary(Object)
 		CONSTANT : {
 			browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
-			transformList : {"gleft":"translateX(?)", "gtop":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)"},
+			transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
 			browserEffectCSS : {"origin" : "transform-origin:?"},
-			styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {count} {type};\n{prefix}animation-fill-mode: forwards;\n",
+			styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {type};\n{prefix}animation-fill-mode: forwards;\n{prefix}animation-iteration-count:{count};\n",
 			stylePauseAnimation : "{prefix}animation-play-state:paused;\n",
-			ignoreCSS : ["count", "time", "function"]
+			ignoreCSS : ["count", "time", "function", "length", "fill"]
 		},
 		prefixToBrowser : function(css, prefix) {
 			prefix = prefix === undefined ? "all" : prefix;
+			//prefix
+			//all : prefix별로 바꿔준다.
+			//-1 : prefix를 바꾸지 않고 그대로 둔다.
+			//나머지 : 지정된 prefix로 바꿔준다.
+			
 			var CONSTANT = this.CONSTANT;
 			var browserPrefixLength = CONSTANT.browserPrefix.length;
-		
+			var cssWithPrefix;
+			
 			switch(prefix) {
 			case "all":
 				var totalStyle = "";
@@ -48,13 +54,13 @@ daylight.animation = {
 				return totalStyle;
 				break;
 			case -1:
-				return prefix;
+				return css;
 			default:
-				var css1 = daylight.replace("{prefix}", prefix, css);
+				cssWithPrefix = daylight.replace("{prefix}", prefix, css);
 				if(prefix === "")
-				 	return css1;
+				 	return cssWithPrefix;
 				 else
-				 	return css1 + daylight.replace("{prefix}", "", css);
+				 	return cssWithPrefix + daylight.replace("{prefix}", "", css);
 			 }
 		},
 		objectToCSS : function(actionList, prefix) {
@@ -66,10 +72,12 @@ daylight.animation = {
 			var transformStyle = "{prefix}transform:";
 			var browserEffectStyle = "" ;
 			var otherStyle = "";
+			var action, replaceMotion;
+			var j;
 			prefix = prefix === undefined ? "all" : prefix;
 			//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
 			
-			for(var action in actionList) {
+			for(action in actionList) {
 				if(action in CONSTANT.transformList)
 					transformList.push(action);
 				else if(action in CONSTANT.browserEffectCSS)
@@ -80,18 +88,18 @@ daylight.animation = {
 					otherList.push(action);
 			}
 			if(transformList.length > 0) {
-				for(var j = 0; j < transformList.length; ++j) {
-					var action = transformList[j];
-					var replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
+				for(j = 0; j < transformList.length; ++j) {
+					action = transformList[j];
+					replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
 					transformStyle += " " + replaceMotion;
 				}
 				transformStyle += ";\n";
 				totalStyle += this.prefixToBrowser(transformStyle, prefix);
 			}
 			if(browserEffectList.length > 0) {
-				for(var j = 0; j < browserEffectList.length; ++j) {
-					var action = browserEffectList[j];
-					var replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
+				for(j = 0; j < browserEffectList.length; ++j) {
+					action = browserEffectList[j];
+					replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
 					browserEffectStyle += " " + replaceMotion;
 					browserEffectStyle += ";\n";
 				}
@@ -99,8 +107,8 @@ daylight.animation = {
 
 			}
 			if(otherList.length > 0) {
-				for(var j = 0; j < otherList.length; ++j) {
-					var action = otherList[j];
+				for(j = 0; j < otherList.length; ++j) {
+					action = otherList[j];
 					otherStyle += action+":"+actionList[action];
 					otherStyle += ";\n";
 				}
@@ -111,6 +119,7 @@ daylight.animation = {
 		},
 		Timeline : function(selector) {
 			console.log("NEW TIMELINE");
+			
 			this.selector = selector;
 			var dl_object = this.dl_object = daylight(selector);
 			this.layers = [];
@@ -122,7 +131,7 @@ daylight.animation = {
 			
 
 			
-		},
+		},//레이어를 만드는 함수
 		Layer : function(selector, initMotion) {
 			this.selector = selector;
 			var id = selector;
@@ -132,7 +141,10 @@ daylight.animation = {
 			
 			this.id = id;
 			this.dl_object = daylight(selector);
-			this.is_unusable = (this.dl_object.size() != 1);
+			
+			if(this.dl_object.size() == 0) {
+				throw new Error("레이어가 없습니다.");
+			}
 			
 			
 			this.motions = [];
@@ -146,6 +158,145 @@ daylight.animation = {
 			}
 		}
 };
+daylight.animation.animationActions = {
+	form : function(_layer, startTime, endTime, option) {
+		
+	},
+	rotate : function(_layer, startTime, endTime, option) {
+		var angle = parseFloat(option.angle) || 0;
+		var prevRotate = parseFloat(_layer.getPrevMotion("rotate", startTime)["rotate"]) || 0;
+		var motion = {startTime : startTime , endTime : endTime, start:{rotate : prevRotate + "deg"}, end:{rotate:(prevRotate + angle)+"deg"}};
+		_layer.addMotion(motion);
+		
+	},
+	fade : function(_layer, startTime, endTime, option, to) {
+		var opacity = option && parseFloat(option.opacity) || to;		
+		var prevOpacity = _layer.getPrevMotion("opacity", startTime)["opacity"];
+		prevOpacity = typeof prevOpacity === "number" ? prevOpacity : 1;
+		
+		var motion = {startTime : startTime , endTime : endTime, start:{opacity:prevOpacity}, end:{opacity:opacity}};
+		_layer.addMotion(motion);
+	
+	},
+	fadein : function(_layer, startTime, endTime, option) {
+		this.fade(_layer, startTime, endTime, option, 1);	
+	},
+	fadeout : function(_layer, startTime, endTime, option) {
+		this.fade(_layer, startTime, endTime, option, 0);		
+	},
+	move : function(_layer, option) {
+		if(!option)
+			return;
+		var moveMotion;
+		var i, pos, left, top;
+		var optionLength = option.length;
+		//var dimension = _layer.dl_object.dimension();
+		//top = daylight.type(top) === "string" ? parseFloat(top) : 0;
+		//left = daylight.type(top) === "string" ? parseFloat(left) : 0;
+		
+		for(i = 0; 	i < optionLength; ++i) {
+			moveMotion = option[i];
+			if(moveMotion.hasOwnProperty("pos")) {
+				pos = moveMotion["pos"];
+				left = pos[1];
+				top = pos[0];
+				moveMotion.left = left;
+				moveMotion.top = top;
+				delete moveMotion.pos;
+			}
+			_layer.addMotion(moveMotion);
+		}
+	},
+	flip : function(_layer, startTime, endTime, option) {
+		option = option || {};
+		var startMotion = {time:startTime};
+		var endMotion = {time:endTime};
+		var rotate, toRotate;
+		
+		var property;
+		var direction;
+		//option.direction
+		//left
+		//right
+		//top
+		//bottom
+		//rotateY
+		//rotateX
+		
+		_layer.addMotion(startMotion);
+		
+		switch(option.direction) {
+
+		case "left":
+			property = "rotateY";
+			direction = -1;
+			break;
+		case "top":
+			property = "rotateX";
+			direction = 1;
+			break;
+		case "bottom":
+			property = "rotateX";
+			direction = -1;
+			break;
+		case "right":
+		default:
+			property = "rotateY";
+			direction = 1;
+		}
+		rotate = parseFloat(_layer.getPrevMotion(property, endTime)[property]) || 0;
+		toRotate = (parseInt(rotate / 180) + direction) * 180;
+		console.log(rotate);
+		console.log(toRotate);
+		endMotion[property] = toRotate + "deg";
+		_layer.addMotion(endMotion);
+	},
+	loop: function(_layer, startTime, endTime, option) {
+		option = option || {};
+		if(!option.hasOwnProperty("list"))
+			return;
+		//count는 1번 이상.
+		option.count = option.count || 1;
+		
+		//시간이 정해져있다면 그 시간안에 몇 번의 count가 될 수 있는지 쳌.
+		if(option.hasOwnProperty("time"))
+			option.count = (option.time - endTime) / (endTime - startTime);
+			
+		var count = option.count;
+		var list = option.list;
+		var loopMotion = option.list;
+		var loopMotionLength = loopMotion.length;
+		var loop = {};
+		
+		for(var i = 0; i < count; ++i)
+			loop[i] = {};
+			
+		daylight.each(_layer.motions, function(o, index) { 
+			if(o.time < startTime || o.time > endTime)
+				return;
+			
+			var motion;
+			var property;
+			var time;
+			for(var i = 0; i < count; ++i) {
+				time = (endTime - startTime) * (i + 1) + o.time;
+				motion = loop[i][o.time] = {time: time};
+				for(property in o) {
+					if(loopMotion.indexOf(property) == -1)
+						continue;
+					motion[property] = o[property];
+				}
+			}
+		});
+		
+		for(i in loop) {
+			for(var j in loop[i]) {
+				_layer.addMotion(loop[i][j]);
+			}
+		}
+		console.log(loop);
+	}
+}
 daylight.animation.Layer.prototype.fillMotion = function(motion, prevMotion, is_force) {
 	var self = this;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
@@ -154,6 +305,8 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, prevMotion, is_
 		if(self.properties.indexOf(k) === -1)
 			self.properties.push(k);
 	});
+	if(!prevMotion)
+		return;
 	daylight.each(prevMotion, function(value, key){
 		if(ignoreCSS.indexOf(key) >= 0)
 			return;
@@ -213,7 +366,7 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	var prevMotion = {time : -2};
 	var self = this;
-	
+	var is_add = false;
 	/*모션의 구성
 		{
 		start : {time :??}
@@ -230,35 +383,48 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 		for(var i = 0; i < length; ++i) {
 			this.addMotion(motion[i]);
 		}
+		return;
 	}
 	if(motion.hasOwnProperty("time")) {
 		//한개만 추가...
 		var time = motion.time;
-		if(time && this.totalTime < time) {
-			this.totalTime = time;
-		}	
-		
+
 		daylight.each(this.motions, function(o, index) {
 			if(o.time === time) {
-				time = motion.time += 0.00001;//겹치는게 있다면 살짝 차이를 줘서 바꿔준다.
+				if(motion.fill === "add") {
+					self.fillMotion(o, motion);
+					is_add = true;
+					return;
+				}
+				//겹치는게 있다면 살짝 차이를 줘서 바꿔
 			}
-			if(o.time > startTime) {
-				this.fillMotion(o, motion, -1);
+			if(o.time >= startTime) {
+				self.fillMotion(o, motion, -1);
 				prevMotion = {};
-			} else if(prevMotion.hasOwnProperty("time") && o.time < time && o.time > prevMotion.time) {
+			} else if(prevMotion.hasOwnProperty("time") && o.time <= time && o.time >= prevMotion.time) {
 				daylight.each(o, function(value, key) {
 					if(ignoreCSS.indexOf(key) == -1)
 						prevMotion[key] = value;
 				});
 			}
 		});
+		
+		if(time && this.totalTime < time) {
+			this.totalTime = time;
+		}	
+		
 		//이전 속성을 현재 속성에 추가. 존재하는 건 넣지 않는다.
-		this.fillMotion(motion, prevMotion);
-		this.motions.push(motion);
+		if(motion.fill === "auto" || motion.fill === "add" && !is_add) {
+			delete motion.fill;
+			this.fillMotion(motion, prevMotion);
+		}
+		if(!is_add)
+			this.motions.push(motion);
+		
 		return;
 	}
 	
-	
+	//옛날 방식  수정...해야겠다..
 	var startTime = motion.start && motion.start.time || motion.startTime;
 	var endTime =  motion.end && motion.end.time || motion.endTime;
 	
@@ -302,6 +468,7 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 daylight.animation.Layer.prototype.initTimer = function() {
 	var motions = this.motions;
 	var timeSchedule = this.timeSchedule;
+
 	for(var i = 0; i < motions.length; ++i) {
 		var motion = motions[i];
 		var time = motion.time;
@@ -320,14 +487,58 @@ daylight.animation.Layer.prototype.initTimer = function() {
 	
 	return this.getCSSInitMotion();
 }
+daylight.animation.Layer.prototype.getMotion = function(time) {
+	time = parseFloat(time);
+	var length = this.motions.length;
+	for(var i = 0; i < length; ++i) {
+		var motion = this.motions[i];
+		if(motion.time === time)
+			return motion;
+
+	}
+	return;
+}
+daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev, next) {
+	var prevMotion = prev[property];
+	var nextMotion = next[property];
+	var dimension = "";
+	
+	var value = prevMotion;
+	if(lrtype.indexOf(property) !== -1)
+		dimension =  "width";
+	else if(tbtype.indexOf(property) !== -1)
+		dimension = "height";
+	else if(dtype.indexOf(property) !== -1)
+		dimension = "dimension";
+	
+	if(dimension === "width" || dimension === "height") {
+		var p100 = this.dl_object.dimension(dimension);//100퍼센트 기준으로 수치
+		prevMotion = _abspx(prevMotion, p100);
+		nextMotion = _abspx(nextMotion, p100);
+		value = _dot(prevMotion, nextMotion, next.time - time, time - prev.time);
+	} else if(dimension === "dimension") {
+		prevMotion = _abspx(prevMotion);
+		nextMotion = _abspx(nextMotion);
+		
+		//console.log(prevMotion, nextMotion);
+		value = _dot(prevMotion, nextMotion, next.time - time, time - prev.time);
+		switch(property) {
+		case "rotate":
+			value = value + "deg";
+		}
+	} else {
+	}
+	return value;
+}
 daylight.animation.Layer.prototype.timer = function(time) {
 	var properties = this.properties;
 	var length = properties.length;
 	var motions = {};
+	var value, property, prev, next;
 	for(var i = 0; i < length; ++i) {
-		var property = properties[i];
-		var prev = this.getPrevMotion(property, time);
-		var next = this.getNextMotion(property, time);
+		property = properties[i];
+		prev = this.getPrevMotion(property, time);
+		next = this.getNextMotion(property, time);
 		
 		if(!prev.hasOwnProperty(property))
 			continue;
@@ -335,37 +546,7 @@ daylight.animation.Layer.prototype.timer = function(time) {
 		if(!next.hasOwnProperty(property))
 			next = prev;
 			
-				
-		var prevMotion = prev[property];
-		var nextMotion = next[property];
-		var dimension = "";
-		
-		var value = prevMotion;
-		if(lrtype.indexOf(property) !== -1)
-			dimension =  "width";
-		else if(tbtype.indexOf(property) !== -1)
-			dimension = "height";
-		else if(dtype.indexOf(property) !== -1)
-			dimension = "dimension";
-		
-		if(dimension === "width" || dimension === "height") {
-			var p100 = this.dl_object.dimension(type);//100퍼센트 기준으로 수치
-			prevMotion = _abspx(prevMotion, p100);
-			nextMotion = _abspx(nextMotion, p100);
-			value = _dot(prevMotion, nextMotion, next.time - time, time - prev.time);
-		} else if(dimension === "dimension") {
-			prevMotion = _abspx(prevMotion);
-			nextMotion = _abspx(nextMotion);
-			
-			//console.log(prevMotion, nextMotion);
-			value = _dot(prevMotion, nextMotion, next.time - time, time - prev.time);
-			switch(property) {
-			case "rotate":
-				value = value + "deg";
-			}
-		} else {
-			
-		}
+		value = this.getTimeValue(time, property, prev, next);
 		
 		
 		motions[property] = value;
@@ -420,17 +601,19 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 	return styleHTML;
 
 }
-daylight.animation.Timeline.prototype.hasLayer = function(_layer) {
+daylight.animation.Timeline.prototype.hasLayer = function(layer) {
 	var layers = this.layers;
 	var t = daylight.type(_layer);
 	var is_string = t === "string";
 	var layerLength = layers.length;
+	var _layer;
+
 	for(var i = 0; i < layerLength; ++i) {
-		var layer = layers[i];
-		if(!is_string && layer.dl_object.equal(_layer.dl_object))
+		_layer = layers[i];
+		if(!is_string && _layer.dl_object.equal(layer.dl_object))
 			return true;
 		
-		if(is_string && layer.id != _layer)
+		if(is_string && _layer.id != layer)
 			continue;
 		else if(!is_string && (layer != _layer))// && layers[i].layer.id != layer.id
 			continue;
@@ -443,9 +626,12 @@ daylight.animation.Timeline.prototype.getLayer = function(layer) {
 	var layers = this.layers;
 	var t = daylight.type(layer, true);
 	var is_string = (t === "string");
-	console.log(t);
+	var _layer;
+	if(t === "undefined")
+		throw new Error("No Layer");
+	
 	for(var i = 0; i < layers.length; ++i) {
-		var _layer = layers[i];
+		_layer = layers[i];
 		if(is_string && _layer.id != layer)
 			continue;
 		else if((t === "daylight" || t === "element") && !_layer.dl_object.equal(layer))
@@ -471,10 +657,6 @@ daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) 
 
 	var layer = (selector instanceof daylight.animation.Layer) ? selector : new daylight.animation.Layer(selector, initMotion);
 	
-	if(layer.is_unusable) {
-		console.log("객체가 여러개 있거나 발견하지 못했습니다.");
-		return null;
-	}
 	if(this.hasLayer(layer)) {
 		console.log("이미 레이어가 있습니다. id : " + layer.id);
 		return null;
@@ -506,41 +688,24 @@ daylight.animation.Timeline.prototype.addAction = function(layer, name, startTim
 	//disolve(targe포함)
 	
 	var _layer = this.getLayer(layer);
-	
-	if(name === "rotate") {
-		//option
-		//angle:100deg
-		var angle = parseFloat(option.angle) || 0;
-		var prevRotate = parseFloat(_layer.getPrevMotion("rotate", startTime)["rotate"]) || 0;
-		var motion = {startTime : startTime , endTime : endTime, start:{rotate : prevRotate + "deg"}, end:{rotate:(prevRotate + angle)+"deg"}};
-		_layer.addMotion(motion);
-	} else if(name === "fadeout" || name === "fadein") {
-		var opacity = option && parseFloat(option.opacity) || name === "fadein" ? 1 : 0;
-		
-		var prevOpacity = _layer.getPrevMotion("opacity", startTime)["opacity"];
-		prevOpacity = typeof prevOpacity === "number" ? prevOpacity : 1;
-		
-		var motion = {startTime : startTime , endTime : endTime, start:{opacity:prevOpacity}, end:{opacity:opacity}};
-		_layer.addMotion(motion);
-	} else if(name === "move") {
-		
-	} else if(name == "flip") {
-		
+	if(daylight.animation.animationActions.hasOwnProperty(name)) {
+		daylight.animation.animationActions[name](_layer, startTime, endTime, option);
+	} else {
+		throw new Error("해당하는 엑션이 없습니다.")
 	}
+	return this;
 }
 daylight.animation.Timeline.prototype.addMotion = function(layer, motion) {
 	if(!layer) {
-		console.log("잘못된 레이어입니다.");
-		return;
+		throw new Error("잘못된 레이어입니다.");
 	}
 	var _layer = this.getLayer(layer);
 	if(!_layer) {
-		console.log("레이어가 없습니다.");
-		return;
+		throw new Error("레이어가 없습니다.");
 	}
 	_layer.addMotion(motion);
+	return this;
 }
-
 daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 	var motions = layer.motions;
 	var totalTime = this.totalTime;
@@ -558,10 +723,12 @@ daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 			}
 		}
 		
-		if(time !== undefined)
+		if(time !== undefined) {
+			while(timeSchedule.hasOwnProperty(time)) {time += 0.00001;}
 			timeSchedule[time] = motion;
-			
-		if(finalMotion.time < time)
+		}
+		
+		if(finalMotion.time <= time)
 			finalMotion = motion;
 	}
 	if(!timeSchedule[totalTime])
@@ -569,8 +736,10 @@ daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 	
 	layer.totalTime = totalTime;
 	layer.timeSchedule = timeSchedule;
+	
+	return this;
 }
-daylight.animation.Timeline.prototype.initMotionCSS = function() {
+daylight.animation.Timeline.prototype.getInitMotionCSS = function() {
 	var styleHTML = '<style class="daylightAnimationStyle">\n';
 	var layers = this.layers;
 	var layerLength = layers.length;
@@ -583,7 +752,7 @@ daylight.animation.Timeline.prototype.initMotionCSS = function() {
 }
 daylight.animation.Timeline.prototype.initTimer = function() {
 	console.log("INIT TIMELINE TIMER");
-
+	this.is_timer = true;
 	var layers = this.layers;
 	var layerLength = layers.length;
 	for(var i = 0; i < layerLength; ++i) {
@@ -596,6 +765,7 @@ daylight.animation.Timeline.prototype.initTimer = function() {
 		var layer = layers[i];
 		this.fillTimeline(layer);
 	}
+	return this;
 }
 daylight.animation.Timeline.prototype.init = function() {
 	console.log("INIT TIMELINE");
@@ -625,21 +795,27 @@ daylight.animation.Timeline.prototype.init = function() {
 		style.remove();
 		
 	$("head").append(styleHTML);
-	$("head").append(this.initMotionCSS());
+	$("head").append(this.getInitMotionCSS());
 
+	return this;
+}
+daylight.animation.Timeline.prototype.executeFunction = function(schedule, spendTime, count) {
+	
 }
 daylight.animation.Timeline.prototype.timer = function() {
 
 	var self = this;
-		
+	var is_timer = this.is_timer;
 	var time = Date.now();
-	var spendTime = this.spendTime += (time - this.prevTime) / 1000 % this.totalTime;
+	var nowTime = this.spendTime += (time - this.prevTime) / 1000;
+	var spendTime = nowTime % this.totalTime;
 	var count = parseInt((time - this.startTime) / 1000 / this.totalTime);
+	var totalTime = this.totalTime;
 	var layers = this.layers;
 	
 	this.prevTime = time;
-	if(spendTime > this.totalTime)
-		return;	
+	
+
 
 	if(!this.is_start)
 		return;
@@ -654,17 +830,19 @@ daylight.animation.Timeline.prototype.timer = function() {
 			if(!motion.hasOwnProperty("count"))
 				motion.count = 0;
 			//test
+			
+
 			if(count < motion.count)
 				return;
 			
 			if(time > spendTime && (motion.count == count))
 				return;
-			
+				
 			motion.count++;
 			daylight.each(motion, function(action, name) {
 				if(typeof action === "function") {
 					console.log("function");
-					action(self, parseFloat(time));
+					action(layer, parseFloat(time), nowTime);
 					return;
 				}
 			
@@ -673,7 +851,8 @@ daylight.animation.Timeline.prototype.timer = function() {
 			//아니면 count가 돌아야할 횟수를 넘으면 종료
 			is_finish = self.getCount() === "infinite" ? false :  count >= self.getCount();
 		});
-		layer.timer(spendTime);
+		if(is_timer)
+			layer.timer(spendTime);
 		
 		//count 0일 떄
 		//spendTime을 지난 것만 찾자
@@ -682,6 +861,7 @@ daylight.animation.Timeline.prototype.timer = function() {
 		//count 1일 때 
 		//motion.count가 0인 것을 찾자.
 	});
+	
 	if(is_finish) {
 		console.log("FINISHED");
 		return;
@@ -696,11 +876,15 @@ daylight.animation.Timeline.prototype.start = function() {
 	this.spendTime = 0;
 	requestAnimFrame(this.timer.bind(this));
 	this.is_start = true;
+	
+	return this;
 }
 daylight.animation.Timeline.prototype.pause = function() {
 	console.log("PAUSE TIMELINE");
 	$(".daylightAnimationLayer").toggleClass("animationPause");
 	this.is_start = false;
+	
+	return this;
 }
 daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	

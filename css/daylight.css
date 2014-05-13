@@ -5,6 +5,36 @@ body {
 * {
 	font-family: sans-serif;
 }
+.span4, .span8, .span3, .span6, .span9, .span12 {
+	float: left;
+}
+.span3 {width:25%;}
+.span4 {width: 33.333333333%;}
+.span6{width:50%;}
+.span8 {width: 66.666666666%;}
+.span9 {width:75%;}
+.span12 {width: 100%;}
+.relative {position: relative;}
+.tcenter {text-align: center;}
+.tright {text-align: right;}
+.center {margin-left:auto;margin-right: auto; }
+.clear {clear: both;}
+.btn {
+	background: #5fcf80;
+	border-radius: 4px;
+	color:#fff;
+	display: inline-block;
+	font-size:1.2em;
+	font-weight: 400;
+/* 	padding:13px 25px; */
+	padding:13px 25px;
+}
+.btn.white-border {
+	background: transparent;
+	color:#fff;
+	border:2px solid #fff;
+}
+.no-radius{border-radius: 0px;}
 .badge {
 	display: inline-block;
 	min-width: 10px;

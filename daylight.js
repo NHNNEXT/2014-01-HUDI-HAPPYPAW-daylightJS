@@ -116,7 +116,7 @@ var _curCssHook = function(element, name, pre_styles) {
 	daylihgtObject의 매핑된 오브젝트 각각에 대해 element를 추가한다.
 */
 var _addDomEach = function(daylightObject, element, callback) {
-	if(daylightObject.length == 0)
+	if(daylightObject.length === 0)
 		return;
 		
 	var t = daylight.type(element, true);
@@ -132,9 +132,10 @@ var _addDomEach = function(daylightObject, element, callback) {
 	case "nodelist":
 	case "array":
 		e = element;
-	case "html":
+	case "element":
 		e = [element];
 	}
+	
 	if(e === undefined)
 		return;
 	
@@ -403,7 +404,7 @@ daylight.extend( {
 	},
 	defineSetter : function(object, name, func) {
 		if(!func)
-			func = function(name){return function(value) {return this[name] = value;}}(name);
+			func = function(name){return function(value) {this[name] = value; return this;}}(name);
 			
 		name =  "set" + name.charAt(0).toUpperCase() + name.substr(1, name.length);	
 		this.define(object, name, func);
@@ -1099,13 +1100,14 @@ daylight.fn.extend({
 		});
 		return this;
 	},
-	append : function(e) {
-		var is_element = daylight.isElement(e);//type 검사
-		if(!is_element && daylight.type(e) != "daylight") {
-			this.insertHTML("beforeend", e);
+	append : function(obj) {
+		var is_element = daylight.isElement(obj);//type 검사
+		if(!is_element && daylight.type(obj) != "daylight") {
+			this.insertHTML("beforeend", obj);
 			return this;
 		}
-		_addDomEach(this, e, function(target, element) {
+		_addDomEach(this, obj, function(target, element) {
+			console.log(target);
 			if(daylight.isElement(target))
 				target.appendChild(element);
 		});

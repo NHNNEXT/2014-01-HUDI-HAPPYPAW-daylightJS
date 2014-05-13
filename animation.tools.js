@@ -1,7 +1,7 @@
 var tools = {};
 tools.size = "-4px";
 {
-	var relative = "relative", none = "none", absolute = "absolute", block="block";
+	var relative = "relative", none = "none", absolute = "absolute", block="block",center="center", left="left", hidden="hidden";
 	tools.css = {
 		".day-figure": {
 			position: "absolute",
@@ -25,9 +25,14 @@ tools.size = "-4px";
 		".day-figure .sw" : {bottom:0, left:0, "margin-left":tools.size, "margin-bottom":tools.size},
 		".day-figure .s" : {bottom:0, left:"50%", "margin-left":tools.size, "margin-bottom":tools.size},
 		".day-figure .se" : {bottom:0, right:0, "margin-right":tools.size, "margin-bottom":tools.size},
-		".timeline" :{width:"80%", "position":"relative", "padding":0, "list-style":none},
+		".AnimationTools": {position:relative, overflow:hidden},
+		".ids" :{width:"10%", position:relative, "padding":0, "list-style":none, float:left},
+		".ids li" :{position:relative, height:"30px", "line-height":"30px"},
+		".timeline" :{float:left, width:"80%", "position":"relative", "padding":0, "list-style":none},
 		".timeline li" :{height:"30px", position:relative,  "border-left":"1px solid #ccc"},
-		".motion" : {"border-radius":"50%",top:"50%", "width":"10px", "height":"10px", "margin":"-5px 0px 0px -5px", "background":"#f55", position:absolute}
+		".motion" : {"border-radius":"50%",top:"50%", "width":"10px", "height":"10px", "margin":"-5px 0px 0px -5px", "background":"#f55", position:absolute},
+		".motion .tip" : {display:none, "border-radius":"4px",top:"-15px",left:"50%","text-align":center, "width":"50px", "height":"20px", "line-height":"20px", "margin":"-10px 0px 0px -25px", "background":"#000", position:absolute, color:"#fff", "font-size":"12px"},
+		".motion:hover .tip":{display:block}
 		
 	};
 }
@@ -52,6 +57,17 @@ tools.init = function(timeline) {
 	$("head").append(styleHTML);
 	$("body").append(tools.element);
 	$(".AnimationTools").template(timeline, $(".AnimationTools"));
+	
+	$(".timeline").click(function(e) {
+		var o_event = daylight.$Event(e);
+		var element = o_event.target
+		if(daylight.hasClass(element, "motion")) {
+			var dl_element = $(element);
+			var time = dl_element.attr("data-time")  ;
+			var id = dl_element.parent().attr("data-id");
+			var motion = timeline.getLayer(id).getMotion(time);
+		}
+	})
 	$(".daylightAnimationLayer").click(function() {
 		timeline.pause();
 		var layer = timeline.getLayer(this);
