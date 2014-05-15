@@ -9,3 +9,19 @@
 .boxsize {
 	box-sizing: border-box;
 }
+
+.fixed {
+	position: fixed;
+}
+.absolute {
+	position: absolute;
+}
+.b1 {
+	left:50px;
+	top:50px;
+}
+.b2 {
+	margin-left:10px;
+	left:50px;
+	top:50px;
+}

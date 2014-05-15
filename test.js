@@ -1,6 +1,8 @@
 $(document).ready(function() {
 $("body").append('<link href="./test/test.css" rel="stylesheet"/>');
 $("body").append('<div class="size t1"></div><div class="size boxsize t2"></div>');
+$("body").append('<div class="fixed b1 test1">1<div class="absolute b2 test2">2</div></div>');
+$("body").append('<div class="absolute b1 test3">2<div class="absolute b2 test4">2</div></div>');
 test("equal test", function() {
 	var div = document.createElement("div");
 
@@ -68,6 +70,7 @@ test("type test", function() {
 	equal(daylight.type(1), "number");
 	equal(daylight.type(new Number(2)), "number");
 	equal(daylight.type(document.createElement("div")), "object");
+	equal(daylight.type(document.querySelectorAll("div")), "nodelist");
 });
 test("class test", function() {
 	var div = document.createElement("div");
@@ -85,6 +88,8 @@ test("insertion test", function() {
 	var div = document.createElement("div");
 	div.innerHTML = "";
 	var div2 = document.createElement("div");
+	var div3 = document.createElement("p");
+	div3.innerHTML = 1;
 	div.appendChild(div2);
 	ok(div.contains(div2));
 	
@@ -96,9 +101,77 @@ test("insertion test", function() {
 	equal(dl_div2.after('<div>a</div>').next().html(), "a");
 	equal(dl_div2.before('<div>2</div>').prev().html(), "2");
 	
+	equal(dl_div2.append(div3).html(), "32<p>1</p>");
+	equal(dl_div2.prepend(div3).html(), "<p>1</p>32");
+	equal(dl_div2.after(div3).html(), "32");
+	equal(dl_div2.next().html(), "1");
+});
 
+test("dom", function() {
+	var div = document.createElement("div");
+	div.innerHTML = "";
+	var div2 = document.createElement("div");
+	div2.className = "abcde";
+	var div3 = document.createElement("p");
+	div3.innerHTML = 1;
+	div.appendChild(div2);
+	ok(div.contains(div2));
+	
+	var dl_div = $(div);
+	var dl_div2 = $(div2);
+	
+	ok(dl_div.find("div").equal(dl_div2));
+	equal(dl_div2.attr("class"), "abcde");
+	equal(dl_div2.attr("class", "a").attr("class"), "a");
+	ok(dl_div2.hasClass("a"));
+	
+	ok(dl_div.has(div2));
+	ok(dl_div.has(".a").equal(dl_div));
+	ok(dl_div.has(".abc").equal([]));
+	
+});
+test("position", function() {
+	var dl_test = $(".test1");
+	var dl_test2 = dl_test.find(".test2");	
+	var pos1 = dl_test.position();
+	var pos2 = dl_test2.position();
+	var offset1 = dl_test.offset();
+	var offset2 = dl_test2.offset();
+	
+	equal(pos1.left, 50);
+	equal(pos1.top, 50);
+
+	equal(pos2.left, 50);
+	equal(pos2.top, 50);	
 	
 	
+	equal(offset1.left, 50);
+	equal(offset1.top, 50);
+
+	equal(offset2.left, 110);
+	equal(offset2.top, 100);
+});
+
+test("position2", function() {
+	var dl_test = $(".test3");
+	var dl_test2 = dl_test.find(".test4");
+	var pos1 = dl_test.position();
+	var pos2 = dl_test2.position();
+	var offset1 = dl_test.offset();
+	var offset2 = dl_test2.offset();
+	
+	equal(pos1.left, 50);
+	equal(pos1.top, 50);
+
+	equal(pos2.left, 50);
+	equal(pos2.top, 50);	
+	
+	
+	equal(offset1.left, 50);
+	equal(offset1.top, 50);
+
+	equal(offset2.left, 110);
+	equal(offset2.top, 100);
 });
 
 

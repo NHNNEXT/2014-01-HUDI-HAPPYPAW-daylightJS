@@ -37,6 +37,10 @@ var _textToElement = function(text) {
 	e.innerHTML = text;
 	return e;
 }
+
+var doc = document;
+var docElem = doc.documentElement;
+
 var _concat = function(arr) {
 	var a = [];
 	var l = arr.length;
@@ -70,7 +74,6 @@ var _curCss = function(element, name, pre_styles) {
 	
 	var style = pre_styles && pre_styles[name] || _style(element)[name] || 0;
 	
-	console.log(pre_styles, pre_styles["padding-left"]);
 	
 	//한 스타일 속성  style.length - 1 = 문자 끝자리가 %
 	if(style && style.length && style[style.length - 1] === "%") {
@@ -412,7 +415,6 @@ daylight.type = function(obj, expand) {
 daylight.camelCase = function(str) {
 	return str.replace(/-+(.)?/g, 
 		function(a,b){
-			console.log(a,b);
 			return b?b.toUpperCase():""
 	});
 }
@@ -1024,7 +1026,6 @@ daylight.fn.extend({
 			}
 		};
 		this.each(function() {
-			console.log(this.readyState);
 			if(this.readyState === "interactive" || this.readyState === "complete")
 				listener({readyState : "interactive"});
 		});
@@ -1232,7 +1233,6 @@ daylight.fn.extend({
 			return this;
 		}
 		_addDomEach(this, obj, function(target, element) {
-			console.log(target);
 			if(daylight.isElement(target))
 				target.appendChild(element);
 		});
@@ -1575,8 +1575,6 @@ daylight.fn.extend({
 			dimension = o["client" + name];
 		
 		var cssHooks = _style(o);
-		console.log("padding-" + requestComponent[0]);
-		console.log(_curCss(o, "padding-" + requestComponent[0], cssHooks));
 		
 		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[0], cssHooks));
 		
@@ -1637,7 +1635,7 @@ daylight.fn.test = function() {
 	this.dimension();
 }
 daylight.fn.extend({
-	position : function() {
+	position: function() {
 		//margin padding을 무시한 위치
 
 		var offsetParent, offset,
@@ -1645,7 +1643,7 @@ daylight.fn.extend({
 			parentOffset = { top: 0, left: 0 };
 
 		// Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is its only offset parent
-		if ( elem.style.position === "fixed" ) {
+		if ( _curCss(elem, "position") === "fixed" ) {
 			offset = elem.getBoundingClientRect();
 		} else {
 			offsetParent = this.offsetParent();
@@ -1657,8 +1655,11 @@ daylight.fn.extend({
 			// Add offsetParent borders
 			parentOffset.top += daylight.css( offsetParent.o[0], "borderTopWidth", true );
 			parentOffset.left += daylight.css( offsetParent.o[0], "borderLeftWidth", true );
-			parentOffset.top -= daylight.css( offsetParent.o[0], "paddingTop", true );
-			parentOffset.left -= daylight.css( offsetParent.o[0], "paddingLeft", true );
+			//parentOffset.top -= daylight.css( offsetParent.o[0], "paddingTop", true );
+			//parentOffset.left -= daylight.css( offsetParent.o[0], "paddingLeft", true );
+			parentOffset.top -= daylight.css( offsetParent.o[0], "marginTop", true );
+			parentOffset.left -= daylight.css( offsetParent.o[0], "marginLeft", true );			
+			//console.log(daylight.css( offsetParent.o[0], "marginTop"));
 		}
 
 		// Subtract parent offsets and element margins
@@ -1669,7 +1670,7 @@ daylight.fn.extend({
 
 	}
 	//jQuery를 거의 그대로 퍼옴.
-	,offset : function() {
+	,offset: function() {
 		//contents의 위치
 		var element = this.o[0];		
 		var box = { top: 0, left: 0 };
