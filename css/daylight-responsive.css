@@ -1,0 +1,7 @@
+@media (max-width:767px) {
+	[class*="span"] {
+		float: none;
+		width: 100%;
+		margin-bottom: 20px;
+	}
+}

@@ -9,7 +9,7 @@ var userAgent = navigator.userAgent;
 
 
 if(!document.querySelector) {
-	alert("지원하지 않는 브라우저입니다.");
+	alert("Not Support");
 	return;
 }
 
@@ -65,7 +65,13 @@ var _curCss = function(element, name, pre_styles) {
 		return;
 	//pre_styles
 	//element에 대해 미리 정의한 style들의 모음.
-	var style = pre_styles && pre_styles[name] || _style(element)[name];
+	
+	name = daylight.camelCase(name);
+	
+	var style = pre_styles && pre_styles[name] || _style(element)[name] || 0;
+	
+	console.log(pre_styles, pre_styles["padding-left"]);
+	
 	//한 스타일 속성  style.length - 1 = 문자 끝자리가 %
 	if(style && style.length && style[style.length - 1] === "%") {
 		var percentage = parseFloat(style);
@@ -291,6 +297,12 @@ var _value = {
 	
 };
 
+/**
+*
+* @class
+* @classdesc 데이라이트오브젝트 형태를 가지고 있다.
+*
+*/
 daylight.Object = function(arr) {
 	var size = arr.length;
 	this.o = this.objects = arr;
@@ -315,6 +327,16 @@ daylight.fn = daylight.Object.prototype;
 daylight.fn.daylight = "daylight";
 
 //확장 함수
+/**
+* @method
+* @name $.extend
+*
+* @example
+* daylight.extend({key: function() {}});
+* @param {Object} key value 쌍을 이룬 오브젝트
+* @param {Object...}
+*
+*/
 daylight.extend = daylight.fn.extend = function() {
 	var a = arguments;
 	var length = a.length;
@@ -323,6 +345,7 @@ daylight.extend = daylight.fn.extend = function() {
 	
 	var i = 0;
 	var target = this;
+	var src , copy;
 	
 	if(typeof target === "boolean") {
 		target = a[0] || {};
@@ -335,8 +358,8 @@ daylight.extend = daylight.fn.extend = function() {
 			continue;
 
 		for(name in options) {
-			var src = target[name];
-			var copy = options[name];
+			src = target[name];
+			copy = options[name];
 
 /*
 	중복제거
@@ -353,6 +376,24 @@ daylight.extend = daylight.fn.extend = function() {
 
 //daylight만의 타입  Array, String 등 구분가능.
 //jQuery jQuery.type 참고.
+/**
+* @method
+* @name daylight.type
+*
+* @example
+* //return number
+* daylight.type(1)
+* @example
+* //return string
+* daylight.type("abc")
+* @example
+* //return element
+* daylight.type(document.querySelector("???"))
+* @param {*} 검사할 대상
+* @param {Boolean} element까지 검사 여부
+* @retruns {String} object의 타입을 리턴.
+* @desc check Type.
+*/
 daylight.type = function(obj, expand) {
 	var type = typeof obj;
 	if(!expand)
@@ -360,7 +401,30 @@ daylight.type = function(obj, expand) {
 	
 	return obj==null ? obj+"" : type == "object" ? obj instanceof HTMLElement ? "element" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
 }
-
+/**
+* @method
+* @name daylight.camelCase
+*
+* @param {String} name
+* @retruns {String} camelCase String
+* @desc 카멜케이스 표기법으로 고쳐준다.
+*/
+daylight.camelCase = function(str) {
+	return str.replace(/-+(.)?/g, 
+		function(a,b){
+			console.log(a,b);
+			return b?b.toUpperCase():""
+	});
+}
+/**
+* @method
+* @name daylight.css
+*
+* @param {Element} HTMLElement
+* @param {String} CSS Property
+* @retruns {string | undefined} value
+* @desc CSS 속성을 가져오거나 CSS 속성에 대해 설정할 수 있다.
+*/
 daylight.css = function(element, name, value) {
 	//set CSS value가 있으면 style을 정해준다.
 	if(value !== undefined && typeof value != "boolean") {
@@ -390,7 +454,18 @@ daylight.extend( {
 		else if(type == "object")
 			object[name] = func;
 	},
-	//GetterSetter함수를 만듭니다.
+/**
+* @method
+* @name daylight.defineGetterSetter
+*
+* @example
+* //define this.setCount(??); this.getCount();
+* daylgiht.defineGetterSetter(this, "count");
+* @param {Object} 적용할 대상
+* @retruns {string} name
+* @desc GetterSetter함수를 만듭니다.
+*/
+	//
 	defineGetterSetter :function(object, name) {
 		this.defineGetter(object, name);
 		this.defineSetter(object, name);
@@ -469,10 +544,12 @@ daylight.create = function(classFunction) {
 
 daylight.extend({
 /**
-* @func : daylight.parseJSON(text)
-* @description : jsonString을 Object로 바꿔준다.
-* @param : jsonString
-* @return : Object(JSON)
+* @method
+* @name daylight.parseJSON
+*
+* @param {String} json
+* @retruns {Object} JSON
+* @desc 텍스트 형식으로 된 JSON이 Object로 바꿔준다.
 */
 	parseJSON : function(text) {
 		try {
@@ -488,11 +565,20 @@ daylight.extend({
 	}
 });
 daylight.extend({
+/**
+* @method
+* @name daylight.nodeName
+*
+* @param {element} Element
+* @param {element} compareElement
+* @retruns {String|Boolean} element의 노드이름을 보여주거나 2번째 인자가 들어오면 비교해서 같으면 true 틀리면 false를 리턴한다.
+* @desc element의 노드이름을 보여주거나 2번째 인자가 들어오면 비교해서 같으면 true 틀리면 false를 리턴한다.
+*/
 	nodeName : function(element, compare) {
 		var nodeName = element.nodeName;
 		
 		if(compare !== undefined)//비교 대상이 있으면 비교값을 리턴 true, false;
-			return nodeName === compare;
+			return nodeName === compare.nodeName;
 			
 		return nodeName;//비교 대상이 없으면 노드 이름만 반환.
 	},
@@ -509,10 +595,17 @@ daylight.extend({
 		return false;
 	},
 /**
-* @func : daylight.isElement(Node)
+* @method
+* @name daylight.isElement
+*
 * @description : 해당 객체가 Element인지 확인
 * @param : Element
 * @return : Boolean(Element이면 true 아니면 false)
+*/
+/**
+* @param {*} All
+* @retruns {Boolean} if All is Element, True 
+* @desc element인지 검사한다.
 */
 	isElement : function(o) {
 		if(!o)
@@ -524,9 +617,25 @@ daylight.extend({
 	
 		return false;
 	},
+/**
+* @method
+* @name daylight.isFunction
+*
+* @param {*} All
+* @retruns {Boolean} if All is Function, True 
+* @desc Function인지 검사한다.
+*/
 	isFunction : function(o) {
 		return typeof o === "function";
 	},
+/**
+* @method
+* @name daylight.isPlainObject
+*
+* @param {*} All
+* @retruns {Boolean} if All is PlainObject, True 
+* @desc PlainObject인지 검사한다.
+*/	
 	isPlainObject : function(n) {
 		if(!n)
 			return false;
@@ -537,11 +646,16 @@ daylight.extend({
 });
 
 /**
-* @func : daylight.replace(SearchValue, NewValue, String)
-* @description : replaceAll
-* @param : from(바뀔 문자), to(바꿀 문자), str(문자열)
-* @return : String
-*/
+* @method
+* @name daylight.isPlainObject
+*
+* @param {String} from 바뀔문자
+* @param {String} to 바꿀문자
+* @param {String} target 문자열
+*
+* @retruns {String} 바뀐 문자를 리턴
+* @desc from이 들어간 문자를 to로 전부 바꿔준다.
+*/	
 daylight.replace = function(from, to, str) {
 	if(!str)
 		return "";
@@ -687,7 +801,9 @@ daylight.extend({
 			
 		return true;
 	},
-	toggleClass : function(element, className, className2) {		
+	toggleClass : function(element, className, className2) {
+		if(!element)
+			return false;
 		var is_add = daylight.addClass(element, className);
 		if(!is_add) {
 			//className이 이미 있다. -> className 제거
@@ -832,6 +948,8 @@ daylight.fn.css = function(name, value) {
 		}
 		return this;
 	}
+	if(this.o[0] === undefined)
+		return;
 		
 	return _curCss(this.o[0], name);
 }
@@ -919,9 +1037,16 @@ daylight.fn.equal = function(object) {
 	var type = daylight.type(object, true);
 	if(type === "element" && this.length === 1 && object === this.o[0]) {
 		return true;
-	} else if(type === "daylight" &&  this.length === object.length) {
-		for(var i = 0; i < object.length; ++i) {
-			if(this.index(object.o[i]) === -1)
+	} else if(this.length === object.length) {
+		var arr, length;
+		if(type === "daylight")
+			arr = object.o;
+		else if(type === "array" || type === "nodelist")
+			arr = object;
+			
+		length = arr.length;
+		for(var i = 0; i < length; ++i) {
+			if(this.index(arr[i]) === -1)
 				return false;
 
 		}
@@ -1243,6 +1368,8 @@ daylight.fn.scrollTop = function(value) {
 		});
 		return this;
 	} else {
+		if(this.o[0] === undefined)
+			return;
 		return this.o[0].scrollTop;
 	}
 }
@@ -1308,6 +1435,9 @@ daylight.fn.extend({
 		}
 		if(this.length === 0)
 			return "";
+
+		if(this.o[0] === undefined)
+			return;
 		return this.o[0].innerHTML;
 	},
 	text : function(value) {
@@ -1317,6 +1447,8 @@ daylight.fn.extend({
 			});
 			return this;
 		}
+		if(this.o[0] === undefined)
+			return;
 		return this.o[0].innerText;
 	},
 	ohtml : function(value) {
@@ -1325,6 +1457,8 @@ daylight.fn.extend({
 				this.outerHTML = value;
 			});
 		}
+		if(this.o[0] === undefined)
+			return;
 		return this.o[0].outerHTML;
 	},
 	val : function(value) {
@@ -1340,6 +1474,7 @@ daylight.fn.extend({
 		}
 		if(!daylight.isElement(this.o[0]))
 			return;
+
 		var node = this.o[0].nodeName.toLowerCase();
 		return _value[node].get(this.o[0]);
 	}
@@ -1418,8 +1553,10 @@ daylight.fn.extend({
 	
 	style : function(name) {
 		var o = this.o[0];
-		if(!o)
-			return o.style[name];
+		if(!daylight.isElement(o))
+			return;
+		
+		return o.style[name];
 	}
 });
 //demension 관련 함수들  width, height, innerWidth, innerHeight, outerWidth, outerHeight
@@ -1429,10 +1566,20 @@ daylight.fn.extend({
 	daylight.fn[lowerName] = function() {
 		var currentStyle = this.style();
 		var o = this.o[0];
+		var dimension = 0;
+		
+		if(!o)
+			return;
+			
 		if(o["client" + name] > 0) {
-			var dimension = o["client" + name];
+			dimension = o["client" + name];
+		
 		var cssHooks = _style(o);
+		console.log("padding-" + requestComponent[0]);
+		console.log(_curCss(o, "padding-" + requestComponent[0], cssHooks));
+		
 		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[0], cssHooks));
+		
 		dimension -= parseFloat(_curCss(o, "padding-" + requestComponent[1], cssHooks));
 			
 			return dimension;
@@ -1449,6 +1596,12 @@ daylight.fn.extend({
 	daylight.fn["inner" + name] = function() {
 		var currentStyle = this.style();
 		var o = this.o[0];
+		
+		if(!o)
+			return;
+
+
+
 		if(o["client" + name] > 0)
 			return o["client" + name]
 
@@ -1462,6 +1615,11 @@ daylight.fn.extend({
 	daylight.fn["outer" + name] = function(bInlcudeMargin) {
 		var currentStyle = this.style();
 		var o = this.o[0];
+
+		if(!o)
+			return;
+
+
 		var dimension = o["offset" + name];
 		
 		if(bInlcudeMargin) {
