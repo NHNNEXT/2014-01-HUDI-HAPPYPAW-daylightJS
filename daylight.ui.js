@@ -1,3 +1,5 @@
+//공사중...
+
 //test 설계
 daylight.ui = {};
 daylight.ui.TEMPLATE = {};
@@ -62,22 +64,27 @@ daylight.ui.slider = function(name, option) {
 	return this.templateHTML(option, template);
 }
 //test Naming
-daylight.ui.slider.event = function(element, e, dragDistance) {
+daylight.ui.slider.event = function(e) {
+	var element = e.dragObject;
 	var o_event = daylight.$Event(e);
+	var dragDistance = e.dragInfo;
+
 	var slider = daylight(element);
 	var type = o_event.type;
 	var thumbs = slider.find(".thumb");
 	var quantity = slider.find(".quantity");
 	var width = slider.width();
 
-	if(type === "mousedown" || type === "touchstart") {
+	if(type === "dragstart") {
 		var x = slider.offset().left;
 		var percentage = (o_event.pos().pageX - x) * 100 / width;
 		var etarget = daylight(o_event.target);
 		dragDistance.element = element;
+		console.log(etarget.o[0]);
 		if(etarget.hasClass("thumb")) {
 			dragDistance.target = etarget;
 			dragDistance.index = thumbs.index(etarget);
+
 		} else {
 			var min_value = 10000;
 			var min_object = null;
@@ -249,9 +256,10 @@ daylight.ui.drag = function(name, option) {
 	var template = daylight("#sample .day_drag");
 	return daylight.template(option, template);
 }
-daylight.ui.drag.event = function(element, e, dragDistance) {
-	var element_object = daylight(element);
+daylight.ui.drag.event = function(e) {
+	var element_object = daylight(e.dragObject);
 	var o_event = daylight.$Event(e);
+	var dragDistance = e.dragInfo;
 
 	if(element_object.size() == 0)
 		return;
@@ -310,9 +318,10 @@ daylight.ui.resize = function(name, option) {
 	var template = daylight("#sample .day_resize");
 	return daylight.template(option, template);
 }
-daylight.ui.resize.event = function(element, e, dragDistance) {
-	var element_object = daylight(element);
+daylight.ui.resize.event = function(e) {
+	var element_object = daylight(e.dragObject);
 	var o_event = daylight.$Event(e);
+	var dragDistance = e.dragInfo;
 
 	/*
 if(element == o_event.target)
@@ -470,9 +479,11 @@ daylight(document).ready(function() {
 			daylight.ui.select.event(es.o[i], e);
 		}
 	});
-	daylight("body").drag(function(element, e, dragDistance) {
+	daylight("body").drag();
+	var dragFunc = function(e) {
+		console.log(e);
 		var o_event = daylight.$Event(e);
-		var es = daylight(".day_slider, .day_drag, .day_resize").has(element, true);
+		var es = daylight(".day_slider, .day_drag, .day_resize").has(e.dragObject, true);
 
 		for(var i = 0; i < es.size(); ++i) {
 			var element = es.o[i];
@@ -483,10 +494,12 @@ daylight(document).ready(function() {
 			if(daylight.hasClass(element, "day_resize")) _callFuncName.push("resize");
 			var length = _callFuncName.length;
 			for(var j = 0; j < length; ++j)
-				daylight.ui[_callFuncName[j]].event(element, e, dragDistance);
+				daylight.ui[_callFuncName[j]].event(e);
 				
 		}
-	});
+	};
+	daylight("body").on("dragstart", dragFunc);
+	daylight("body").on("drag", dragFunc);
 	daylight(".data-request").each(function(element, index) {
 		var type = element.getAttribute("data-type");
 		var name = element.getAttribute("data-name");

@@ -8,6 +8,9 @@ body {
 .span4, .span8, .span3, .span6, .span9, .span12 {
 	float: left;
 }
+.fixed {position: fixed;}
+.absolute {position: absolute;}
+.relative {position: relative;}
 .span3 {width:25%;}
 .span4 {width: 33.333333333%;}
 .span6{width:50%;}

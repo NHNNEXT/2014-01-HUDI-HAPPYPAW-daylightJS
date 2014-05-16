@@ -41,7 +41,9 @@ var _touch = function(e) {
 		pageX   : e.pageX,
 		pageY   : e.pageY,
 		layerX  : e.offsetX || e.layerX,
-		layerY  : e.offsetY || e.layerY //ie6 layerY
+		layerY  : e.offsetY || e.layerY, //ie6 layerY
+		screenX : e.screenX,
+		screenY : e.screenY
 	};
 	return pos;
 }, _touchOne = function(e) {
@@ -71,7 +73,7 @@ daylight.$E = {
 	pos : function(e) {return _pos(e); },
 	touch : function(e) {return _touch(e);},
 	cross : function(e) {
-		var is_mobile = e.touches != undefined;
+		var is_mobile = e.touches !== undefined;
 		if(is_mobile) return _touchOne(e);
 		else return _pos(e);
 	}

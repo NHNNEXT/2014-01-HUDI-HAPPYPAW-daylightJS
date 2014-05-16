@@ -64,6 +64,12 @@ daylight.animation = {
 				 	return cssWithPrefix + daylight.replace("{prefix}", "", css);
 			 }
 		},
+		/**
+		*
+		* @prarm {object} property, value 쌍으로 이루어져 있는 Object
+		* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
+		* @desc CSS값들이 있는 Object를 style로 바꿔준다.
+		*/
 		objectToCSS : function(actionList, prefix) {
 			var CONSTANT = this.CONSTANT;
 			var transformList = [];
@@ -192,12 +198,21 @@ daylight.animation.animationActions = {
 		_layer.addMotion(motion);
 	
 	},
+	/**
+	* @desc fadein 액션
+	*/	
 	fadein : function(_layer, startTime, endTime, option) {
 		this.fade(_layer, startTime, endTime, option, 1);	
 	},
+	/**
+	* @desc fadeout 액션
+	*/
 	fadeout : function(_layer, startTime, endTime, option) {
 		this.fade(_layer, startTime, endTime, option, 0);		
 	},
+	/**
+	* @desc 이동 액션
+	*/
 	move : function(_layer, option) {
 		if(!option)
 			return;
@@ -221,6 +236,9 @@ daylight.animation.animationActions = {
 			_layer.addMotion(moveMotion);
 		}
 	},
+	/**
+	* @desc flip 액션
+	*/
 	flip : function(_layer, startTime, endTime, option) {
 		option = option || {};
 		var startMotion = {time:startTime};
@@ -274,7 +292,7 @@ daylight.animation.animationActions = {
 		
 		//시간이 정해져있다면 그 시간안에 몇 번의 count가 될 수 있는지 쳌.
 		if(option.hasOwnProperty("time"))
-			option.count = (option.time - endTime) / (endTime - startTime);
+			option.count = parseInt((option.time - endTime) / (endTime - startTime));
 			
 		var count = option.count;
 		var list = option.list;
@@ -309,6 +327,9 @@ daylight.animation.animationActions = {
 			}
 		}
 	},
+	/**
+	* @desc 이미지 전환 액션
+	*/
 	sprite : function(_layer, startTime, endTime, option) {
 		
 	},

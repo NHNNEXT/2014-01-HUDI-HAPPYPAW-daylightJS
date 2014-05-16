@@ -37,7 +37,7 @@ var _textToElement = function(text) {
 	e.innerHTML = text;
 	return e;
 }
-
+var _Element = window.HTMLElement || window.Element;
 var doc = document;
 var docElem = doc.documentElement;
 
@@ -184,15 +184,33 @@ var arr = [];
 var indexOf = arr.indexOf;
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (element) {
-		var length = arr.length;
+		var length = this.length;
 		
 		for(var i = 0; i < length; ++i) {
-			if(arr[i] == object)
+			if(this[i] == object)
 				return i;
 		}		
 		return -1;
     }
 }
+
+var forEach = arr.forEach;
+if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function (func) {
+		var length = this.length;
+		
+		for(var i = 0; i < length; ++i) {
+			func(this[i], i, this);
+		}		
+		return this;
+    }
+}
+
+
+"Boolean Number String Text Function Array Date RegExp Object Error Window NodeList".split(" ").forEach(function(name, index, arr) {
+	class2type[ "[object " + name + "]" ] = name.toLowerCase();
+});
+
 
 
 //FORM INPUT, SELECT VALUE값는 찾는 함수와 설정하는 함수
@@ -402,7 +420,7 @@ daylight.type = function(obj, expand) {
 	if(!expand)
 		return obj==null ? obj+"" : type == "object" ? obj.daylight || class2type[toString.call(obj)] || "object" : type;
 	
-	return obj==null ? obj+"" : type == "object" ? obj instanceof HTMLElement ? "element" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
+	return obj==null ? obj+"" : type == "object" ? obj instanceof _Element ? "element" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
 }
 /**
 * @method
@@ -696,8 +714,9 @@ daylight.extend({
 		//배열 또는 nodelist인 경우
 		if(type === "array" || type === "nodelist") {
 			var length = arr.length;
-			for(var i = 0; i < length; ++i)
+			for(var i = 0; i < length; ++i) {
 				callback.call(arr[i], arr[i], i, arr);//i == index, arr
+			}
 		} else if(type == "object") {
 			for(var i in arr) 
 				callback.call(arr[i], arr[i], i, arr);
@@ -955,51 +974,142 @@ daylight.fn.css = function(name, value) {
 		
 	return _curCss(this.o[0], name);
 }
-//Event
+
+//Event  수정 바람...
 daylight.fn.extend({
-	drag : function(dragFunc) {
+	dragEvent: function(name, e, dragDistance, dragObject) {
+		//console.log(e.constructor);
+		var event = {};
+		try {
+			event = new e.constructor(name, e);
+			event.dragInfo = dragDistance;
+			event.dragObject = dragObject;
+			event.stx = dragDistance.stx;
+			event.sty = dragDistance.sty;
+			event.dragX = dragDistance.x;
+			event.dragY = dragDistance.y;
+			event.dx = dragDistance.dx;
+			event.dy = dragDistance.dy;
+			event.daylight = true;
+			event.target = e.target;
+			event.srcElement = e.srcElement;
+			return event;
+		} catch(e) {
+			event = document.createEventObject();
+			event.dragInfo = dragDistance;
+			event.dragObject = dragObject;
+			event.stx = dragDistance.stx;
+			event.sty = dragDistance.sty;
+			event.dragX = dragDistance.x;
+			event.dragY = dragDistance.y;
+			event.dx = dragDistance.dx;
+			event.dy = dragDistance.dy;
+			event.daylight = true;
+			event.srcElement = e.srcElement;
+			
+			event.preventDefault = function() {};
+			return event;
+		}
+	},
+	drag: function(dragFunc) {
 		var dragObject = null;
 		var is_drag = false;
 		var dragDistance = {x : 0, y : 0};
 		var prePosition = null;
-		
+		var self = this;
+		var is_object = daylight.isPlainObject(dragFunc);
+		var is_function = daylight.isFunction(dragFunc);
+		var isScreenPosition = false;
+		var pos;
 		var mouseDown = function(e) {
 			is_drag = true;
 			prePosition = daylight.$E.cross(e);
-			dragDistance = {stx :prePosition.pageX, sty : prePosition.pageY, x : 0, y : 0, dx:0, dy:0};
+			isScreenPosition = prePosition.screenX !== undefined;
+			pos = isScreenPosition ? {x:"screenX", y:"screenY"} : {x:"pageX", y:"pageY"};
+
+			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0};
 			dragObject = e.target || e.srcElement;
 	/* 		console.log("DRAG START"); */
-			dragFunc(dragObject, e, dragDistance);
+	
+			var event = self.dragEvent("dragstart", e, dragDistance, dragObject);
+			//console.log(e, this);
+
+			var returnValue;
+			if(is_function)
+				returnValue = dragFunc(event);
+			else if(e.target.fireEvent)
+				e.target.fireEvent("ondragstart", event);
+			else if(e.target.dispatchEvent)
+				returnValue = e.target.dispatchEvent(event);
+			else
+				alert("NO");
+			
+
+			if(returnValue === false) {
+				if(e.preventDefault) e.preventDefault();
+				e.returnValue = false;
+			}
 		};
 		var mouseMove = function(e) {
 			if(!is_drag)
-				return;	
+				return;
 			var position = daylight.$E.cross(e);
-			dragDistance.dx = position.pageX - prePosition.pageX;
-			dragDistance.dy = position.pageY - prePosition.pageY;
+			
+			dragDistance.dx = position[pos.x] - prePosition[pos.x];
+			dragDistance.dy = position[pos.y] - prePosition[pos.y];
 			dragDistance.x += dragDistance.dx;
 			dragDistance.y += dragDistance.dy;
 	
 			prePosition = position;
 			
-			if(dragFunc) dragFunc(dragObject, e, dragDistance);
-			e.preventDefault();
+			
+			var event = self.dragEvent("drag", e, dragDistance, dragObject);
+
+			var returnValue;
+			if(is_function)
+				returnValue = dragFunc(event);
+			else if(e.target.fireEvent)
+				e.target.fireEvent("ondragstart", event);
+			else if(e.target.dispatchEvent)
+				returnValue = e.target.dispatchEvent(event);
+			else
+				alert("NO");
+
+			if(e.preventDefault) e.preventDefault();
+			e.returnValue = false;
 		};
 		var mouseUp = function(e) {
 			if(!is_drag)
 				return;
-			dragObject = null;
+
 			is_drag = false;
+			
+			var event = self.dragEvent("dragend", e, dragDistance, dragObject);
+
+			var returnValue;
+			if(is_function)
+				returnValue = dragFunc(event);
+			else if(e.target.fireEvent)
+				e.target.fireEvent("ondragend", event);
+			else if(e.target.dispatchEvent)
+				returnValue = e.target.dispatchEvent(event);
+			else
+				alert("NO");
+				
+				
+			dragObject = null;
+
 		}
 		
-		this.addEvent("mousedown", mouseDown);
-		this.addEvent("mousemove", mouseMove);
-		this.addEvent("mouseup", mouseUp);
-		this.addEvent("mouseleave", mouseUp);
-		
-		this.addEvent("touchstart", mouseDown);
-		this.addEvent("touchmove", mouseMove);
-		this.addEvent("touchend", mouseUp);
+		this.on("mousedown", mouseDown);
+		this.on("mousemove", mouseMove);
+		this.on("mouseup", mouseUp);
+		this.on("mouseleave", mouseUp);
+		if(!is_object || is_object && !dragFunc.isOnlyMouse) {
+			this.on("touchstart", mouseDown);
+			this.on("touchmove", mouseMove);
+			this.on("touchend", mouseUp);
+		}
 		
 		return this;
 	},
@@ -1009,7 +1119,7 @@ daylight.fn.extend({
 				if(e.addEventListener){
 					e.addEventListener(key, func);    
 				} else if(e.attachEvent){ // IE < 9 :(
-				    e.attachEvent("on" + key, func);
+				    e.attachEvent("on" + key, function(event){ func.call( e, event )});
 				}
 			});
 		} else {
@@ -1142,7 +1252,7 @@ daylight.fn.extend({
 	getClass : function() {
 		var obj = this.o[0];
 		//var type = daylight.type(obj);
-		if(obj instanceof HTMLElement) {
+		if(obj instanceof _Element) {
 			return this.o[0].className.split(" ");
 		}
 		return [];
@@ -1361,18 +1471,26 @@ daylight.fn.extend({
 		return daylight(this.get(-1));
 	}
 });
-daylight.fn.scrollTop = function(value) {
-	if(value) {
-		this.each(function(e) {
-			e.scrollTop = value;
-		});
-		return this;
-	} else {
-		if(this.o[0] === undefined)
-			return;
-		return this.o[0].scrollTop;
+daylight.each(["Top", "Left"], function(name) {
+	var funcName = "scroll" + name;
+	daylight.fn[funcName] = function(value) {
+		if(value) {
+			this.each(function(e) {
+				
+				e[funcName] = value;
+				if(e === document.body) {
+					docElem[funcName] = value;
+				}
+			});
+			return this;
+		} else {
+			if(this.o[0] === undefined)
+				return;
+			return this.o[0][funcName] || docElem[funcName];
+		}
 	}
-}
+});
+
 
 daylight.fn.template = function(o, t) {
 	this.html(daylight.template(o, t));
@@ -1560,7 +1678,11 @@ daylight.fn.extend({
 	}
 });
 //demension 관련 함수들  width, height, innerWidth, innerHeight, outerWidth, outerHeight
-["Width", "Height"].forEach(function(name) {
+daylight.each(["Width", "Height"], function(name) {
+	if(typeof name !== "string")
+		return;
+		
+	
 	var lowerName = name.toLowerCase();
 	var requestComponent = name === "Width" ? ["left", "right"] : ["top", "bottom"];
 	daylight.fn[lowerName] = function() {
@@ -1618,12 +1740,24 @@ daylight.fn.extend({
 			return;
 
 
-		var dimension = o["offset" + name];
+		var dimension = o["offset" + name] || o["outer" + name];
 		
 		if(bInlcudeMargin) {
 			var cssHooks = _style(o);
 			dimension += parseFloat(_curCss(o, "margin-" + requestComponent[0], cssHooks)) + parseFloat(_curCss(o, "margin-" + requestComponent[1], cssHooks));
 		}
+		return dimension;
+	}
+	daylight.fn["scroll" + name] = function(bInlcudeMargin) {
+		//var currentStyle = this.style();
+		var o = this.o[0];
+
+		if(!o)
+			return;
+
+
+		var dimension = o["scroll" + name];
+		
 		return dimension;
 	}
 });
@@ -1709,7 +1843,7 @@ daylight.parseHTML = function(text) {
 	var arr = _concat(p.childNodes);
 	return arr;
 }
-daylight.fn.scrollLeft;
+
 
 
 
@@ -1728,10 +1862,6 @@ daylight.fn.extend({
 
 
 
-daylight.each("Boolean Number String Text Function Array Date RegExp Object Error Window NodeList".split(" "), function(name, index, arr) {
-	class2type[ "[object " + name + "]" ] = name.toLowerCase();
-});
-
 /*
 daylight.each("$Event".split(" "), function(name, index, arr) {
 	daylight.defineGlobal(name, daylight[name]);
@@ -1739,6 +1869,9 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 */
 
 daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart resize".split(" "), function(name, index, arr) {
+	if(typeof name !== "string")
+		return;
+		
 	daylight.fn[name] = function(func) {
 		this.on(name, func);
 	}
