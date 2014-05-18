@@ -1,7 +1,7 @@
 /*
 여기는 대부분 Jindo Framework의 jindo.$Event를 가져옴.. 필요한 것만 골라서 고칠 예정.
 */
-daylight.$Event = function(e) {
+daylight.Event = daylight.$Event = function(e) {
 	var callee = arguments.callee;
 	if (e instanceof callee) return e;
 	if (!(this instanceof callee)) return new callee(e);
@@ -63,6 +63,9 @@ daylight.$Event.prototype.mouse = function(bGetOffset) {
 }
 daylight.$Event.prototype.touch = function(e) {
 	return _touch(this._event);
+}
+daylight.$Event.prototype.cross = function(e) {
+	return daylight.$E.cross(this._event);
 }
 
 daylight.$Event.prototype.key = function() {
