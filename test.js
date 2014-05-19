@@ -14,7 +14,6 @@ test("CORE", function() {
 	var div = document.createElement("div");
 	div.innerHTML = "<div class=''></div>aaa<div class='ss'></div>"
 	var p = document.createElement("p");
-	//var input = document.createElement("");
 	var dl_div = $(div);
 	var dl_p = $(p);
 
@@ -178,6 +177,7 @@ test("dom", function() {
 	var div3 = document.createElement("p");
 	div3.innerHTML = 1;
 	div.appendChild(div2);
+	div2.appendChild(div3);
 	ok(div.contains(div2));
 	
 	var dl_div = $(div);
@@ -191,6 +191,14 @@ test("dom", function() {
 	ok(dl_div.has(div2));
 	ok(dl_div.has(".a").equal(dl_div));
 	ok(dl_div.has(".abc").equal([]));
+	
+	ok(daylight.has(div2, div3));
+	dl_div2.remove(div3);
+	ok(!daylight.has(div2, div3));
+	
+	ok(daylight.has(div, div2));
+	dl_div2.remove();
+	ok(!daylight.has(div, div2));
 });
 test("CSS", function() {
 
@@ -258,7 +266,24 @@ test("position2", function() {
 	equal(offset2.left, 110);
 	equal(offset2.top, 100);
 });
-
+test("val", function() {
+	var input = document.createElement("input");
+	var chkbox = document.createElement("input");
+	chkbox.setAttribute("type", "checkbox");
+	chkbox.setAttribute("value", "hi");
+	
+	var radio = document.createElement("radio");
+	radio.setAttribute("type", "radio");
+	chkbox.setAttribute("value", "hi");
+	var textarea = document.createElement("textarea");
+		textarea.innerText ="hello--";
+	input.value = "hello";
+	
+	equal($(input).val(), "hello");
+	equal($(input).val("hi").val(), "hi");
+	equal($(chkbox).val(), "hi");
+	equal($(textarea).val(), "hello--");
+});
 test("custom event", function() {
 	//var div = document.createElement("div");
 	var dl_div = $(".test3");

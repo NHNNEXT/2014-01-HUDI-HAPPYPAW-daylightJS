@@ -322,12 +322,12 @@ var _value = {
 			else
 				return _value[type].get(element, is_value);
 		},
-		set : function(element, key) {
+		set : function(element, value) {
 			var type = element.type;
 			if(!_value[type])
-				element.value = key;
+				element.value = value;
 			else
-				_value[type].set(element, key);	
+				_value[type].set(element, value);	
 		}
 	},
 	textarea : {
@@ -339,9 +339,11 @@ var _value = {
 		}
 	},
 	radio : {
-		get : function(element, is_value) {
-			if(is_value || element.checked) return element.value;
-			return;	
+		get : function(element, is_checked) {
+			if(is_checked)
+				return element.checked;
+			return element.value;
+	
 		},
 		set : function(element, key) {
 			var type = daylight.type(key);
@@ -352,9 +354,10 @@ var _value = {
 		}		
 	},
 	checkbox : {
-		get : function(element, is_value) {
-			if(is_value || element.checked) return element.value;
-			return;	
+		get : function(element, is_checked) {
+			if(is_checked)
+				return element.checked;
+			return element.value;
 		},
 		set : function(element, key) {
 			var type = daylight.type(key);
@@ -1729,7 +1732,7 @@ daylight.fn.extend({
 			return;
 		return this.o[0].innerText;
 	},
-	ohtml : function(value) {
+	ohtml: function(value) {
 		if(!(value === undefined)) {
 			this.each(function() {
 				this.outerHTML = value;
@@ -1739,7 +1742,7 @@ daylight.fn.extend({
 			return;
 		return this.o[0].outerHTML;
 	},
-	val : function(value) {
+	val: function(value) {
 		if(!(value === undefined)) {
 			this.each(function() {
 				if(!daylight.isElement(this))
@@ -1755,6 +1758,9 @@ daylight.fn.extend({
 
 		var node = this.o[0].nodeName.toLowerCase();
 		return _value[node].get(this.o[0]);
+	},
+	checked: function(value) {
+			
 	}
 });
 daylight.fn.extend({
