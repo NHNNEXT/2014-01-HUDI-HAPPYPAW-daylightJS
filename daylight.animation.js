@@ -6,6 +6,17 @@ window.requestAnimFrame = (function(){
             window.setTimeout(callback, 1000 / 60);
           };
 })();
+
+/*공통 
+ * 전반적으로 오류 상황에 대해서 잘 대처하고 있는지 모르겠음.
+ * 인자의 갯수나 타입이 올바르지 않다면 console.warn과 같이 개발자에게 경고성멘트를 남겨두는 것도 좋을 듯.
+ * 필요하면 인자타입을 체크하는 로직을 만들어서 재사용하는 것도 방법.
+ */
+
+//전역변수가  어떻게 이렇게 널려있지..
+//daylight만의 namespace(이름을 짓기 위한 껍데기 객체)를 생성하고 그 안에 담는 게 나을 듯.
+//그래서 4개가가 지금처럼 배열로 나눠져 있지 않고 하나의 객체묶음으로 같이 존재하는 것이 좋겠음. 
+
 //content width에 따라 바뀔 수 있는 속성
 var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right"];
 //content height에 따라 바뀔 수 있는 속성
@@ -14,10 +25,11 @@ var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding
 var dtype = ["rotate", "opacity", "tx", "ty", "gtop", "gleft"];
 var dimensionType = ["px", "em", "%"]
 
+//아래 3개는 그냥 전역함수인데... 객체에 묶여있게 하는 것이 좋겠음.
 function _dot(a1,a2,b1,b2) {
 	if(b1 + b2 == 0)
 		return a1;
-	return a1 * b1 / (b1 + b2) + a2 * b2 / (b1 + b2);
+	return a1 * b1 / (b1 + b2) + a2 * b2 / (b1 + b2);  //혼란스럽지 않게 괄호를 더 많이 사용해서 연산자 우선되는 것을 표시해두기
 }
 function _abspx(a, p100) {
 	var v = parseFloat(a);
@@ -28,7 +40,7 @@ function _abspx(a, p100) {
 }
 function _getDimensionType(a) {
 	var length = dimensionType.length;
-	for(var i = 0; i < length; ++i) {
+	for(var i = 0; i < length; ++i) {  //length는 미리 항상 계산해두기.자바스크립트는 루프가도는 만큼 그 갯수를 계산함.
 		if(a.indexOf(dimensionType[i]) != -1)
 			return dimensionType[i];
 		}
@@ -46,7 +58,7 @@ daylight.animation = {
 			ignoreCSS : ["count", "time", "function", "length", "fill"]
 		},
 		prefixToBrowser : function(css, prefix) {
-			prefix = prefix === undefined ? "all" : prefix;
+			prefix = prefix === undefined ? "all" : prefix;  //typeof prefix === "undefined" 가 좀더 일반적인 습관.
 			//prefix
 			//all : prefix별로 바꿔준다.
 			//-1 : prefix를 바꾸지 않고 그대로 둔다.
@@ -74,6 +86,7 @@ daylight.animation = {
 				 	return cssWithPrefix + daylight.replace("{prefix}", "", css);
 			 }
 		},
+		//이제 주석 메타태크 형태로 사용하는건가?? 오~ 자동으로 추출하는 YUIDOC같은 거 쓸거야? 암튼 좋다.
 		/**
 		*
 		* @desc 애니메이션을 지원하는 브라우저인지 확인한다.
@@ -116,6 +129,7 @@ daylight.animation = {
 		* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
 		* @desc CSS값들이 있는 Object를 style로 바꿔준다.
 		*/
+		// 사실 동적타이핑인 자바스크립트의 변수는 헝가리안 표기법이 꽤 좋음.(사실상 표준적인 현장 방법이랄까..)
 		objectToCSS: function(actionList, prefix) {
 			var CONSTANT = this.CONSTANT;
 			var transformList = [];
@@ -140,8 +154,10 @@ daylight.animation = {
 				else 
 					otherList.push(action);
 			}
+			//아래 if문 3개 그 안의 로직은 함수로 모두 빼고 여기서는 구현된 각각의 함수만 호출하는 게 어떨지.
+			//아마도 그렇게 구현된 함수는 objectToCSS함수 안에 포함된 내부 함수일 수도 있고.
 			if(transformList.length > 0) {
-				for(j = 0; j < transformList.length; ++j) {
+				for(j = 0; j < transformList.length; ++j) { //length는 변수에 담아두고 재사용. 객체 속성을 자꾸 접근하는 것을 줄여보기
 					action = transformList[j];
 					replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
 					transformStyle += " " + replaceMotion;
@@ -158,7 +174,7 @@ daylight.animation = {
 				}
 				totalStyle += this.prefixToBrowser(browserEffectStyle, prefix);
 
-			}
+			} //이렇게 긴~ 함수에서는 if문과 다음 if문 사이에 한 줄 공백이 있음 훨씬 보기 좋음.
 			if(otherList.length > 0) {
 				for(j = 0; j < otherList.length; ++j) {
 					action = otherList[j];
@@ -208,10 +224,12 @@ daylight.animation = {
 			this.dl_object = daylight(selector);
 			
 			if(this.dl_object.size() == 0) {
-				throw new Error("레이어가 없습니다.");
+				throw new Error("레이어가 없습니다.");  //에러처리 좋네. 이런메시지도 하나의 메시지상수 객체를 만들어두고 넣어두는 게 좋긴함.(비즈니스로직과 데이터의 분리차원에서)
 			}
 			
 			
+			//생성자안에서 디폴트 값을 설정하는 함수를 한번 만들어두고 다른 생성자에서 재사용할 수 있게 하는 건 어떨까?
+			//생성자마다 option처리하는 방식이 일관성이 약간 부족해보여.
 			this.motions = [];
 			this.timeSchedule = {};
 			this.initMotion = initMotion;
@@ -398,20 +416,21 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 
 
 	//중복되는 프로퍼티가 있는지 검사.
-	if(is_force != -1 && is_force != 1) {
+	if(is_force != -1 && is_force != 1) {  //비용이 더 들지 모르겠지만,, if(Math.abs(is_force) !==1)  이렇게 해도 같을 듯.
+		//언더바 표기법을 썻다가..카멜표기법을 썻다가.. 잘 결정하고 일관되게 이름을 짓도록.
 		var is_repeat = false;
 		daylight.each(fromMotion, function(value, key){
 			if(ignoreCSS.indexOf(key) >= 0)
 				return;
 				
 			if(motion.hasOwnProperty(key))
-				is_repeat = true;
+				is_repeat = true;  //is라는 건 주로 boolean타입을 리턴하는 함수에 사용하고 변수는 bRepeat 처럼 prefix에 b라는 단어를 사용하는 게 일반적.
 			
 	
 		});
 	}
 	if(is_repeat) {
-		fromMotion.time += 0.0001;
+		fromMotion.time += 0.0001; //이런숫자는 불편임??
 		this.addMotion(fromMotion);
 		return false;
 	}
@@ -446,6 +465,7 @@ daylight.animation.Layer.prototype._fillPrevMotionsWithMotionWithIndex = functio
         }
     }
 }
+//method 에 underbar가 붙은 건 private속성으로 이해하고 있겠음.
 daylight.animation.Layer.prototype._fillNextMotions = function(motion, time) {
 	var self = this;
 	var motions = this.motions;
@@ -471,6 +491,7 @@ daylight.animation.Layer.prototype._fillNextMotions = function(motion, time) {
     });
 }
 
+///hasproperty의 반환값이 0, 1, -1인데 3가지 유형으로 꼭 해야 하는 걸까? 두가지라면 true, false로 그냥 하면 될텐데.
 daylight.animation.Layer.prototype.hasProperty = function(index, property) {
 	var motions = this.motions;
 	var motion = typeof index === "object" ?index : motions[i];
@@ -486,6 +507,7 @@ daylight.animation.Layer.prototype.getPrevMotion = function(name, time) {
 	var max_time = -2;
 	var value = {};
 	
+	//근데 너가 사용한 each함수가 native메서드 보다 빠르니? 그냥 궁금했다. native메서드는 브라우저 지원 범위가 아직 넓지 않지만..
 	daylight.each(this.motions, function(o, index) {
 		if(max_time > o.time || time < o.time)
 			return;
@@ -504,8 +526,9 @@ daylight.animation.Layer.prototype.getPrevMotion = function(name, time) {
 	@param {string} css property
 	@param {number} 찾고 싶은 시간
 */
+//getPreMotion과 꽤 중복이네..해결방법은 없을꼬.
 daylight.animation.Layer.prototype.getNextMotion = function(name, time) {
-	var min_time = 100000000;
+	var min_time = 100000000; //의미없는 값... 밖으로 상수로 빼. 
 	var value = {};
 	
 	daylight.each(this.motions, function(o, index) {
@@ -548,6 +571,8 @@ daylight.animation.Layer.prototype._addMotion = function(motion) {
 *	@param {object|object[]} motion / motion List / from Motion to Motion
 *	@returns {Layer} this
 */
+
+//재귀도 적절히 잘 쓴 거 같은데. 덩어리가 너무 크니까 좀 분리하자. 의미적으로 아래 from---to 부분을 나눌수도 있지 않을까? (private함수로)
 daylight.animation.Layer.prototype.addMotion = function(motion) {
 	if(!motion)
 		return;
@@ -714,11 +739,13 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 	
 	var prevTime = time - prev.time;
 	var nextTime = next.time - time;
+
 	if(dimension === "width" || dimension === "height") {
 		var p100 = this.dl_object.dimension(dimension);//100퍼센트 기준으로 수치
 		prevMotion = _abspx(prevMotion, p100);
 		nextMotion = _abspx(nextMotion, p100);
 		value = _dot(prevMotion, nextMotion, nextTime, prevTime) +"px";
+
 	} else if(dimension === "dimension") {
 		prevMotion = _abspx(prevMotion);
 		nextMotion = _abspx(nextMotion);
@@ -818,6 +845,7 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 	var selector = this.selector;
 	var styleHTML = "";
 	var percentage;
+
 	for(var i = 0; i < browserPrefixLength; ++i) {
 		prefix = browserPrefix[i];
 		styleHTML += "@" + prefix +"keyframes daylightAnimation"+id+" {\n";
@@ -913,7 +941,7 @@ daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) 
 	
 	if(this.hasLayer(layer)) {
 		console.log("이미 레이어가 있습니다. id : " + layer.id);
-		return null;
+		return null; //보통 null을 리턴하지 않고 그냥 return.(자바스크립트에서는 null을 객체 초기화 할 때 빼고는 잘 안써서.)
 	}
 
 	layer.dl_object.addClass("daylightAnimationLayer");
