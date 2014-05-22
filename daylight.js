@@ -51,6 +51,7 @@ var _Node = window.Node || function() {};
 var doc = document;
 var docElem = doc.documentElement;
 
+
 var _concat = function(arr) {
 	var a = [];
 	var l = arr.length;
