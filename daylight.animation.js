@@ -176,7 +176,7 @@ daylight.animation = {
 		* @classdesc 타임라인
 		*
 		*/
-		Timeline : function(selector) {
+		Timeline: function Timeline(selector) {
 			console.log("NEW TIMELINE");
 			
 			this.selector = selector;
@@ -188,8 +188,6 @@ daylight.animation = {
 			
 			dl_object.scroll(function(e) {e.preventDefault();});
 			
-
-			
 		},//레이어를 만드는 함수
 		/**
 		*
@@ -197,7 +195,7 @@ daylight.animation = {
 		* @classdesc 타임라인의 레이어
 		*
 		*/
-		Layer: function(selector, initMotion) {
+		Layer: function Layer(selector, initMotion) {
 			this.selector = selector;
 			var id = selector;
 			id = daylight.replace(" ", "", id);
@@ -222,7 +220,7 @@ daylight.animation = {
 				this.addMotion(this.initMotion);
 			}
 		},
-		Motion: function(time, _propertyValues, option) {
+		Motion: function Motion(time, _propertyValues, option) {
 			option = option || {};
 			this.count = option.count || 0;
 			this.fill = option.fill || "";
@@ -389,6 +387,32 @@ daylight.animation.animationActions = {
 		
 	}
 }
+
+daylight.animation.Motion.prototype.hasProperty = function(property) {
+	if(propertyValues.hasOwnProperty(property))
+		return 1;
+	else if(propertyValues.hasOwnProperty(property + "?a"))
+		return 0;
+	
+	return -1;
+}
+daylight.animation.Motion.prototype.getPropertyValue = function(property) {
+    var value = this.propertyValues[property];
+    
+    if(value)
+        return value;
+    
+    return this.propertyValues[property +"?a"];
+}
+daylight.animation.Motion.prototype.getObject = function(property) {
+    return this.propertyValues[property];
+}
+daylight.animation.Motion.prototype.setObject = function(property, value) {
+    this.propertyValues[property] = value;
+}
+
+
+
 daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_force) {
 	var self = this;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
@@ -757,19 +781,15 @@ daylight.animation.Layer.prototype.timer = function(time) {
 				continue;
 
 			
-			if(property === "border-radius")
-				console.log(time +"  "+ dl_object.css(property));
-
-			prev[property] = dl_object.css(property);
 			prev.time = 0;
+			prev[property] = dl_object.css(property);
 			prev.count = 0;
-			
-			this.motions.push(prev);
+		
 			
 			if(this.getMotion(time))
 				this.getMotion(time)[property] = prev[property];
 			else
-				this.getMotion(prev);
+				this.addMotion(prev);
 			
 		}
 		
@@ -862,6 +882,7 @@ daylight.animation.Timeline.prototype.hasLayer = function(layer) {
 	var layerLength = layers.length;
 	var _layer;
 
+	
 	for(var i = 0; i < layerLength; ++i) {
 		_layer = layers[i];
 		if(!is_string && _layer.dl_object.equal(layer.dl_object))
@@ -875,6 +896,13 @@ daylight.animation.Timeline.prototype.hasLayer = function(layer) {
 		return true;
 	}
 	return false;
+}
+
+daylight.animation.Timeline.prototype.exportToJSON = function() {
+	var id = "";
+	var dl_object = this.dl_object;
+	var element = dl_object.o[0];
+	return JSON.stringify(this._exportToJSON(element));
 }
 daylight.animation.Timeline.prototype.getLayer = function(layer) {
 	var layers = this.layers;
@@ -985,6 +1013,12 @@ daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 	}
 	
 	layer.fillMotion(fMotion, finalMotion, 1);
+	fMotion.time = totalTime;
+	/*
+if(layer.id === "brownlegRight") {
+		console.log(fMotion);
+	}
+*/
 	if(!layer.getMotion(totalTime))
 		layer.addMotion(fMotion);
 	
@@ -1147,6 +1181,14 @@ daylight.animation.Timeline.prototype.finish = function() {
 }
 /**
 *
+* @desc 애니메이션을 강제 종료한다.
+*/
+daylight.animation.Timeline.prototype.stop = function() {
+	this.finish();
+	$(".daylightAnimationLayer").removeClass("animationStart");
+}
+/**
+*
 * @desc 재생된 횟수를 초기화한다.
 */
 daylight.animation.Timeline.prototype.initCount = function() {
@@ -1193,6 +1235,70 @@ daylight.animation.Timeline.prototype.pause = function() {
 daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	
 }
+
+(function() {
+	var browserPrefix = daylight.animation.CONSTANT.browserPrefix;
+	var NO_CHILD = ["IMG"];
+	var EXPORT_PROPERTIES = {"opacity":1, "box-sizing":"content-box", width:"0px", height:"0px" , "border-radius":"0px", "color":"rgb(255, 255, 255)"};
+	var POS = ["left","top", "right", "bottom"];
+	var BACKGROUND = "background-";
+	EXPORT_PROPERTIES[BACKGROUND + "color"] = "rgba(0, 0, 0, 0)";
+	EXPORT_PROPERTIES[BACKGROUND + "image"] = "none";
+	EXPORT_PROPERTIES[BACKGROUND + "size"] = "auto";
+	EXPORT_PROPERTIES[BACKGROUND + "position"] = "0% 0%";
+
+
+	for(var i = 0; i < 4; ++i) {
+		EXPORT_PROPERTIES["border-"+ POS[i]] = {has:"0px"};
+		EXPORT_PROPERTIES["padding-"+ POS[i]] = "0px";
+		EXPORT_PROPERTIES["margin-"+ POS[i]] = "0px";
+		EXPORT_PROPERTIES[POS[i]] = "auto";
+	}
+	var prefix;
+	for(var i = 0; i < browserPrefix.length; ++i) {
+		prefix = browserPrefix[i];
+		EXPORT_PROPERTIES[prefix + "transform"] = "none";
+		EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
+	}
+	daylight.animation.Timeline.prototype._exportStyle = function(element) {
+		var exportStyle = {};
+		var styles = window.getComputedStyle(element);
+		
+		for(var property in EXPORT_PROPERTIES) {
+			var propertyValue = styles[property];
+			var propertyDefaultValue = EXPORT_PROPERTIES[property];
+			if(propertyValue === undefined || propertyValue === "" || propertyValue === propertyDefaultValue)
+				continue;
+			
+			exportStyle[property] = propertyValue;
+		}
+		
+		return exportStyle;
+	}
+	daylight.animation.Timeline.prototype._exportToJSON = function(element) {
+		var json = {name:element.nodeName, id:element.id, className:element.className};
+		var node, value;
+		switch(json.name) {
+		case "IMG": json.src = element.src;break;
+		}
+	
+		var childNodes = element.childNodes;
+		var length = childNodes && childNodes.length; 
+		
+		if(NO_CHILD.indexOf(json.name) == -1)
+			json.childNodes = [];
+		
+		for(var i = 0; i < length; ++i) {
+			node = childNodes[i];
+			value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
+			if(value) json.childNodes.push(value)
+		}
+		json.style = this._exportStyle(element);
+		return json;
+	}
+}());
+
+
 
 daylight.defineGetterSetter(daylight.animation.Timeline, "animationType");
 daylight.defineGetterSetter(daylight.animation.Timeline, "count");

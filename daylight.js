@@ -599,7 +599,9 @@ daylight.extend( {
 				return methods[args2.length].apply(this, args2);
 				
 				
-			var arr = daylight.map(args2, function(value) {return daylight.type(value);});//인자의 타입을 가져옴
+			var arr = daylight.map(args2, function(value) {var type = daylight.type(value);
+						return type === "object" && value.constructor.name.toLowerCase() || type;
+					});//인자의 타입을 가져옴
 			var param = arr.join(",");
 			if(methods[param])
 				return methods[param].apply(this, args2);
