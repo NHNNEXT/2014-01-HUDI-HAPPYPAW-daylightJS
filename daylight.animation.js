@@ -34,200 +34,177 @@ function _getDimensionType(a) {
 		}
 	return "";
 }
-
 daylight.animation = {
-		//actionList : Dictionary(Object)
-		CONSTANT : {
-			browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
-			transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
-			browserEffectCSS : {"origin" : "transform-origin:?", "transition":"transition:?"},
-			styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {type};\n{prefix}animation-fill-mode: forwards;\n{prefix}animation-iteration-count:{count};\n",
-			stylePauseAnimation : "{prefix}animation-play-state:paused;\n",
-			ignoreCSS : ["count", "time", "function", "length", "fill"]
-		},
-		prefixToBrowser : function(css, prefix) {
-			prefix = prefix === undefined ? "all" : prefix;
-			//prefix
-			//all : prefix별로 바꿔준다.
-			//-1 : prefix를 바꾸지 않고 그대로 둔다.
-			//나머지 : 지정된 prefix로 바꿔준다.
-			
-			var CONSTANT = this.CONSTANT;
-			var browserPrefixLength = CONSTANT.browserPrefix.length;
-			var cssWithPrefix;
-			
-			switch(prefix) {
-			case "all":
-				var totalStyle = "";
-				for(var i = 0; i < browserPrefixLength; ++i) {
-					totalStyle +=daylight.replace("{prefix}", CONSTANT.browserPrefix[i], css);
-				}
-				return totalStyle;
-				break;
-			case -1:
-				return css;
-			default:
-				cssWithPrefix = daylight.replace("{prefix}", prefix, css);
-				if(prefix === "")
-				 	return cssWithPrefix;
-				 else
-				 	return cssWithPrefix + daylight.replace("{prefix}", "", css);
-			 }
-		},
-		/**
-		*
-		* @desc 애니메이션을 지원하는 브라우저인지 확인한다.
-		* @return {boolean} 지원하는 브라우저이면 true, 아니면 false를 반환한다.
-		*/
-		checkBrowser : function() {
-		
-			return true;
-		},
-		/**
-		*
-		* @prarm {string} selector, CSS Selector
-		* @prarm {object} property, value 쌍으로 이루어져 있는 Object
-		* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
-		* @desc CSS값들이 있는 Object를 CSSSelector가 포함된 style로 바꿔준다.
-		*/
-		objectToCSSWithSelector: function(selector, actionList, prefix) {
-			var value = this.objectToCSS(actionList, prefix);
-			var style = this.getCSSWithSelector(selector, value);
-			
-			return style;
-		},
-		/**
-		/**
-		*
-		* @prarm {string} selector, CSS Selector
-		* @prarm {string} CSS Value
-		* @desc CSS값들이 있는 String을 CSSSelector가 포함된 style로 바꿔준다.
-		*/
-		getCSSWithSelector: function(selector, value) {
-			var style = selector + "{";
-			style += value;
-			style += "}";
-			
-			return style;
-		},
-		/**
-		*
-		* @prarm {object} property, value 쌍으로 이루어져 있는 Object
-		* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
-		* @desc CSS값들이 있는 Object를 style로 바꿔준다.
-		*/
-		objectToCSS: function(actionList, prefix) {
-			var CONSTANT = this.CONSTANT;
-			var transformList = [];
-			var browserEffectList = [];
-			var otherList = [];
-			var totalStyle = "";
-			var transformStyle = "{prefix}transform:";
-			var browserEffectStyle = "" ;
-			var otherStyle = "";
-			var action, replaceMotion;
-			var j;
-			prefix = prefix === undefined ? "all" : prefix;
-			//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
-			
-			for(action in actionList) {
-				if(action in CONSTANT.transformList)
-					transformList.push(action);
-				else if(action in CONSTANT.browserEffectCSS)
-					browserEffectList.push(action);
-				else if(CONSTANT.ignoreCSS.indexOf(action) != -1)
-					continue;
-				else 
-					otherList.push(action);
-			}
-			if(transformList.length > 0) {
-				for(j = 0; j < transformList.length; ++j) {
-					action = transformList[j];
-					replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
-					transformStyle += " " + replaceMotion;
-				}
-				transformStyle += ";\n";
-				totalStyle += this.prefixToBrowser(transformStyle, prefix);
-			}
-			if(browserEffectList.length > 0) {
-				for(j = 0; j < browserEffectList.length; ++j) {
-					action = browserEffectList[j];
-					replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
-					browserEffectStyle += " " + replaceMotion;
-					browserEffectStyle += ";\n";
-				}
-				totalStyle += this.prefixToBrowser(browserEffectStyle, prefix);
-
-			}
-			if(otherList.length > 0) {
-				for(j = 0; j < otherList.length; ++j) {
-					action = otherList[j];
-					otherStyle += action+":"+actionList[action];
-					otherStyle += ";\n";
-				}
-				totalStyle += otherStyle;
-			}
-			var cssStyle = daylight.replace("{prefix}", CONSTANT.browserPrefix[1], totalStyle);
-			return cssStyle;
-		},
-		/**
-		*
-		* @class
-		* @classdesc 타임라인
-		*
-		*/
-		Timeline: function Timeline(selector) {
-			console.log("NEW TIMELINE");
-			
-			this.selector = selector;
-			var dl_object = this.dl_object = daylight(selector);
-			this.layers = [];
-			this.totalTime = 0;
-			this.animationType = "ease";
-			this.count = "infinite";
-			
-			dl_object.scroll(function(e) {e.preventDefault();});
-			
-		},//레이어를 만드는 함수
-		/**
-		*
-		* @class
-		* @classdesc 타임라인의 레이어
-		*
-		*/
-		Layer: function Layer(selector, initMotion) {
-			this.selector = selector;
-			var id = selector;
-			id = daylight.replace(" ", "", id);
-			id = daylight.replace(".", "", id);
-			id = daylight.replace("#", "", id);
-			
-			this.id = id;
-			this.dl_object = daylight(selector);
-			
-			if(this.dl_object.size() == 0) {
-				throw new Error("레이어가 없습니다.");
-			}
-			
-			
-			this.motions = [];
-			this.timeSchedule = {};
-			this.initMotion = initMotion;
-			this.totalTime = 0;
-			this.properties = [];
-			if(this.initMotion) {
-				this.initMotion.time = -1;
-				this.addMotion(this.initMotion);
-			}
-		},
-		Motion: function Motion(time, _propertyValues, option) {
-			option = option || {};
-			this.count = option.count || 0;
-			this.fill = option.fill || "";
-			this.time = time;
-			this.propertyValues = _propertyValues;
+	isActivateAnimation: function() {
+		var browser = daylight.browser();
+		var version = browser.version;
+		if(!browser.mobile) {
+			if(browser.ie && version >= 10 || browser.webkit && version >= 4 || browser.firefox && version >= 16 || browser.opera && version >= 12)
+				return true;
 		}
+		var computedStyle = window.getComputedStyle && window.getComputedStyle(document.body);
+		
+		if(!computedStyle)
+			return false;
+			
+		var is_has_property_animation = computedStyle.hasOwnProperty("animation") ||
+										computedStyle.hasOwnProperty("-webkit-animation") ||
+										computedStyle.hasOwnProperty("-ms-animation") ||
+										computedStyle.hasOwnProperty("-moz-animation") ||
+										computedStyle.hasOwnProperty("-o-animation");
+		
+		return is_has_property_animation;
+	},
+	CONSTANT : {
+		browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
+		transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
+		browserEffectCSS : {"origin" : "transform-origin:?", "transition":"transition:?"},
+		styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {type};\n{prefix}animation-fill-mode: forwards;\n{prefix}animation-iteration-count:{count};\n",
+		stylePauseAnimation : "{prefix}animation-play-state:paused;\n",
+		ignoreCSS : ["count", "time", "function", "length", "fill"]
+	},
+	prefixToBrowser : function(css, prefix) {
+		prefix = prefix === undefined ? "all" : prefix;
+		//prefix
+		//all : prefix별로 바꿔준다.
+		//-1 : prefix를 바꾸지 않고 그대로 둔다.
+		//나머지 : 지정된 prefix로 바꿔준다.
+		
+		var CONSTANT = this.CONSTANT;
+		var browserPrefixLength = CONSTANT.browserPrefix.length;
+		var cssWithPrefix;
+		
+		switch(prefix) {
+		case "all":
+			var totalStyle = "";
+			for(var i = 0; i < browserPrefixLength; ++i) {
+				totalStyle +=daylight.replace("{prefix}", CONSTANT.browserPrefix[i], css);
+			}
+			return totalStyle;
+			break;
+		case -1:
+			return css;
+		default:
+			cssWithPrefix = daylight.replace("{prefix}", prefix, css);
+			if(prefix === "")
+			 	return cssWithPrefix;
+			 else
+			 	return cssWithPrefix + daylight.replace("{prefix}", "", css);
+		 }
+	},
+	/**
+	*
+	* @desc 애니메이션을 지원하는 브라우저인지 확인한다.
+	* @return {boolean} 지원하는 브라우저이면 true, 아니면 false를 반환한다.
+	*/
+	checkBrowser : function() {
+	
+		return true;
+	},
+	/**
+	*
+	* @prarm {string} selector, CSS Selector
+	* @prarm {object} property, value 쌍으로 이루어져 있는 Object
+	* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
+	* @desc CSS값들이 있는 Object를 CSSSelector가 포함된 style로 바꿔준다.
+	*/
+	objectToCSSWithSelector: function(selector, actionList, prefix) {
+		var value = this.objectToCSS(actionList, prefix);
+		var style = this.getCSSWithSelector(selector, value);
+		
+		return style;
+	},
+	/**
+	/**
+	*
+	* @prarm {string} selector, CSS Selector
+	* @prarm {string} CSS Value
+	* @desc CSS값들이 있는 String을 CSSSelector가 포함된 style로 바꿔준다.
+	*/
+	getCSSWithSelector: function(selector, value) {
+
+		if(!value) {
+		return "";
+		}
+			
+		var style = selector + "{\n";
+		style += value;
+		style += "\n}";
+		
+		return style;
+	},
+	/**
+	*
+	* @prarm {object} property, value 쌍으로 이루어져 있는 Object
+	* @prarm {string} prefix prefix가 없으면 모든 브라우저에 맞게 고쳐준다.
+	* @desc CSS값들이 있는 Object를 style로 바꿔준다.
+	*/
+	objectToCSS: function(actionList, prefix) {
+		var CONSTANT = this.CONSTANT;
+		var transformList = [];
+		var browserEffectList = [];
+		var otherList = [];
+		var totalStyle = "";
+		var transformStyle = "{prefix}transform:";
+		var browserEffectStyle = "" ;
+		var otherStyle = "";
+		var action, replaceMotion;
+		var j;
+		prefix = prefix === undefined ? "all" : prefix;
+		//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
+		
+		for(action in actionList) {
+			if(action in CONSTANT.transformList)
+				transformList.push(action);
+			else if(action in CONSTANT.browserEffectCSS)
+				browserEffectList.push(action);
+			else if(CONSTANT.ignoreCSS.indexOf(action) != -1)
+				continue;
+			else 
+				otherList.push(action);
+		}
+		if(transformList.length > 0) {
+			for(j = 0; j < transformList.length; ++j) {
+				action = transformList[j];
+				replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
+				transformStyle += " " + replaceMotion;
+			}
+			transformStyle += ";\n";
+			totalStyle += this.prefixToBrowser(transformStyle, prefix);
+		}
+		if(browserEffectList.length > 0) {
+			for(j = 0; j < browserEffectList.length; ++j) {
+				action = browserEffectList[j];
+				replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
+				browserEffectStyle += " " + replaceMotion;
+				browserEffectStyle += ";\n";
+			}
+			totalStyle += this.prefixToBrowser(browserEffectStyle, prefix);
+
+		}
+		if(otherList.length > 0) {
+			for(j = 0; j < otherList.length; ++j) {
+				action = otherList[j];
+				otherStyle += action+":"+actionList[action];
+				otherStyle += ";\n";
+			}
+			totalStyle += otherStyle;
+		}
+		var cssStyle = daylight.replace("{prefix}", CONSTANT.browserPrefix[1], totalStyle);
+		return cssStyle;
+	},
+	makeId : function(id) {
+		id = daylight.replace(" ", "", id);
+		id = daylight.replace(".", "", id);
+		id = daylight.replace("#", "", id);
+		id = daylight.replace("=", "Equal", id);
+		id = daylight.replace("[", "A", id);
+		var limit_char = /[~!\#$^&*\=+|:;?"<,.>']/;
+		id = id.replace(limit_char, "");
+		return id;
+	}
 };
+
 daylight.animation.animationActions = {
 	form : function(_layer, startTime, endTime, option) {
 		
@@ -387,32 +364,64 @@ daylight.animation.animationActions = {
 		
 	}
 }
+daylight.animation.Motion = function Motion(time, _propertyValues, option) {
+	option = option || {};
+	this.count = option.count || 0;
+	this.fill = option.fill || "";
+	this.time = time;
+	this.propertyValues = _propertyValues;
+}
+daylight.animation.Motion.prototype = {
+	hasProperty : function(property) {
+		if(propertyValues.hasOwnProperty(property))
+			return 1;
+		else if(propertyValues.hasOwnProperty(property + "?a"))
+			return 0;
+		
+		return -1;
+	},
+	getPropertyValue : function(property) {
+	    var value = this.propertyValues[property];
+	    
+	    if(value)
+	        return value;
+	    
+	    return this.propertyValues[property +"?a"];
+	},
+	getObject : function(property) {
+	    return this.propertyValues[property];
+	},
+	setObject : function(property, value) {
+	    this.propertyValues[property] = value;
+	}
+};
 
-daylight.animation.Motion.prototype.hasProperty = function(property) {
-	if(propertyValues.hasOwnProperty(property))
-		return 1;
-	else if(propertyValues.hasOwnProperty(property + "?a"))
-		return 0;
+/**
+*
+* @class
+* @classdesc 타임라인의 레이어
+*
+*/
+daylight.animation.Layer = function Layer(selector, initMotion) {
+	this.selector = selector;
+	var id = daylight.animation.makeId(selector);
+	this.id = id;
+	this.dl_object = daylight(selector);
 	
-	return -1;
+	if(this.dl_object.size() == 0) {
+		throw new Error("레이어가 없습니다.");
+	}
+	
+	this.motions = [];
+	this.timeSchedule = {};
+	this.initMotion = initMotion;
+	this.totalTime = 0;
+	this.properties = [];
+	if(this.initMotion) {
+		this.initMotion.time = -1;
+		this.addMotion(this.initMotion);
+	}
 }
-daylight.animation.Motion.prototype.getPropertyValue = function(property) {
-    var value = this.propertyValues[property];
-    
-    if(value)
-        return value;
-    
-    return this.propertyValues[property +"?a"];
-}
-daylight.animation.Motion.prototype.getObject = function(property) {
-    return this.propertyValues[property];
-}
-daylight.animation.Motion.prototype.setObject = function(property, value) {
-    this.propertyValues[property] = value;
-}
-
-
-
 daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_force) {
 	var self = this;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
@@ -517,7 +526,7 @@ daylight.animation.Layer.prototype.getPrevMotion = function(name, time) {
 		
 		var tmp = o.hasOwnProperty(name + "?a") ? o[name +"?a"] : o[name];
 
-		if(tmp !== undefined) {
+		if(typeof tmp !== "undefined") {
 			value = o;
 			max_time = o.time;
 		}
@@ -537,14 +546,20 @@ daylight.animation.Layer.prototype.getNextMotion = function(name, time) {
 			return;
 
 		var tmp = o.hasOwnProperty(name + "?a") ? o[name +"?a"] : o[name];
-		if(tmp !== undefined) {
+		if(typeof tmp !== "undefined") {
 			value = o;
 			min_time = o.time;
 		}
 	});
 	return value;
 }
-
+daylight.animation.Layer.prototype.addAction = function(name, startTime, endTime, option) {
+	if(daylight.animation.animationActions.hasOwnProperty(name)) {
+		daylight.animation.animationActions[name](this, startTime, endTime, option);
+	} else {
+		throw new Error("해당하는 엑션이 없습니다.")
+	}
+}
 
 daylight.animation.Layer.prototype._addMotion = function(motion) {
 	var motions = this.motions;
@@ -606,11 +621,10 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 		var _motion = this.getMotion(time);
 		var is_success = false;
 	    if(!_motion) {
-
 	        this._addMotion(motion);
 	        is_success = true;
 	    } else {
-	        is_success = this.fillMotion(_motion, motion);// _motion에  motion을 추가
+	        is_success = this.fillMotion(_motion, motion, motion.fill === "add" ? 1: 0);// _motion에  motion을 추가
 	    }
 	    time = motion.time;
 	    if(is_success)
@@ -724,8 +738,8 @@ daylight.animation.Layer.prototype.indexOfNextMotionWithTime = function(time) {
 * @desc  이전 시간과 이후 시간을 현재시간에 비례하는 값을 찾아준다.
 */
 daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev, next) {
-	var prevMotion = prev[property];
-	var nextMotion = next[property];
+	var prevMotion = prev[property] || prev[property + "?a"];
+	var nextMotion = next[property] || next[property + "?a"];
 	var dimension = "";
 	
 	var value = prevMotion;
@@ -737,6 +751,7 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 		dimension = "dimension";
 	
 	var prevTime = time - prev.time;
+	prevTime = prevTime >= 0 ? prevTime : 0;
 	var nextTime = next.time - time;
 	if(dimension === "width" || dimension === "height") {
 		var p100 = this.dl_object.dimension(dimension);//100퍼센트 기준으로 수치
@@ -792,12 +807,15 @@ daylight.animation.Layer.prototype.timer = function(time) {
 				this.addMotion(prev);
 			
 		}
-		
+		if(this.id === "car")
+			console.log(prev.time);
+			
 		if(!next.hasOwnProperty(property))
 			next = prev;
 			
 		value = this.getTimeValue(time, property, prev, next);
 		if(value === "transition") {
+		
 			motions["transition"] =  property + " linear " + (next.time - prev.time) + "s";
 			motions[property] = next[property];
 		} else {
@@ -837,29 +855,35 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 	var totalTime = this.totalTime;
 	var selector = this.selector;
 	var styleHTML = "";
-	var percentage;
+
+	var keyframeSelector,
+		keyframeStyle;
+		
 	for(var i = 0; i < browserPrefixLength; ++i) {
 		prefix = browserPrefix[i];
-		styleHTML += "@" + prefix +"keyframes daylightAnimation"+id+" {\n";
+		keyframeSelector = "@" + prefix +"keyframes daylightAnimation"+id;
+		keyframeStyle = "";
 		daylight.each(this.motions, function(motion, i) {
-			percentage = parseFloat(motion.time) * 100 / totalTime;//시간을 %로 바꿔준다.
-			
-			styleHTML += daylight.animation.objectToCSSWithSelector(percentage +"%"
-						, motion, prefix) +"\n";	
+			if(motion.time < 0)
+				return;
+			var percentage = parseFloat(motion.time) * 100 / totalTime;//시간을 %로 바꿔준다.
+			var style = daylight.animation.objectToCSSWithSelector(percentage +"%"
+						, motion, prefix);
+			keyframeStyle += style ? style + "\n" : "";
 		});
-		styleHTML += "}\n";
+		styleHTML += daylight.animation.getCSSWithSelector(keyframeSelector, keyframeStyle);
 	}
 
 	var data = {id: id, time: totalTime, count: count, type: type};
 	styleStartAnimation = daylight.template(data, styleStartAnimation);
 	
+	if(styleHTML) {
+		styleHTML += daylight.animation.getCSSWithSelector(this.selector + ".animationStart"
+					,daylight.animation.prefixToBrowser(styleStartAnimation)) +"\n";
 	
-	styleHTML += daylight.animation.getCSSWithSelector(this.selector + ".animationStart"
-				,daylight.animation.prefixToBrowser(styleStartAnimation)) +"\n";
-
-	styleHTML += daylight.animation.getCSSWithSelector(this.selector + ".animationPause"
-				,daylight.animation.prefixToBrowser(stylePauseAnimation)) +"\n";	
-
+		styleHTML += daylight.animation.getCSSWithSelector(this.selector + ".animationPause"
+					,daylight.animation.prefixToBrowser(stylePauseAnimation)) +"\n";	
+	}
 	
 	return styleHTML;
 
@@ -874,7 +898,28 @@ daylight.animation.Layer.prototype.print = function() {
 	});
 }
 
-
+/**
+*
+* @class
+* @classdesc 타임라인
+*
+*/
+daylight.animation.Timeline = function Timeline(selector) {
+	console.log("NEW TIMELINE");
+	
+	this.selector = selector;
+	var id = daylight.animation.makeId(selector);
+	this.id = id;
+	
+	var dl_object = this.dl_object = daylight(selector);
+	this.layers = [];
+	this.totalTime = 0;
+	this.animationType = "ease";
+	this.count = "infinite";
+	
+	dl_object.scroll(function(e) {e.preventDefault();});
+	
+}
 daylight.animation.Timeline.prototype.hasLayer = function(layer) {
 	var layers = this.layers;
 	var t = daylight.type(_layer);
@@ -970,11 +1015,9 @@ daylight.animation.Timeline.prototype.addAction = function(layer, name, startTim
 	//disolve(targe포함)
 	
 	var _layer = this.getLayer(layer);
-	if(daylight.animation.animationActions.hasOwnProperty(name)) {
-		daylight.animation.animationActions[name](_layer, startTime, endTime, option);
-	} else {
-		throw new Error("해당하는 엑션이 없습니다.")
-	}
+	_layer.addAction(name, startTime, endTime, option);
+	
+
 	return this;
 }
 daylight.animation.Timeline.prototype.addMotion = function(layer, motion) {
@@ -1267,7 +1310,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		for(var property in EXPORT_PROPERTIES) {
 			var propertyValue = styles[property];
 			var propertyDefaultValue = EXPORT_PROPERTIES[property];
-			if(propertyValue === undefined || propertyValue === "" || propertyValue === propertyDefaultValue)
+			if(typeof propertyValue === "undefined" || propertyValue === "" || propertyValue === propertyDefaultValue)
 				continue;
 			
 			exportStyle[property] = propertyValue;

@@ -22,7 +22,7 @@ body {
 .tright {text-align: right;}
 .center {margin-left:auto;margin-right: auto; }
 .clear {clear: both;}
-
+.fleft {float:left;}
 
 .btn {
 	background: #5fcf80;

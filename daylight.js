@@ -263,6 +263,8 @@ if (!Array.prototype.forEach) {
 
 
 
+
+
 //FORM INPUT, SELECT VALUE값는 찾는 함수와 설정하는 함수
 var _value = {
 	//SELECT 태그에 해당하는 함수
@@ -370,6 +372,23 @@ var _value = {
 	}
 	
 };
+
+//reference to jindo.js jindo._p_._j_ag
+var _navigator = daylight._navigator = window.navigator || navigator;
+var _userAgent = _navigator.userAgent;
+daylight._userAgent = _userAgent;
+
+daylight._AGENT_IS_IE = /(MSIE|Trident)/.test(daylight._userAgent);
+daylight._AGENT_IS_FF = daylight._userAgent.indexOf("Firefox") > -1;
+daylight._AGENT_IS_OP = daylight._userAgent.indexOf("Opera") > -1;
+daylight._AGENT_IS_SP = daylight._userAgent.indexOf("Safari") > -1;
+daylight._AGENT_IS_SF = daylight._userAgent.indexOf("Apple") > -1;
+daylight._AGENT_IS_CH = daylight._userAgent.indexOf("Chrome") > -1;
+daylight._AGENT_IS_WK = daylight._userAgent.indexOf("WebKit") > -1;
+daylight._AGENT_IS_MO = /(iPad|Mobile|Android|Nokia|webOS|BlackBerry|Opera Mini)/.test(daylight._userAgent);
+
+
+
 
 /**
 *
@@ -644,15 +663,13 @@ daylight.clone = function(node, dataAndEvent, deepDataAndEvent) {
 	return n;
 }
 /*??제거 대상*/
-daylight.create = function(classFunction) {
-	return function() {
-		var a = new function(arg) {
-			return classFunction.apply(this, arg);
-		}(arguments);
-		a.__proto__ = classFunction.prototype;
-		
-		return a;
-	};
+daylight.createElement = function(name, object) {
+	var element = document.createElement(name);
+	
+	for(var attr in object) {
+		element.setAttribute(name, object[attr]);	
+	}
+	return element;
 }
 
 
@@ -756,7 +773,7 @@ daylight.extend({
 * @retruns {Boolean} if All is PlainObject, True 
 * @desc PlainObject인지 검사한다.
 */	
-	isPlainObject : function(n) {
+	isPlainObject: function(n) {
 		if(!n)
 			return false;
 		//PlainObject의 생성자는 Object이다???
@@ -765,6 +782,8 @@ daylight.extend({
 	}
 });
 
+/*String 관련 함수*/
+daylight.extend({
 /**
 * @method
 * @name daylight.isPlainObject
@@ -776,11 +795,29 @@ daylight.extend({
 * @retruns {String} 바뀐 문자를 리턴
 * @desc from이 들어간 문자를 to로 전부 바꿔준다.
 */	
-daylight.replace = function(from, to, str) {
+replace: function(from, to, str) {
 	if(!str)
 		return "";
 	return str.split(from).join(to);
+},
+/**
+* @method
+* @name daylight.repeat
+*
+* @param {String} 반복할 문자
+* @param {Number} 반복 횟수
+*
+* @retruns {String} 반복한 문자
+* @desc 반복 횟수만큼 문자를 반복한다.
+*/	
+repeat: function(str, num) {
+	var sWord = "";
+	for(var i = 0; i < num; ++i) {
+		sWord += daylight.replace("{count}", i + 1, str);
+	}
+	return sWord;
 }
+});
 //해당 index를 보여줍니다.
 daylight.index = function(arr, object) {
 	var type = daylight.type(arr);
@@ -809,7 +846,7 @@ daylight.index = function(arr, object) {
 }
 daylight.extend({
 	//각각의 요소에 대해 콜백함수를 실행시킨다.
-	each : function(arr, callback) {
+	each: function(arr, callback) {
 		var type = daylight.type(arr, true);
 		//배열 또는 nodelist인 경우
 		if(type === "array" || type === "nodelist") {
@@ -826,7 +863,7 @@ daylight.extend({
 		
 		return arr;
 	},
-	map : function(arr, callback) {
+	map: function(arr, callback) {
 		var arr2 = [];
 		var type = daylight.type(arr, true);
 		//배열 또는 nodelist인 경우
@@ -1020,7 +1057,7 @@ daylight.template = function(obj, template) {
 }
 
 daylight.extend({
-	initEvent: function(name) {
+	initEvent: function(name, extra) {
 		var e;
 		if(_isIeCustomEvent) {
 			e = document.createEventObject();
@@ -1030,6 +1067,9 @@ daylight.extend({
 			e = document.createEvent('Event');
 			e.initEvent(name, true, true);
 		}
+		for(var key in extra)
+			e[key] = extra[key];
+		
 		return e;
 	}
 });
@@ -1121,37 +1161,22 @@ daylight.fn.css = function(name, value, isNoObject) {
 daylight.fn.extend({
 	dragEvent: function(name, e, dragDistance, dragObject) {
 		//console.log(e.constructor);
-		var event = {};
-		try {
-			event = new e.constructor(name, e);
-			event.dragInfo = dragDistance;
-			event.dragObject = dragObject;
-			event.stx = dragDistance.stx;
-			event.sty = dragDistance.sty;
-			event.dragX = dragDistance.x;
-			event.dragY = dragDistance.y;
-			event.dx = dragDistance.dx;
-			event.dy = dragDistance.dy;
-			event.daylight = true;
-			event.target = e.target;
-			event.srcElement = e.srcElement;
-			return event;
-		} catch(e) {
-			event = document.createEventObject();
-			event.dragInfo = dragDistance;
-			event.dragObject = dragObject;
-			event.stx = dragDistance.stx;
-			event.sty = dragDistance.sty;
-			event.dragX = dragDistance.x;
-			event.dragY = dragDistance.y;
-			event.dx = dragDistance.dx;
-			event.dy = dragDistance.dy;
-			event.daylight = true;
-			event.srcElement = e.srcElement;
-			
-			event.preventDefault = function() {};
-			return event;
-		}
+		var event = daylight.initEvent(name, e);
+		
+		event.dragInfo = dragDistance;
+		event.dragObject = dragObject;
+		event.stx = dragDistance.stx;
+		event.sty = dragDistance.sty;
+		event.dragX = dragDistance.x;
+		event.dragY = dragDistance.y;
+		event.dx = dragDistance.dx;
+		event.dy = dragDistance.dy;
+		event.daylight = true;
+		event.srcElement = e.srcElement;
+		event.is_touch = dragDistance.is_touch;
+		
+		event.preventDefault = function() {};
+		return event;
 	},
 	drag: function(dragFunc) {
 		var dragObject = null;
@@ -1164,30 +1189,27 @@ daylight.fn.extend({
 		var isScreenPosition = false;
 		var pos;
 		var mouseDown = function(e) {
-			is_drag = true;
 			prePosition = daylight.$E.cross(e);
 			isScreenPosition = prePosition.screenX !== undefined;
 			pos = isScreenPosition ? {x:"screenX", y:"screenY"} : {x:"pageX", y:"pageY"};
-
-			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0};
+			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0, is_touch:prePosition.is_touch};
 			dragObject = e.target || e.srcElement;
-	/* 		console.log("DRAG START"); */
+			is_drag = true;
 	
 			var event = self.dragEvent("dragstart", e, dragDistance, dragObject);
-			//console.log(e, this);
+						
 
 			var returnValue;
 			if(is_function)
 				returnValue = dragFunc(event);
 			else if(e.target.fireEvent)
-				e.target.fireEvent("ondragstart", event);
-			else if(e.target.dispatchEvent)
+				returnValue = e.target.fireEvent("ondragstart", event);
+			else if(e.target.dispatchEvent) {
 				returnValue = e.target.dispatchEvent(event);
-			else
-				alert("NO");
-			
+			}
 
 			if(returnValue === false) {
+				console.log("false");
 				if(e.preventDefault) e.preventDefault();
 				e.returnValue = false;
 			}
@@ -1199,8 +1221,8 @@ daylight.fn.extend({
 			
 			dragDistance.dx = position[pos.x] - prePosition[pos.x];
 			dragDistance.dy = position[pos.y] - prePosition[pos.y];
-			dragDistance.x += dragDistance.dx;
-			dragDistance.y += dragDistance.dy;
+			dragDistance.x = position[pos.x] - dragDistance.stx;
+			dragDistance.y = position[pos.y] - dragDistance.sty;
 	
 			prePosition = position;
 			
@@ -1211,14 +1233,15 @@ daylight.fn.extend({
 			if(is_function)
 				returnValue = dragFunc(event);
 			else if(e.target.fireEvent)
-				e.target.fireEvent("ondragstart", event);
-			else if(e.target.dispatchEvent)
-				returnValue = e.target.dispatchEvent(event);
-			else
-				alert("NO");
-
-			if(e.preventDefault) e.preventDefault();
-			e.returnValue = false;
+				returnValue = e.target.fireEvent("ondrag", event);
+			else if(e.target.dispatchEvent) {
+				e.target.dispatchEvent(event);
+				returnValue = event.returnValue;
+			}
+			if(returnValue === false) {
+				if(e.preventDefault) e.preventDefault();
+				e.returnValue = false;
+			}
 		};
 		var mouseUp = function(e) {
 			if(!is_drag)
@@ -1240,13 +1263,19 @@ daylight.fn.extend({
 				
 				
 			dragObject = null;
-
 		}
 		
 		this.on("mousedown", mouseDown);
 		this.on("mousemove", mouseMove);
 		this.on("mouseup", mouseUp);
 		this.on("mouseleave", mouseUp);
+		
+		this.on("dragcancel", function(e) {
+			//var event = self.dragEvent("drag", e, dragDistance, dragObject);
+			is_drag = false;
+			dragObject = null;
+		});
+		
 		if(!is_object || is_object && !dragFunc.isOnlyMouse) {
 			this.on("touchstart", mouseDown);
 			this.on("touchmove", mouseMove);
@@ -1255,31 +1284,37 @@ daylight.fn.extend({
 		
 		return this;
 	},
+	wheel: function(func) {
+		this.on("DOMMouseScroll", func);
+		this.on("mousewheel", func);
+	},
 	/*
-		jindo.$Element.prototype.fireEvent 15526줄 참고.
+		reference to jindo.$Element.prototype.fireEvent 15526줄 참고.
 	*/
 	//test용 trigger
 	trigger: function(key, extra) {
 		this.each(function(element) {
-			var e = daylight.initEvent(key);
+			var returnValue = false;
+			var e = daylight.initEvent(key, extra);
 
 			if(element.dispatchEvent) {
-				element.dispatchEvent(e);
+				returnValue = element.dispatchEvent(e);
 			} else if(element.fireEvent) {
 				if(_isIeCustomEvent) {
 					//mouseEvent의 버블링 해야겠다 ㅠㅠ
-					daylight.triggerCustomEvent(element, key, extra);
+					returnValue = daylight.triggerCustomEvent(element, key, extra);
 				}else {
-					
-					element.fireEvent("on" + key, e);
+					returnValue = element.fireEvent("on" + key, e);
 				}
 			} else if(element[key]) {
-				element[key](e);
+				returnValue = element[key](e);
 			} else if(element["on" +key]) {
-				element["on" +key](e);
+				returnValue = element["on" +key](e);
 			}
+			return returnValue;
 		});
 		return this;
+		
 	},
 	on: function(key, func, type) {
 		if(func) {
@@ -1294,7 +1329,7 @@ daylight.fn.extend({
 						_customEvents[key].push({element: ele, handler: func, bubble: type=== undefined? true : !type, capture: !!type});
 					}
 				} else{
-					ele["on" + key]=handler;
+					ele["on" + key] = handler;
 				}
 			});
 		} else {
@@ -1640,7 +1675,7 @@ daylight.fn.extend({
 daylight.each(["Top", "Left"], function(name) {
 	var funcName = "scroll" + name;
 	daylight.fn[funcName] = function(value) {
-		if(value) {
+		if(typeof value !== "undefined") {
 			this.each(function(e) {
 				
 				e[funcName] = value;
@@ -1650,8 +1685,9 @@ daylight.each(["Top", "Left"], function(name) {
 			});
 			return this;
 		} else {
-			if(this.o[0] === undefined)
+			if(!daylight.isElement(this.o[0]))
 				return;
+				
 			return this.o[0][funcName] || docElem[funcName];
 		}
 	}
@@ -1767,16 +1803,16 @@ daylight.fn.extend({
 	}
 });
 daylight.fn.extend({
-	first : function() {
+	first: function() {
 		return this.o[0];
 	},
-	last : function() {
+	last: function() {
 		if(!this.length)
 			return;
 
 		return this.o[this.length - 1];
 	},
-	children : function() {
+	children: function() {
 		var o = [];
 		this.each(function(v) {
 			if(!daylight.isElement(v))
@@ -1789,7 +1825,7 @@ daylight.fn.extend({
 		});
 		return daylight(o);
 	},
-	prev : function() {
+	prev: function() {
 		var arr = [];
 		var length = this.length;
 		for(var i = 0; i < length; ++i) {
@@ -1856,6 +1892,9 @@ daylight.each(["Width", "Height"], function(name) {
 	var lowerName = name.toLowerCase();
 	var requestComponent = name === "Width" ? ["left", "right"] : ["top", "bottom"];
 	daylight.fn[lowerName] = function() {
+		if(this[lowerName] > 0)
+			return this[lowerName];
+			
 		var currentStyle = this.style();
 		var o = this.o[0];
 		var dimension = 0;
@@ -1884,16 +1923,17 @@ daylight.each(["Width", "Height"], function(name) {
 		return dimension;
 	}
 	daylight.fn["inner" + name] = function() {
-		var currentStyle = this.style();
 		var o = this.o[0];
 		
 		if(!o)
 			return;
 
-
+		if(o["inner" + name] > 0)
+			return o["inner" + name]
 
 		if(o["client" + name] > 0)
 			return o["client" + name]
+
 
 		var dimension = o["offset" + name];
 		var cssHooks = _style(o);
@@ -2072,8 +2112,104 @@ daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus ke
 		
 	daylight.fn[name] = function(func) {
 		this.on(name, func);
+		return this;
 	}
 });
+
+/**
+
+
+@desc 브라우저 목록과 모바일 인지 아닌지 보여준다.
+*/
+// reference to jindo.desktop.all.js jindo.$Agent.prototype.navigator
+daylight.browser = function() {
+	var ver = -1,
+		name = "",
+		u = _userAgent || "",
+		info = {},
+		v = _navigator.vendor || "";
+		
+	function f(browser, userAgent) {
+		return ((userAgent || "").indexOf(browser) > -1);
+	}
+	function hasBrowser(browser) {
+		return (u.indexOf(browser) > -1);
+	}
+	info.webkit = f("WebKit", u);
+	info.opera = (window.opera !== undefined) || f("Opera", u);
+	info.ie = !info.opera && (f("MSIE", u)||f("Trident", u));
+	info.chrome = info.webkit && f("Chrome", u);
+	info.safari = info.webkit && !info.chrome && f("Apple", v);
+	info.firefox = f("Firefox", u);
+	info.mozilla = f("Gecko", u) && !info.safari && !info.chrome && !info.firefox && !info.ie;
+	info.camino = f("Camino", v);
+	info.netscape = f("Netscape", u);
+	info.omniweb = f("OmniWeb", u);
+	info.icab = f("iCab", v);
+	info.konqueror = f("KDE", v);
+	info.mobile = (f("Mobile", u) || f("Android", u) || f("Nokia", u) || f("webOS", u) || f("Opera Mini", u) || f("BlackBerry", u) || (f("Windows", u) && f("PPC", u)) || f("Smartphone", u) || f("IEMobile", u)) && !f("iPad", u);
+	info.msafari = ((!f("IEMobile", u) && f("Mobile", u)) || (f("iPad", u) && f("Safari", u))) && !info.chrome;
+	info.mopera = f("Opera Mini", u);
+	info.mie = f("PPC", u) || f("Smartphone", u) || f("IEMobile", u);
+	
+	
+	try{
+		var nativeVersion = -1;
+		var dm = document.documentMode;
+		if(info.ie){
+			if(dm > 0){
+				ver = dm;
+				if(u.match(/(?:Trident)\/([0-9.]+)/)){
+					var nTridentNum = parseFloat(RegExp.$1, 10);
+					
+					if(nTridentNum > 3){
+						nativeVersion = nTridentNum + 4;
+					}
+				}else{
+					nativeVersion = ver;
+				}
+			}else{
+				nativeVersion = ver = u.match(/(?:MSIE) ([0-9.]+)/)[1];
+			}
+		}else if(info.safari || info.msafari){
+			ver = parseFloat(u.match(/Safari\/([0-9.]+)/)[1]);
+			
+			if(ver == 100){
+				ver = 1.1;
+			}else{
+				if(u.match(/Version\/([0-9.]+)/)){
+					ver = RegExp.$1;
+				}else{
+					ver = [1.0, 1.2, -1, 1.3, 2.0, 3.0][Math.floor(ver / 100)];
+				}
+			}
+		}else if(info.mopera){
+			ver = u.match(/(?:Opera\sMini)\/([0-9.]+)/)[1];
+		}else if(info.firefox||info.opera||info.omniweb){
+			ver = u.match(/(?:Firefox|Opera|OmniWeb)\/([0-9.]+)/)[1];
+		}else if(info.mozilla){
+			ver = u.match(/rv:([0-9.]+)/)[1];
+		}else if(info.icab){
+			ver = u.match(/iCab[ \/]([0-9.]+)/)[1];
+		}else if(info.chrome){
+			ver = u.match(/Chrome[ \/]([0-9.]+)/)[1];
+		}
+		
+		info.version = parseFloat(ver);
+		info.nativeVersion = parseFloat(nativeVersion);
+		
+		if(isNaN(info.version)){
+			info.version = -1;
+		}
+	}catch(e){
+		info.version = -1;
+	}
+	
+	
+	return info;
+		
+}
+
 
 
 })(window);
