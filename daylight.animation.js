@@ -152,21 +152,12 @@ daylight.animation = {
 		var CONSTANT = this.CONSTANT;
 		var transformList = [];
 		var browserEffectList = [];
+		
 		var otherList = [];
 		var totalStyle = "";
-		
-		var transformStyle = "{prefix}transform:";
-		var transformLength = transformList.length;
-
-		var browserEffectStyle = "" ;
-		var browserEffectListLength = browserEffectList.length;
-		
-		var otherStyle = "";
-		var otherListLength = otherList.length;
-		
-		
 		var action, replaceMotion;
 		var j;
+		
 		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
 		
@@ -180,6 +171,17 @@ daylight.animation = {
 			else 
 				otherList.push(action);
 		}
+		
+		var transformStyle = "{prefix}transform:";
+		var transformLength = transformList.length;
+
+		var browserEffectStyle = "" ;
+		var browserEffectListLength = browserEffectList.length;
+		
+		var otherStyle = "";
+		var otherListLength = otherList.length;
+		
+		
 		
 		if(transformLength > 0) {
 			for(j = 0; j < transformLength; ++j) {
@@ -964,6 +966,7 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 	var stylePauseAnimation = CONSTANT.stylePauseAnimation;
 	var browserPrefix = CONSTANT.browserPrefix;
 	var browserPrefixLength = browserPrefix.length;
+	
 	var id = this.id;
 	var totalTime = this.totalTime;
 	var selector = this.selector;
@@ -972,6 +975,7 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 	var keyframeSelector,
 		keyframeStyle;
 		
+
 	for(var i = 0; i < browserPrefixLength; ++i) {
 		prefix = browserPrefix[i];
 		keyframeSelector = "@" + prefix +"keyframes daylightAnimation"+id;
@@ -985,8 +989,8 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 			keyframeStyle += style ? style + "\n" : "";
 		});
 		styleHTML += daylight.animation.getCSSWithSelector(keyframeSelector, keyframeStyle);
-	}
 
+	}
 	var data = {id: id, time: totalTime, count: count, type: type};
 	styleStartAnimation = daylight.template(data, styleStartAnimation);
 	
