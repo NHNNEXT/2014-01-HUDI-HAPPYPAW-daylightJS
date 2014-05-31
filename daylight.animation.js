@@ -57,11 +57,12 @@ daylight.animation = {
 		
 		return is_has_property_animation;
 	},
-	ERRORMESSAGE : {
-		NOLAYER : "레이어가 없습니다.",
-		WRONGTYPE : "잘못된 형식입니다."
+	ERRORMESSAGE: {
+		NOLAYER: "레이어가 없습니다.",
+		WRONGTYPE: "잘못된 형식입니다.",
+		WRONGLAYER: "잘못된 레이어입니다."
 	},
-	CONSTANT : {
+	CONSTANT: {
 		BIGNUMBER : 10000000,
 		
 		browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
@@ -1091,20 +1092,7 @@ daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) 
 	
 	return layer.id;
 }
-daylight.animation.Timeline.prototype.setLayer = function(layer, initMotion) {
-	if(!layer) {
-		console.log("잘못된 레이어입니다.");
-		return;
-	}
-	
-	var _layer = this.getLayer(layer);
-	
-	if(!_layer) {
-		console.log("레이어가 없습니다.");
-		return;
-	}
-	_layer.initMotion = initMotion;
-}
+
 daylight.animation.Timeline.prototype.addAction = function(layer, name, startTime, endTime, option) {
 	//fade-in
 	//fade-out
@@ -1120,11 +1108,11 @@ daylight.animation.Timeline.prototype.addAction = function(layer, name, startTim
 
 daylight.animation.Timeline.prototype.addMotion = function(layer, motion) {
 	if(!layer) {
-		throw new Error("잘못된 레이어입니다.");
+		throw new Error(daylight.animation.ERRORMESSAGE.WRONGLAYER);
 	}
 	var _layer = this.getLayer(layer);
 	if(!_layer) {
-		throw new Error("레이어가 없습니다.");
+		throw new Error(daylight.animation.ERRORMESSAGE.NOLAYER);
 	}
 	_layer.addMotion(motion);
 	return this;
