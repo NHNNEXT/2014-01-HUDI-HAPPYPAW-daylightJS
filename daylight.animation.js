@@ -66,7 +66,7 @@ daylight.animation = {
 		ignoreCSS : ["count", "time", "function", "length", "fill"]
 	},
 	prefixToBrowser : function(css, prefix) {
-		prefix = prefix === undefined ? "all" : prefix;
+		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix
 		//all : prefix별로 바꿔준다.
 		//-1 : prefix를 바꾸지 않고 그대로 둔다.
@@ -147,12 +147,20 @@ daylight.animation = {
 		var browserEffectList = [];
 		var otherList = [];
 		var totalStyle = "";
+		
 		var transformStyle = "{prefix}transform:";
+		var transformLength = transformList.length;
+
 		var browserEffectStyle = "" ;
+		var browserEffectListLength = browserEffectList.length;
+		
 		var otherStyle = "";
+		var otherListLength = otherList.length;
+		
+		
 		var action, replaceMotion;
 		var j;
-		prefix = prefix === undefined ? "all" : prefix;
+		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
 		
 		for(action in actionList) {
@@ -165,8 +173,8 @@ daylight.animation = {
 			else 
 				otherList.push(action);
 		}
-		if(transformList.length > 0) {
-			for(j = 0; j < transformList.length; ++j) {
+		if(transformLength > 0) {
+			for(j = 0; j < transformLength; ++j) {
 				action = transformList[j];
 				replaceMotion = CONSTANT.transformList[action].replace("?", actionList[action]);
 				transformStyle += " " + replaceMotion;
@@ -174,8 +182,8 @@ daylight.animation = {
 			transformStyle += ";\n";
 			totalStyle += this.prefixToBrowser(transformStyle, prefix);
 		}
-		if(browserEffectList.length > 0) {
-			for(j = 0; j < browserEffectList.length; ++j) {
+		if(browserEffectListLength > 0) {
+			for(j = 0; j < browserEffectListLength; ++j) {
 				action = browserEffectList[j];
 				replaceMotion = "{prefix}" + CONSTANT.browserEffectCSS[action].replace("?", actionList[action]);
 				browserEffectStyle += " " + replaceMotion;
@@ -184,8 +192,8 @@ daylight.animation = {
 			totalStyle += this.prefixToBrowser(browserEffectStyle, prefix);
 
 		}
-		if(otherList.length > 0) {
-			for(j = 0; j < otherList.length; ++j) {
+		if(otherListLength > 0) {
+			for(j = 0; j < otherListLength; ++j) {
 				action = otherList[j];
 				otherStyle += action+":"+actionList[action];
 				otherStyle += ";\n";
