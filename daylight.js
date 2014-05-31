@@ -1,5 +1,24 @@
 (function(window) {
 
+/*Console Support*/
+var _console = {
+	error: [],
+	debug: [],
+	log: []
+};
+for(var consoleProperty in _console) {
+	window.console[consoleProperty] = function() {
+		var arr = [];
+		for(var i = 0; i < arguments.length; ++i) {
+			arr[i] = arguments[i];
+		}
+		_console[consoleProperty].push(arr);
+	}
+}
+
+
+
+
 var document = window.document || document;
 var class2type = {};
 var toString = class2type.toString;
