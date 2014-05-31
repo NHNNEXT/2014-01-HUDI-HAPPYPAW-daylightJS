@@ -17,7 +17,7 @@ var dtype = ["rotate", "opacity", "tx", "ty", "gtop", "gleft"];
 var dimensionType = ["px", "em", "%"]
 
 function _dot(a1,a2,b1,b2) {
-	if(b1 + b2 == 0)
+	if(b1 + b2 === 0)
 		return a1;
 	return a1 * b1 / (b1 + b2) + a2 * b2 / (b1 + b2);
 }
@@ -57,7 +57,13 @@ daylight.animation = {
 		
 		return is_has_property_animation;
 	},
+	ERRORMESSAGE : {
+		NOLAYER : "레이어가 없습니다.",
+		WRONGTYPE : "잘못된 형식입니다."
+	},
 	CONSTANT : {
+		BIGNUMBER : 10000000,
+		
 		browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
 		transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
 		browserEffectCSS : {"origin" : "transform-origin:?", "transition":"transition:?"},
@@ -173,6 +179,7 @@ daylight.animation = {
 			else 
 				otherList.push(action);
 		}
+		
 		if(transformLength > 0) {
 			for(j = 0; j < transformLength; ++j) {
 				action = transformList[j];
@@ -182,6 +189,7 @@ daylight.animation = {
 			transformStyle += ";\n";
 			totalStyle += this.prefixToBrowser(transformStyle, prefix);
 		}
+		
 		if(browserEffectListLength > 0) {
 			for(j = 0; j < browserEffectListLength; ++j) {
 				action = browserEffectList[j];
@@ -190,12 +198,12 @@ daylight.animation = {
 				browserEffectStyle += ";\n";
 			}
 			totalStyle += this.prefixToBrowser(browserEffectStyle, prefix);
-
 		}
+		
 		if(otherListLength > 0) {
 			for(j = 0; j < otherListLength; ++j) {
 				action = otherList[j];
-				otherStyle += action+":"+actionList[action];
+				otherStyle += action + ":" + actionList[action];
 				otherStyle += ";\n";
 			}
 			totalStyle += otherStyle;
@@ -351,7 +359,7 @@ daylight.animation.animationActions = {
 				time = (endTime - startTime) * (i + 1) + o.time;
 				motion = loop[i][o.time] = {time: time};
 				for(property in o) {
-					if(loopMotion.indexOf(property) == -1)
+					if(loopMotion.indexOf(property) === -1)
 						continue;
 					motion[property] = o[property];
 				}
@@ -423,15 +431,15 @@ daylight.animation.Layer = function Layer(selector, initMotion) {
 		selector = id ? "#" + id  : "." + className.replaceAll(" ", " .");
 	}
 	else if(type !== "string") {
-		throw new Error("잘못된 형식입니다.");
+		throw new Error(daylight.animation.ERRORMESSAGE.WRONGTYPE);
 	}
 	this.selector = selector;
 	var id = daylight.animation.makeId(selector);
 	this.id = id;
 
 	
-	if(this.dl_object.size() == 0) {
-		throw new Error("레이어가 없습니다.");
+	if(this.dl_object.size() === 0) {
+		throw new Error(daylight.animation.ERRORMESSAGE.NOLAYER);
 	}
 	
 	this.motions = [];
@@ -479,7 +487,7 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 			delete motion[key + "?a"];
 		} else if(!motion.hasOwnProperty(key) || is_force)
 			motion[key] = value;
-		if(is_force == -1) {
+		if(is_force === -1) {
 			motion[key + "?a"] = value;
 		}
 	});
@@ -496,11 +504,11 @@ daylight.animation.Layer.prototype._fillPrevMotionsWithMotionWithIndex = functio
        	
         for(var property in _motion) {
 
-        	if(ignoreCSS.indexOf(property) != -1)
+        	if(ignoreCSS.indexOf(property) !== -1)
         		continue;
 		    	
 		    	
-            if(this.hasProperty(motion, property) != -1)
+            if(this.hasProperty(motion, property) !== -1)
                 continue;
 
 	
@@ -523,7 +531,7 @@ daylight.animation.Layer.prototype._fillNextMotions = function(motion, time) {
 			return;
        
 	    var index = self.indexOfNextMotionWithTime(time);
-	    if(index == -1)
+	    if(index === -1)
 	        return;
 	    
 	    var length = motions.length;
@@ -531,14 +539,19 @@ daylight.animation.Layer.prototype._fillNextMotions = function(motion, time) {
 	    
 	    do {
 	        _motion = motions[index];
-	        if(self.hasProperty(_motion, property) == 1)
+	        if(self.hasProperty(_motion, property) === 1)
 	            return;
 	
 	        _motion[property +"?a"] = value;
 	    } while((++index) < length);
     });
 }
-
+/*
+	@param {Object| Number} 모션이 들어온다면 그대로 숫자라면 레이어의 순서를 가지고 모션을 찾아준다.
+	@param {property} 찾고 싶은 속성
+	@return {Number} 1 가지고 있다. 0 auto속성으로 가지고 있다. -1 없다.
+	@desc 해당하는 모션이 해당 속성을 가지고 있는지 검사한다.
+*/
 daylight.animation.Layer.prototype.hasProperty = function(index, property) {
 	var motions = this.motions;
 	var motion = typeof index === "object" ?index : motions[i];
@@ -549,7 +562,13 @@ daylight.animation.Layer.prototype.hasProperty = function(index, property) {
 	
 	return -1;
 }
-
+/*
+	@param {string} css property
+	@param {number} 찾고 싶은 시간
+	@param {number} auto가 붙은 것까지 찾을 것인가 확인
+	@return {motion} time 이전의 property를 가지고 있는 모션을 반환
+	@desc time 이전의 property를 가지고 있는 모션을 찾아준다.
+*/
 daylight.animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
 	var max_time = -2;
 	var value = {};
@@ -571,16 +590,19 @@ daylight.animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
 /*
 	@param {string} css property
 	@param {number} 찾고 싶은 시간
+	@param {number} auto가 붙은 것까지 찾을 것인가 확인
+	@return {motion} time 이후의 property를 가지고 있는 모션을 반환
+	@desc time 이후의 property를 가지고 있는 모션을 찾아준다.
 */
-daylight.animation.Layer.prototype.getNextMotion = function(name, time, nAuto) {
-	var min_time = 100000000;
+daylight.animation.Layer.prototype.getNextMotion = function(property, time, nAuto) {
+	var min_time = daylight.animation.CONSTANT.BIGNUMBER;
 	var value = {};
 	
 	daylight.each(this.motions, function(o, index) {
 		if(min_time < o.time || time > o.time)
 			return;
 
-		var tmp = !nAuto && o.hasOwnProperty(name + "?a") ? o[name +"?a"] : o[name];
+		var tmp = !nAuto && o.hasOwnProperty(property + "?a") ? o[property +"?a"] : o[property];
 		if(typeof tmp !== "undefined") {
 			value = o;
 			min_time = o.time;
@@ -636,7 +658,7 @@ daylight.animation.Layer.prototype._addMotion = function(motion) {
 	var time = motion.time;
 	
     var index = this.indexOfNextMotionWithTime(time);
-    if(index == -1)
+    if(index === -1)
        	motions.push(motion);
     else
     	motions.splice(index, 0, motion);
@@ -745,7 +767,7 @@ daylight.animation.Layer.prototype.getMotion = function(time) {
 	var totalTime = this.totalTime;
 	var motions = this.motions;
 	var length = this.motions.length;
-    if(length == 0)
+    if(length === 0)
         return;
     
 /*
@@ -758,7 +780,7 @@ daylight.animation.Layer.prototype.getMotion = function(time) {
 */
     
     //test
-    var i = totalTime == 0 ? 0 : Math.floor(time / totalTime * length);
+    var i = totalTime === 0 ? 0 : Math.floor(time / totalTime * length);
     
     if(i >= length)
         i = length - 1;
@@ -779,9 +801,9 @@ daylight.animation.Layer.prototype.getMotion = function(time) {
         
         if(motion.time === time)
             return motion;
-        if(to == 1 && motion.time > time)
+        if(to === 1 && motion.time > time)
         	return;
-        else if(to == -1 && motion.time < time)
+        else if(to === -1 && motion.time < time)
         	 return;
     }
 	    
@@ -1061,7 +1083,7 @@ daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) 
 	
 	if(this.hasLayer(layer)) {
 		console.log("이미 레이어가 있습니다. id : " + layer.id);
-		return null;
+		return;
 	}
 
 	layer.dl_object.addClass("daylightAnimationLayer");
@@ -1254,7 +1276,7 @@ daylight.animation.Timeline.prototype.timer = function() {
 			if(count < motion.count)
 				return;
 			
-			if(time > nowTime && (motion.count == count))
+			if(time > nowTime && (motion.count === count))
 				return;
 				
 			motion.count++;
@@ -1408,7 +1430,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		var childNodes = element.childNodes;
 		var length = childNodes && childNodes.length; 
 		
-		if(NO_CHILD.indexOf(json.name) == -1)
+		if(NO_CHILD.indexOf(json.name) === -1)
 			json.childNodes = [];
 		
 		for(var i = 0; i < length; ++i) {
