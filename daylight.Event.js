@@ -71,11 +71,31 @@ daylight.$Event.prototype.touch = function(e) {
 daylight.$Event.prototype.cross = function(e) {
 	return daylight.$E.cross(this._event);
 }
-
+/**
+*
+*/
+//reference to jindo.desktop.all.ns.js => jindo.$Event.prototype.key
 daylight.$Event.prototype.key = function() {
-	var keycode = e.keyCode || e.charCode;
-	return keycode;
-}
+	var e = this._event;
+	var keyCode = e.keyCode || e.charCode;
+	var ret   = {
+		keyCode		: keyCode,
+		alt			: e.altKey,
+		ctrl		: e.ctrlKey,
+		meta		: e.metaKey,
+		shift		: e.shiftKey,
+		up			: (keyCode == 38),
+		down		: (keyCode == 40),
+		left		: (keyCode == 37),
+		right		: (keyCode == 39),
+		enter		: (keyCode == 13),		
+		esc			: (keyCode == 27),
+		character	: String.fromCharCode(keyCode)
+	};
+
+	return ret;
+};
+
 daylight.$E = {
 	pos : function(e) {return _pos(e); },
 	touch : function(e) {return _touch(e);},

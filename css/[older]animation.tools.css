@@ -1,0 +1,63 @@
+body{
+	margin:0;
+}
+.anim-tools {
+/* 	cursor: move; */
+}
+.anim-tools *{
+	font-family: 'Lato', sans-serif;
+}
+.anim-tools {
+	position:fixed;
+	bottom:0;
+	width:100%;
+	height:200px;
+	background:rgba(255, 255, 255, 0.8);
+	border-top:3px solid #ccc;
+	padding:20px 20px 10px;
+	overflow:auto;
+	box-sizing: border-box;
+	white-space: nowrap;
+}
+.anim-block-box {
+	display: none;
+	height: 100%;
+	overflow-y:auto;
+	margin-right: 10px;
+	vertical-align: top;
+	width: 220px;
+
+}
+.anim-block-box.anim-menu, .anim-block-box.anim-timelines, .anim-block-box.show {
+	display: inline-block;
+}
+.anim-block-box.anim-menu {
+	width: 160px;
+}
+.anim-block-box.anim-menu .anim-block {
+	width: 140px;
+	border:2px solid #000;
+	background:#555;
+}
+.anim-block-box.anim-menu .anim-block.selected {
+	background:#777;
+}
+.anim-block {
+	width:200px;
+	border:2px solid rgba(120, 170, 198, 1);
+	background:rgba(130, 180, 218, 1);
+	padding: 10px;
+	box-sizing: border-box;	
+	margin-bottom: 5px;
+	font-weight: bold;
+	color:#fff;
+}
+.anim-block.checked {
+	border:2px solid rgba(220, 213, 47, 1);
+	background:rgba(230, 223, 67, 1);
+} 
+.anim-block.selected {
+	background: #5078FF;	
+} 
+.anim-block-add {
+}

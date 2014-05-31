@@ -1,100 +1,369 @@
-var tools = {};
-tools.size = "-4px";
-{
-	var relative = "relative", none = "none", absolute = "absolute", block="block",center="center", left="left", hidden="hidden";
-	tools.css = {
-		".day-figure": {
-			position: "absolute",
-			"min-width": "100px",
-			"min-height": "100px",
-			border:"1px solid #72BCEB"
-		},
-		".day-figure div" : {
-			position: "absolute",
-			width: "5px",
-			height: "5px",
-			background:"#fff",
-			border:"1px solid #72BCEB",
-		},
-		".day-figure .nw" : {top:0, left:0, "margin-left":tools.size, "margin-top":tools.size},
-		".day-figure .origin" : {"margin-left":tools.size, "margin-top":tools.size},
-		".day-figure .n" : {top:0, left:"50%", "margin-left":tools.size, "margin-top":tools.size},
-		".day-figure .ne" : {top:0, right:0, "margin-right":tools.size, "margin-top":tools.size},
-		".day-figure .w" : {top:"50%", left:0, "margin-left":tools.size, "margin-top":tools.size},
-		".day-figure .e" : {top:"50%", right:0, "margin-right":tools.size, "margin-top":tools.size},
-		".day-figure .sw" : {bottom:0, left:0, "margin-left":tools.size, "margin-bottom":tools.size},
-		".day-figure .s" : {bottom:0, left:"50%", "margin-left":tools.size, "margin-bottom":tools.size},
-		".day-figure .se" : {bottom:0, right:0, "margin-right":tools.size, "margin-bottom":tools.size},
-		".AnimationTools": {position:relative, overflow:hidden},
-		".ids" :{width:"10%", position:relative, "padding":0, "list-style":none, float:left},
-		".ids li" :{position:relative, height:"30px", "line-height":"30px"},
-		".timeline" :{float:left, width:"80%", "position":"relative", "padding":0, "list-style":none},
-		".timeline li" :{height:"30px", position:relative,  "border-left":"1px solid #ccc"},
-		".motion" : {"border-radius":"50%",top:"50%", "width":"10px", "height":"10px", "margin":"-5px 0px 0px -5px", "background":"#f55", position:absolute},
-		".motion .tip" : {display:none, "border-radius":"4px",top:"-15px",left:"50%","text-align":center, "width":"50px", "height":"20px", "line-height":"20px", "margin":"-10px 0px 0px -25px", "background":"#000", position:absolute, color:"#fff", "font-size":"12px"},
-		".motion:hover .tip":{display:block}
-		
-	};
-}
-tools.objectToCSS = function(css) {
-	var html = "";
-	for(var selector in css) {
-		html += selector +"{";
-		html += daylight.animation.objectToCSS(css[selector]);
-		html += "}";
-	}
-	return html;
+
+
+var tools = {
+	html: '<div class="anim-tools">{boxs}</div>',
+	blockBox: '<div class="anim-block-box {class}"></div>',
+	modifiedBox: '<div class="anim-block-box anim-modified"><h3></h3> <p></p> <input type="text" class="property-value" name="property" value="" /> <button class="save">Save</button></div>',
+	block: '<div class="anim-block {class}" data-type="{type}" data-id="{id}">{title}</div>',
+	timelines: [],
+	layers: [],
+	nowTimeline: null,
+	nowLayer: null,
+	supportProperties : {
+		tx: {name:"translateX", default:"0px"},
+		ty: {name:"translateY", default:"0px"},
+		left: {name:"좌표 X", default:"0px"},
+		top: {name:"좌표 Y", default:"0px"},
+		rotate: {name:"회전", default:"0deg"},
+		origin: {name:"기준점", default:"50% 50%"},
+		scale: {name:"확대/축소", default:"1, 1"},
+		width: {name:"너비", default:"100px"},
+		height: {name:"높이", default:"100px"}
+	},
+	type: ""
 };
-tools.html = '<div class="day-figure day_drag day_draggable day_resize"><div class="n"></div><div class="nw"></div><div class="ne"></div><div class="w"></div><div class="e"></div><div class="s"></div><div class="sw"></div><div class="origin"></div><div class="se day_resizable"></div></div>';
 
-tools.element = daylight(daylight.parseHTML(tools.html)[0]);
-tools.init = function(timeline) {
-
-	var styleElement = document.createElement("style");
-	var styleHTML = '<style class="daylightAnimationToolsStyle">\n';
-	styleHTML += this.objectToCSS(this.css);
-	styleHTML += "</style>";
-	$("head").append(styleHTML);
-	$("body").append(tools.element);
-	$(".AnimationTools").template(timeline, $(".AnimationTools"));
-	
-	$(".timeline").click(function(e) {
-		var o_event = daylight.$Event(e);
-		var element = o_event.target
-		if(daylight.hasClass(element, "motion")) {
-			var dl_element = $(element);
-			var time = dl_element.attr("data-time")  ;
-			var id = dl_element.parent().attr("data-id");
-			var motion = timeline.getLayer(id).getMotion(time);
-		}
-	})
-	$(".daylightAnimationLayer").click(function() {
-		timeline.pause();
-		var layer = timeline.getLayer(this);
-		var dl_el = $(this);
-		var pos = dl_el.position();
-		var width = dl_el.innerWidth();
-		var height = dl_el.innerHeight();
-		dl_el.parent().append(tools.element);
-		tools.element.attr("style", dl_el.attr("style"));
-		tools.element.css("left", dl_el.css("left"));
-		tools.element.css("top", dl_el.css("top"));
-		tools.element.css("margin", dl_el.css("margin"));
-		tools.element.css("width", width+"px");
-		tools.element.css("height", height+"px");
+function getTarget(e, type) {
+	var o_e = $.Event(e);
+	var dl_target = $(o_e.target);
+	if(!dl_target.hasClass(type))
+		return;
 		
-		var style = dl_el.css();
-		var origin = style["-webkit-transform-origin"] || style["transform-origin"] || style["-moz-transform-origin"];
-		if(!origin || origin === "none")
+	return dl_target;
+}
+function searchIn(arr, property, searchValue) {
+	var length = arr.length;
+	var now = -1;
+	for(var i = 0; i < length; ++i) {
+		if(arr[i][property] == searchValue)
+			return i;
+	}
+	return now;
+}
+tools.refreshTimeline = function() {
+	var timelines = daylight.map(this.timelines, function(timeline, index) {
+		return {id:timeline.id,title:timeline.id, selector:timeline.selector, class:"anim-block-timeline"};
+	});
+	timelines[timelines.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
+	$(".anim-block-box.anim-timelines").template(timelines, this.block);
+}
+tools.refreshLayer = function() {
+	var layers = daylight.map(this.layers, function(layer, index) {
+		return {id:layer.id, selector:layer.selector, title:layer.id, class:"anim-block-layer"};
+	});
+	layers[layers.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
+	$(".anim-block-box.anim-layers").template(layers, tools.block);
+}
+tools.refreshCProperties = function() {
+	var dl_cproperties_box = $(".anim-block-box.anim-cproperties");
+	dl_cproperties_box.addClass("show");
+	var cproperties = daylight.map(tools.nowLayer.properties, function(name, index) {
+		return {id:name, selector:"", title:name, class:"anim-block-cproperty"};
+	});
+	dl_cproperties_box.template(cproperties, tools.block);
+}
+tools.refreshProperties = function() {
+	var dl_properties_box = $(".anim-block-box.anim-properties");
+	dl_properties_box.addClass("show");
+	var nowProperties = tools.nowProperties;
+	var list = daylight.map(tools.supportProperties, function(value, property) {
+		var o = {id:property, selector:"", title:this.name, class:"anim-block-property"};
+		if(nowProperties.hasOwnProperty(property))
+			o.class += " checked";
+		return o;
+	});
+	
+	dl_properties_box.template(list, tools.block);
+}
+tools.refreshModifiedBox = function() {
+	var dl_modified_box = $(".anim-block-box.anim-modified"),
+		dl_input = dl_modified_box.find(".property-value");
+		
+	dl_modified_box.addClass("show");
+	var value = tools.nowProperties[tools.nowProperty];
+	if(value !== 0 && !value)
+		value = "";
+	dl_input.val(value);
+}
+tools.refreshTimes = function() {
+
+	var motions = daylight.map(this.nowLayer.motions, function(motion, index) {
+		var title = motion.time;
+		title = title == -1 ? "Init" : title + "s";
+		return {id:motion.time, selector:"", title:title, class:"anim-block-times"};
+	});
+	
+	if(typeof motions[0] === "undefiend" || motions[0].id != -1) {
+		motions.splice(0, 0, {id:-1, selector:"", title:"Init", class:"anim-block-times"});
+	}
+	
+	motions[motions.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
+	$(".anim-block-box.anim-times").template(motions, tools.block);
+}
+tools.initMenu = function() {
+	var menu = [
+	{id:"Default", title:"Default", selector:"", class:"anim-block-menu"},
+	{id:"Keyframes", title:"Keyframes", selector:"", class:"anim-block-menu"},
+	{id:"Timeline", title:"Timeline", selector:"", class:"anim-block-menu"},
+	{id:"Current", title:"Current", selector:"", class:"anim-block-menu"}
+	];
+	var dlMenuBox = $(".anim-block-box.anim-menu");
+	dlMenuBox.template(menu, tools.block);
+	dlMenuBox.click(function(e) {
+		var dl_target = getTarget(e, "anim-block-menu");
+		if(!dl_target)
 			return;
-		dl_el.css("-webkit-transform-origin", origin);
-		tools.element.css("-webkit-transform-origin", origin);
+			
+		dlMenuBox.find(".selected").removeClass("selected");
+		dl_target.addClass("selected");
 		
+		var clickItem = dl_target.attr("data-id");
+		switch(clickItem) {
+			case "Timeline":
+				tools.type = "";
+				break;
+			case "Current":
+				tools.type = "current";
+				break;
+		}
 		
-		origin = origin.split(" ");
-
-		tools.element.find(".origin").css("left", origin[0]);
-		tools.element.find(".origin").css("top", origin[1]);
+	});
+}
+tools.addTime = function(time) {
+	try {
+		time = parseFloat(time);
+		if(time !== 0 && !time) {
+			throw new Error("It is not time");
+		}
+		var motion = {time:time};
+		
+		//addMotion
+		//totalTime 변경 유무
+		//totalTime 증가 finalMotion 전부 시간 증가
+		
+		var nowLayer = tools.nowLayer;
+		var nowTimeline = tools.nowTimeline;
+		
+		nowLayer.totalTime < time ? motion.fill = "auto" : 0;
+		if(!nowLayer)
+			throw new Error("No Layer");
+			
+		if(nowLayer.getMotion(time))
+			throw new Error("Already Time Exist");
+		
+		nowLayer.addMotion(motion);
+		
+		if(nowLayer.totalTime > nowTimeline.totalTime)
+			nowTimeline.totalTime = nowLayer.totalTime;
+		
+	} catch(e) {
+		console.log(e);
+		alert(e.message);
+	}
+}
+tools.removeTime = function(time) {
+	//
+	//totalTime 변경 유무
+	//totalTime 증가 finalMotion 전부 시간 증가ㄴ	
+}
+tools.init = function init() {
+	console.log("INIT ANIMATION TOOLS");
+	var html = $.template({class: "anim-menu"}, this.blockBox)
+			+ $.template({class: "anim-timelines"}, this.blockBox)
+			+ $.template({class: "anim-layers"}, this.blockBox)
+			+ $.template({class: "anim-cproperties"}, this.blockBox)
+			+ $.template({class: "anim-times"}, this.blockBox)
+			+ $.template({class: "anim-properties"}, this.blockBox)
+			+ tools.modifiedBox;
+			
+	tools.html = $.template({boxs:html}, tools.html);
 	
+	
+	
+	$("body").append(this.html);
+	
+	var dlMenuBox = $(".anim-block-box.anim-menu"),
+		dl_all_box = $(".anim-block-box").subtract(dlMenuBox.o[0]),
+		dl_timelines_box = $(".anim-block-box.anim-timelines"),
+		dl_layers_box = $(".anim-block-box.anim-layers"),
+		dl_cproperties_box = $(".anim-block-box.anim-cproperties"),
+		dl_times_box = $(".anim-block-box.anim-times"),
+		dl_properties_box = $(".anim-block-box.anim-properties"),
+		dl_modified_box = $(".anim-block-box.anim-modified"),
+		dl_input = dl_modified_box.find(".property-value");
+	
+	
+	tools.initMenu();
+	
+		
+	this.timelines = [timeline];
+	tools.refreshTimeline();
+
+
+	dl_timelines_box.click(function(e) {
+		var dl_target = getTarget(e, "anim-block-timeline");
+		if(!dl_target)
+			return;
+			
+		$(this).find(".selected").removeClass("selected");
+		dl_target.addClass("selected");
+		
+		
+		dl_all_box.removeClass("show");	
+		dl_layers_box.addClass("show");
+		
+		
+		var id = dl_target.attr("data-id");
+		tools.nowTimeline = tools.timelines[searchIn(tools.timelines, "id", id)];
+		
+		if(!tools.nowTimeline)
+			return;
+	
+		tools.layers = tools.nowTimeline.layers;
+		
+		tools.refreshLayer();
+	});
+	
+	dl_layers_box.click(function(e) {
+		var dl_target = getTarget(e, "anim-block-layer");
+		if(!dl_target)
+			return;
+
+		$(this).find(".selected").removeClass("selected");
+		dl_target.addClass("selected");
+
+		dl_all_box.removeClass("show");
+		dl_layers_box.addClass("show");
+
+
+		var id = dl_target.attr("data-id");
+		console.log(tools.layers);
+		tools.nowLayer = tools.layers[searchIn(tools.layers, "id", id)];
+		if(!tools.nowLayer)
+			return;
+		
+		var curBox = tools.type === "current" ? dl_cproperties_box : dl_times_box;
+		curBox.addClass("show");
+		
+		if(tools.type === "current") {
+			tools.refreshCProperties();
+		}else {
+			//times 함수
+			tools.refreshTimes();
+		}
+		
+		/*
+			레이어 클릭
+			nowLayer 설정
+			
+		*/
+	});
+	dl_cproperties_box.click(function (e) {
+		var dl_target = getTarget(e, "anim-block-cproperty");
+		if(!dl_target)
+			return;
+		if(!tools.nowLayer)
+			return;
+				
+		$(this).find(".selected").removeClass("selected");
+		dl_target.addClass("selected");
+		
+		
+		var id = dl_target.attr("data-id");
+		
+		//프로티스 종류중 하나
+		tools.nowProperty = tools.nowLayer.properties[tools.nowLayer.properties.indexOf(id)];
+		if(!tools.nowProperty)
+			return;
+		tools.refreshTimes();
+
+		dl_times_box.addClass("show");
+
+		
+	});
+	
+	dl_times_box.click(function(e) {
+		var dlTarget = getTarget(e, "anim-block-times");
+		var dlAdd = getTarget(e, "anim-block-add");
+		if(!dlTarget && !dlAdd) 
+			return;
+		
+		if(dlAdd) {
+			var time = prompt("Add Time");
+			tools.addTime(time);
+			return;
+		}
+		dl_modified_box.removeClass("show");
+
+
+
+		$(this).find(".selected").removeClass("selected");
+		dlTarget.addClass("selected");
+		
+		
+		var time = parseFloat(dlTarget.attr("data-id"));
+		var nowProperties = tools.nowLayer.getMotion(time) || {};
+		
+		tools.nowProperties = nowProperties;
+		nowProperties.time = time;
+		if(tools.type === "current") {
+			tools.refreshModifiedBox();
+		} else {
+			tools.refreshProperties();
+		}
+
+	});
+	
+	dl_properties_box.click(function(e) {
+		var o_e = $.Event(e);
+		var dl_target = $(o_e.target);
+		if(!dl_target.hasClass("anim-block-property"))
+			return;
+			
+		var property = dl_target.attr("data-id");
+		if(!property)
+			return;
+		
+		tools.nowProperty = property;
+		
+		$(this).find(".selected").removeClass("selected");
+		dl_target.addClass("selected");
+		dl_modified_box.addClass("show");
+		tools.refreshModifiedBox();
+
+	});
+	function save() {
+		var property = tools.nowProperty;
+		var nowProperties = tools.nowProperties;
+		if(!property)
+			return;
+		if(typeof nowProperties.time === "undefined")
+			return;
+		var propertyValues = {time: nowProperties.time};
+		propertyValues[property] = dl_input.val();
+		propertyValues.fill = "add";
+		tools.nowLayer.addMotion(propertyValues);
+	}
+	dl_modified_box.find("button.save").click(function (){
+		var property = tools.nowProperty;
+		var nowProperties = tools.nowProperties;
+		if(!property)
+			return;
+		if(typeof nowProperties.time === "undefined")
+			return;
+			
+		var propertyValues = {time: nowProperties.time};
+		propertyValues[property] = dl_input.val();
+		propertyValues.fill = "add";
+		tools.nowLayer.addMotion(propertyValues);
+		
+		
+	});
+	dl_input.on("keyup", function(e) {
+		var nKeyCode = e.keyCode;
+		if(nKeyCode !== 13)
+			return;
+			
+		save();
 	});
 }

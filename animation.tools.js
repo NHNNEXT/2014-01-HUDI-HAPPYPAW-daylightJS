@@ -1,281 +1,327 @@
 var tools = {
-	html: '<div class="anim-tools">{boxs}</div>',
-	blockBox: '<div class="anim-block-box {class}"></div>',
-	modifiedBox: '<div class="anim-block-box anim-modified"><h3></h3> <p></p> <input type="text" class="property-value" name="property" value="" /> <button class="save">Save</button></div>',
-	block: '<div class="anim-block {class}" data-type="{type}" data-id="{id}">{title}</div>',
-	timelines: [],
-	layers: [],
-	nowTimeline: null,
-	nowLayer: null,
-	supportProperties : {
-		tx: {name:"translateX", default:"0px"},
-		ty: {name:"translateY", default:"0px"},
-		left: {name:"좌표 X", default:"0px"},
-		top: {name:"좌표 Y", default:"0px"},
-		rotate: {name:"회전", default:"0deg"},
-		origin: {name:"기준점", default:"50% 50%"},
-		scale: {name:"확대/축소", default:"1, 1"},
-		width: {name:"너비", default:"100px"},
-		height: {name:"높이", default:"100px"}
+	nowselectedMenu:"",
+	nowSelectElement: "",
+	figure: null,
+	transformFigure: null,
+	rotateArea: null,
+	dlTool: null,
+	selectedMenu : {
+	"pointer": true,
+	"transform": false,
+	"shape": false
 	},
-	type: ""
+	nowTime : 0,
+	menuActions : {
+		
+	},
+	getLayer: function() {
+		if(!this.nowSelectElement)
+			return;
+		
+		var timeline = this.timeline;
+		var layer = timeline.getLayer(this.nowSelectElement) || timeline.createLayer(this.nowSelectElement);
+		return layer;
+	},
+	getMotion: function(time) {
+		var layer = this.getLayer();
+		if(!layer)
+			return {time:time};
+			
+			
+		var motion = layer.getTimeMotion(time);
+		return motion || {time:time};
+	},
+	getNowMotion: function() {
+		return this.getMotion(this.nowTime);
+	},
+	pause: function() {
+		tools.timeline.addClass("animationPause");
+		this.is_pause = !this.is_pause;
+		if(!this.is_pause) {
+			this.prevTime = Date.now();
+			requestAnimFrame(this.timer.bind(this));
+		}
+	},
+	key: {},
+	inputNodeNames: ["INPUT", "SELECT"],
 };
+tools.size = "-6px";
+{
+	var relative = "relative", none = "none", absolute = "absolute", block="block",center="center", left="left", hidden="hidden";
+	tools.css = {
+		".day-rotate-area": {
+			position:"absolute",
+			padding:"20px",
+			cursor:"move",
+			display: "none", 
+			"z-index":0
+		},
+		".day-transform-figure, .day-figure": {
+			position: "absolute",
+			border:"1px solid #72BCEB",
+			display: "none"
+		},
+		".day-transform-figure": {
+			position: "relative",
+			cursor: "auto",
+			display: block,
+			width: "100%",
+			height: "100%"
+		},
+		".day-rotate-area.show, .day-figure.show": {
+			display: "block"
+		},
+		".day-transform-figure div, .day-figure div" : {
+			position: "absolute",
+			width: "8px",
+			height: "8px",
+			background:"#fff",
+			border:"1px solid #72BCEB",
+			"border-radius":"50%",
+			"z-index":3
+		},
+		".day-transform-figure, .day-transform-figure div": {
+			border: "1px solid #E24E58"
+		},
+		".day-transform-figure .nw, .day-figure .nw" : {top:0, left:0, "margin-left":tools.size, "margin-top":tools.size},
+		".day-transform-figure .origin, .day-figure .origin" : {"margin-left":tools.size, "margin-top":tools.size},
+		".day-transform-figure .n, .day-figure .n" : {top:0, left:"50%", "margin-left":tools.size, "margin-top":tools.size},
+		".day-transform-figure .ne, .day-figure .ne" : {top:0, right:0, "margin-right":tools.size, "margin-top":tools.size},
+		".day-transform-figure .w, .day-figure .w" : {top:"50%", left:0, "margin-left":tools.size, "margin-top":tools.size},
+		".day-transform-figure .e, .day-figure .e" : {top:"50%", right:0, "margin-right":tools.size, "margin-top":tools.size},
+		".day-transform-figure .sw, .day-figure .sw" : {bottom:0, left:0, "margin-left":tools.size, "margin-bottom":tools.size},
+		".day-transform-figure .s, .day-figure .s" : {bottom:0, left:"50%", "margin-left":tools.size, "margin-bottom":tools.size},
+		".day-transform-figure .se, .day-figure .se" : {bottom:0, right:0, "margin-right":tools.size, "margin-bottom":tools.size},
+		".AnimationTools": {position:relative, overflow:hidden},
+		".ids" :{width:"10%", position:relative, "padding":0, "list-style":none, float:left},
+		".ids li" :{position:relative, height:"30px", "line-height":"30px"},
+		".timeline" :{float:left, width:"80%", "position":"relative", "padding":0, "list-style":none},
+		".timeline li" :{height:"30px", position:relative,  "border-left":"1px solid #ccc"},
+		".motion" : {"border-radius":"50%",top:"50%", "width":"10px", "height":"10px", "margin":"-5px 0px 0px -5px", "background":"#f55", position:absolute},
+		".motion .tip" : {display:none, "border-radius":"4px",top:"-15px",left:"50%","text-align":center, "width":"50px", "height":"20px", "line-height":"20px", "margin":"-10px 0px 0px -25px", "background":"#000", position:absolute, color:"#fff", "font-size":"12px"},
+		".motion:hover .tip":{display:block}
+		
+	};
+}
+tools.objectToCSS = function(css) {
+	var html = "";
+	for(var selector in css) {
+		html += selector +"{";
+		html += daylight.animation.objectToCSS(css[selector]);
+		html += "}";
+	}
+	return html;
+};
+
+tools.init = function(timeline) {
+	tools.timeline = timeline;
+	timeline.pause();
+	this.figure = $(".day-figure");
+	this.rotateArea = $(".day-rotate-area");
+	this.transformFigure = $(".day-transform-figure");
+	this.shapeFigure = $(".day-shape-figure");
+	this.dlTool = $(".day-tool");
+	var styleElement = document.createElement("style");
+	var styleHTML = '<style class="daylightAnimationToolsStyle">\n';
+	styleHTML += this.objectToCSS(this.css);
+	styleHTML += "</style>";
+	$("head").append(styleHTML);
+
+	$(".AnimationTools").template(timeline, $(".AnimationTools"));
+	function executeMenuActionWithEvent(funcName, e) {
+		for(var menuItem in tools.selectedMenu) {
+			if(tools.selectedMenu[menuItem]) {
+				if(tools.menuActions[menuItem] && tools.menuActions[menuItem][funcName])
+					tools.menuActions[menuItem][funcName](e);
+			}
+		}
+	}
+	$(document).drag();
+	$(document).on("dragstart", function(e) {
+		tools.timer.pause();
+		executeMenuActionWithEvent("dragstart", e);
+	});
+	$(document).on("drag", function(e) {
+		executeMenuActionWithEvent("drag", e);
+		if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
+			e.preventDefault();
+			e.returnValue = false;
+		}
+	});
+	$(document).on("dragend", function(e) {
+		executeMenuActionWithEvent("dragend", e);
+	});
+	$(window).keyup(tools.keyup);
+	$(window).keydown(tools.keydown);
+	tools.initMenu();
+	tools.setting.init();
+	tools.keyframes.init();
+
+	$(window).resize(function() {
+		$("body").css("min-height", $("body").scrollHeight() );
+	});
+	$(window).resize();
+}
+tools.refresh = function() {
+	tools.getLayer().timer(tools.nowTime);
+}
 tools.refreshTimeline = function() {
-	var timelines = daylight.map(this.timelines, function(timeline, index) {
-		return {id:timeline.id,title:timeline.id, selector:timeline.selector, class:"anim-block-timeline"};
-	});
-	timelines[timelines.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
-	$(".anim-block-box.anim-timelines").template(timelines, this.block);
-}
-tools.refreshLayer = function() {
-	var layers = daylight.map(this.layers, function(layer, index) {
-		return {id:layer.id, selector:layer.selector, title:layer.id, class:"anim-block-layer"};
-	});
-	layers[layers.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
-	$(".anim-block-box.anim-layers").template(layers, tools.block);
-}
-tools.refreshCProperties = function() {
-	var dl_cproperties_box = $(".anim-block-box.anim-cproperties");
-	dl_cproperties_box.addClass("show");
-	var cproperties = daylight.map(tools.nowLayer.properties, function(name, index) {
-		return {id:name, selector:"", title:name, class:"anim-block-cproperty"};
-	});
-	dl_cproperties_box.template(cproperties, tools.block);
-}
-tools.refreshProperties = function() {
-	var dl_properties_box = $(".anim-block-box.anim-properties");
-	dl_properties_box.addClass("show");
-	var nowProperties = tools.nowProperties;
-	var list = daylight.map(tools.supportProperties, function(value, property) {
-		var o = {id:property, selector:"", title:this.name, class:"anim-block-property"};
-		if(nowProperties.hasOwnProperty(property))
-			o.class += " checked";
-		return o;
-	});
+	var layers = tools.timeline.layers;
+	var length = layers.length;
+	var now = tools.nowTime;
+	for(var i = 0; i < length; ++i) {
+		layers[i].timer(now);
+	}
+
 	
-	dl_properties_box.template(list, tools.block);
+	tools.refreshStatus();
+
+	tools.refreshSetting();
 }
-tools.refreshModifiedBox = function() {
-	var dl_modified_box = $(".anim-block-box.anim-modified"),
-		dl_input = dl_modified_box.find(".property-value");
+tools.setFigure = function() {
+	
 		
-	dl_modified_box.addClass("show");
-	var value = tools.nowProperties[tools.nowProperty];
-	if(value !== 0 && !value)
-		value = "";
-	dl_input.val(value);
-}
-tools.refreshTimes = function() {
-	var motions = daylight.map(this.nowLayer.motions, function(motion, index) {
-		var title = motion.time;
-		title = title == -1 ? "Init" : title + "s";
-		return {id:motion.time, selector:"", title:title, class:"anim-block-times"};
-	});
+	var figure = tools.figure;
+	if(!tools.nowSelectElement) {
+		figure.removeClass("show");
+		return;
+	}
+		
 	
-	if(typeof motions[0] === "undefiend" || motions[0].id != -1) {
-		motions.splice(0, 0, {id:-1, selector:"", title:"Init", class:"anim-block-times"});
+	var dlElement = tools.nowSelectElement;
+	var offsetParentPos = dlElement.offsetParent().offset();
+	var pos = dlElement.offset();
+	var width = dlElement.innerWidth();
+	var height = dlElement.innerHeight();
+	dlElement.parent().prepend(tools.figure);
+	
+	var top = pos.top - offsetParentPos.top;
+	var left = pos.left - offsetParentPos.left;
+	
+	figure.addClass("show");
+	figure.attr("style", "");
+	figure.css("left", dlElement.css("left"));
+	figure.css("top", dlElement.css("top") + "");
+	figure.css("bottom", dlElement.css("bottom"));
+	figure.css("right", dlElement.css("right"));
+	figure.css("margin", dlElement.css("margin"));
+	
+	figure.css("width", width+"px");
+	figure.css("height", height+"px");
+
+	tools.setOrigin();
+	
+	
+}
+tools.setShapeFigure = function() {
+	var figure = tools.shapeFigure;
+	if(!tools.nowSelectElement) {
+		figure.removeClass("show");
+		return;
+	}
+		
+	
+	var dlElement = tools.nowSelectElement;
+	
+	
+	var width = dlElement.outerWidth();
+	var height = dlElement.outerHeight();
+	dlElement.parent().prepend(figure);
+	
+
+	var offsetParentPos = dlElement.offsetParent().offset();
+	var pos = dlElement.offset();
+	dlElement.parent().prepend(figure);
+	
+	var top = pos.top - offsetParentPos.top;
+	var left = pos.left - offsetParentPos.left;
+	
+	figure.addClass("show");
+	figure.attr("style", "");
+	figure.css("left", left + "px");
+	figure.css("top", top + "px");
+	figure.css("margin-top", -1);
+	figure.css("margin-left", -1);
+	figure.css("width", width+"px");
+	figure.css("height", height+"px");
+}
+tools.keydown = function(e) {
+	if(tools.setting.items.has(e.target, true).size() > 0) {
+		tools.setting.keydown(e);
+		return;
+	}
+		
+	var key = $.Event(e).key();
+	
+	var multiple = key.shift ? 5 : 1;
+	
+	if(key.up)
+		tools.addPosition(0, -multiple);
+	else if(key.down)
+		tools.addPosition(0, multiple);
+	else if(key.left)
+		tools.addPosition(-multiple, 0);
+	else if(key.right)
+		tools.addPosition(multiple, 0);	
+	
+	tools.key = key;
+	
+	if(key.keyCode === 32) {
+		e.preventDefault();
+		e.returnValue = false;
+	}
+}
+tools.keyup = function(e) {
+	if(tools.setting.items.has(e.target, true).size() > 0) {
+		tools.setting.keyup(e);
+		return;
 	}
 	
-	motions[motions.length] = {id:"",title:"+", selector:"", class:"anim-block-add"};
-	$(".anim-block-box.anim-times").template(motions, tools.block);
-}
-tools.addTime = function(time) {
-	var motion = {time:time};
-	//addMotion
-	//totalTime 변경 유무
-	//totalTime 증가 finalMotion 전부 시간 증가
-}
-tools.removeTime = function(time) {
-	//
-	//totalTime 변경 유무
-	//totalTime 증가 finalMotion 전부 시간 증가ㄴ	
-}
-tools.init = function init() {
-	console.log("INIT ANIMATION TOOLS");
-	var html = $.template({class: "anim-timelines"}, this.blockBox)
-			+ $.template({class: "anim-layers"}, this.blockBox)
-			+ $.template({class: "anim-cproperties"}, this.blockBox)
-			+ $.template({class: "anim-times"}, this.blockBox)
-			+ $.template({class: "anim-properties"}, this.blockBox)
-			+ tools.modifiedBox;
+	var key = $.Event(e).key();
+	
+	var keyCode = key.keyCode;
+	console.debug("keycode", keyCode);
+	switch(keyCode) {
+	case 27://esc
+		tools.figure.removeClass("show");
+		tools.rotateArea.removeClass("show");
+		tools.nowSelectElement = null;
+		break;
+	case 32://space
+		if(tools.timer.bPause)
+			tools.timer.start();
+		else
+			tools.timer.pause();
 			
-	tools.html = $.template({boxs:html}, tools.html);
-	
-	
-	
-	$("body").append(this.html);
-	
-	var dl_all_box = $(".anim-block-box"),
-		dl_timelines_box = $(".anim-block-box.anim-timelines"),
-		dl_layers_box = $(".anim-block-box.anim-layers"),
-		dl_cproperties_box = $(".anim-block-box.anim-cproperties"),
-		dl_times_box = $(".anim-block-box.anim-times"),
-		dl_properties_box = $(".anim-block-box.anim-properties"),
-		dl_modified_box = $(".anim-block-box.anim-modified"),
-		dl_input = dl_modified_box.find(".property-value");
-		
-	this.timelines = [timeline];
-	tools.refreshTimeline();
-	
-	
-	function getTarget(e, type) {
-		var o_e = $.Event(e);
-		var dl_target = $(o_e.target);
-		if(!dl_target.hasClass(type))
-			return;
-			
-		return dl_target;
+		break;
 	}
-	function searchIn(arr, property, searchValue) {
-		var length = arr.length;
-		var now = -1;
-		for(var i = 0; i < length; ++i) {
-			if(arr[i][property] == searchValue)
-				return i;
+	switch(key.character) {
+	case "T":
+		//변형
+
+		tools.selectedMenu.transform = !tools.selectedMenu.transform;
+		
+		break;
+	case "D":
+		//삭제
+		var layers = tools.timeline.layers;
+		var layer = tools.getLayer()
+		var index = layers.indexOf(layer);
+		
+		if(index !== -1) {
+			layers.splice(index, 1);
 		}
-		return now;
+		if(tools.nowSelectElement) {
+			tools.nowSelectElement.remove();
+			tools.nowSelectElement = null;
+		}
+		tools.refreshLayerWindow();
+		tools.refreshStatus();
+		break;
 	}
 	
-	dl_timelines_box.click(function(e) {
-		var dl_target = getTarget(e, "anim-block-timeline");
-		if(!dl_target)
-			return;
-			
-		$(this).find(".selected").removeClass("selected");
-		dl_target.addClass("selected");
-		
-		
-		dl_all_box.removeClass("show");		
-		dl_layers_box.addClass("show");
-		
-		
-		var id = dl_target.attr("data-id");
-		tools.nowTimeline = tools.timelines[searchIn(tools.timelines, "id", id)];
-		
-		if(!tools.nowTimeline)
-			return;
-	
-		tools.layers = tools.nowTimeline.layers;
-		
-		tools.refreshLayer();
-	});
-	
-	dl_layers_box.click(function(e) {
-		var dl_target = getTarget(e, "anim-block-layer");
-		if(!dl_target)
-			return;
-
-		$(this).find(".selected").removeClass("selected");
-		dl_target.addClass("selected");
-
-		dl_all_box.removeClass("show");
-		dl_layers_box.addClass("show");
-
-
-		var id = dl_target.attr("data-id");
-		console.log(tools.layers);
-		tools.nowLayer = tools.layers[searchIn(tools.layers, "id", id)];
-		if(!tools.nowLayer)
-			return;
-		
-		var curBox = tools.type === "current" ? dl_cproperties_box : dl_times_box;
-		curBox.addClass("show");
-		
-		if(tools.type === "current") {
-			tools.refreshCProperties();
-		}else {
-			//times 함수
-			tools.refreshTimes();
-		}
-		
-		/*
-			레이어 클릭
-			nowLayer 설정
-			
-		*/
-	});
-	dl_cproperties_box.click(function (e) {
-		var dl_target = getTarget(e, "anim-block-cproperty");
-		if(!dl_target)
-			return;
-		if(!tools.nowLayer)
-			return;
-				
-		$(this).find(".selected").removeClass("selected");
-		dl_target.addClass("selected");
-		
-		
-		var id = dl_target.attr("data-id");
-		
-		//프로티스 종류중 하나
-		tools.nowProperty = tools.nowLayer.properties[tools.nowLayer.properties.indexOf(id)];
-		if(!tools.nowProperty)
-			return;
-		tools.refreshTimes();
-
-		dl_times_box.addClass("show");
-
-		
-	});
-	
-	dl_times_box.click(function(e) {
-		var o_e = $.Event(e);
-		var dl_target = $(o_e.target);
-		if(!dl_target.hasClass("anim-block-times"))
-			return;
-
-		dl_modified_box.removeClass("show");
-
-
-
-		$(this).find(".selected").removeClass("selected");
-		dl_target.addClass("selected");
-		
-		
-		var time = parseFloat(dl_target.attr("data-id"));
-		var nowProperties = tools.nowLayer.getMotion(time) || {};
-		
-		tools.nowProperties = nowProperties;
-		nowProperties.time = time;
-		if(tools.type === "current") {
-			tools.refreshModifiedBox();
-		} else {
-			tools.refreshProperties();
-		}
-
-	});
-	
-	dl_properties_box.click(function(e) {
-		var o_e = $.Event(e);
-		var dl_target = $(o_e.target);
-		if(!dl_target.hasClass("anim-block-property"))
-			return;
-			
-		var property = dl_target.attr("data-id");
-		if(!property)
-			return;
-		
-		tools.nowProperty = property;
-		
-		$(this).find(".selected").removeClass("selected");
-		dl_target.addClass("selected");
-		dl_modified_box.addClass("show");
-		tools.refreshModifiedBox();
-
-	});
-	dl_modified_box.find("button.save").click(function (){
-		var property = tools.nowProperty;
-		var nowProperties = tools.nowProperties;
-		if(!property)
-			return;
-		if(typeof nowProperties.time === "undefined")
-			return;
-			
-		var propertyValues = {time: nowProperties.time};
-		propertyValues[property] = dl_input.val();
-		propertyValues.fill = "add";
-		tools.nowLayer.addMotion(propertyValues);
-		
-		
-	});
+	tools.refreshMenu();
+	tools.key = key;
 }
+
+
