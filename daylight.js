@@ -1112,7 +1112,7 @@ daylight.extend({
 			e.type = name;
 			e.eventType = name;
 		} else {
-			e = document.createEvent('Event');
+			e = document.createEvent("Event");
 			e.initEvent(name, true, true);
 		}
 		for(var key in extra)
