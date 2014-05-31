@@ -7,7 +7,7 @@ var _console = {
 	log: []
 };
 for(var consoleProperty in _console) {
-	window.console[consoleProperty] = function() {
+	window.console[consoleProperty] = window.console[consoleProperty] || function() {
 		var arr = [];
 		for(var i = 0; i < arguments.length; ++i) {
 			arr[i] = arguments[i];
@@ -118,7 +118,7 @@ var _curCss = function(element, name, pre_styles) {
 	if(style && style.length && style[style.length - 1] === "%") {
 		var percentage = parseFloat(style);
 	
-
+		//false Nan까지 고려
 		if(percentage == 0)
 			return 0 + "px";
 
@@ -155,7 +155,8 @@ var _dimensionCssHook = function(element, component, pre_styles) {
 
 	var padding_left = _curCss(element, "padding-"+component[0], pre_styles);
 	var padding_right = _curCss(element, "padding-"+component[1], pre_styles);
-
+	
+	//NaN과 같은 잘못된 숫자나 그런 것들 고려
 	border_left = border_left_display == 0? 0 : _checkBorder(border_left);
 	border_right = border_right_display == 0? 0 :_checkBorder(border_right);
 	
@@ -219,10 +220,10 @@ var _addDomEach = function(daylightObject, element, callback) {
 	
 	var length = e.length;
 	//1개만 있을 경우 원본을 추가한다. 원본이 추가될 경우 원래 있던 곳은 자동으로 삭제 된다.
-	if(daylightObject.length == 1) {
+	if(daylightObject.length === 1) {
 		var self = daylightObject.o[0];
 		for(var i = 0; i < length; ++i) {
-			if(self == e[i])
+			if(self === e[i])
 				continue;
 			
 			callback.call(self, self, e[i]);
@@ -232,7 +233,7 @@ var _addDomEach = function(daylightObject, element, callback) {
 		//복사한 element를 추가한다.
 		daylightObject.each(function(self, index) {
 			for(var i = 0; i < length; ++i) {
-				if(self == e[i])//자기 자신에 자신을 추가 할 수 없다.
+				if(self === e[i])//자기 자신에 자신을 추가 할 수 없다.
 					continue;
 				callback.call(self, self, daylight.clone(e[i]));
 			}
@@ -256,7 +257,7 @@ if (!Array.prototype.indexOf) {
 		var length = this.length;
 		
 		for(var i = 0; i < length; ++i) {
-			if(this[i] == element)
+			if(this[i] === element)
 				return i;
 		}		
 		return -1;
@@ -328,7 +329,7 @@ var _value = {
 				for(var i = 0; i < length; ++i) {
 					var opt = options[i];
 					var value = (opt.value || opt.text);
-					opt.selected = value == key;
+					opt.selected = value === key;
 				}
 				break;
 			case "array":
@@ -373,7 +374,7 @@ var _value = {
 		},
 		set : function(element, key) {
 			var type = daylight.type(key);
-			if(type == "array")
+			if(type === "array")
 				element.checked = !!(key.indexOf(element.value) >= 0); 
 			else
 				element.checked = (element.value === key);
@@ -387,7 +388,7 @@ var _value = {
 		},
 		set : function(element, key) {
 			var type = daylight.type(key);
-			if(type == "array")
+			if(type === "array")
 				element.checked = !!(key.indexOf(element.value) >= 0);
 			else 
 				element.checked = element.value === key;
@@ -456,7 +457,7 @@ daylight.fn.daylight = "daylight";
 daylight.extend = daylight.fn.extend = function() {
 	var a = arguments;
 	var length = a.length;
-	if(length == 0)
+	if(length === 0)
 		return this;
 	
 	var i = 0;
@@ -513,9 +514,9 @@ daylight.extend = daylight.fn.extend = function() {
 daylight.type = function(obj, expand) {
 	var type = typeof obj;
 	if(!expand)
-		return obj==null ? obj+"" : type == "object" ? obj.daylight || class2type[toString.call(obj)] || "object" : type;
+		return obj==null ? obj+"" : type === "object" ? obj.daylight || class2type[toString.call(obj)] || "object" : type;
 	
-	return obj==null ? obj+"" : type == "object" ? obj instanceof _Element ? "element" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
+	return obj==null ? obj+"" : type === "object" ? obj instanceof _Element ? "element" : obj.daylight || class2type[toString.call(obj)] || "object" : type;	
 }
 /**
 * @method
@@ -571,11 +572,11 @@ daylight.extend( {
 	//해당 함수를 선언합니다.
 	define : function(object, name, func) {
 		var type = typeof object;
-		if(type == "object" && object.__proto__)
+		if(type === "object" && object.__proto__)
 			object.__proto__[name] = func;
 		else if(daylight.index(["function", "object"], type) != -1 && object.prototype)
 			object.prototype[name] = func;
-		else if(type == "object")
+		else if(type === "object")
 			object[name] = func;
 		else
 			throw new Error("함수 만들기 실패  : " + name);
@@ -884,7 +885,7 @@ daylight.index = function(arr, object) {
 		var length = arr.length;
 		
 		for(var i = 0; i < length; ++i) {
-			if(arr[i] == object)
+			if(arr[i] === object)
 				return i;
 		}
 		//못찾으면 -1을 반환.
@@ -901,7 +902,7 @@ daylight.extend({
 			for(var i = 0; i < length; ++i) {
 				callback.call(arr[i], arr[i], i, arr);//i == index, arr
 			}
-		} else if(type == "object") {
+		} else if(type === "object") {
 			for(var i in arr) 
 				callback.call(arr[i], arr[i], i, arr);
 		} else if(type === "daylight") {
@@ -918,7 +919,7 @@ daylight.extend({
 			var length = arr.length;
 			for(var i = 0; i < length; ++i)
 				arr2[arr2.length] = callback.call(arr[i], arr[i], i, arr);
-		} else if(type == "object") {
+		} else if(type === "object") {
 			for(var i in arr) 
 				arr2[arr2.length] = callback.call(arr[i], arr[i], i, arr);
 		} else if(type === "daylight") {
@@ -962,7 +963,7 @@ daylight.extend({
 		
 		for(var i = 0; i < length; ++i) {
 			var eClass = arr[i];
-			if(eClass == className)
+			if(eClass === className)
 				continue;
 			afterClassName += afterClassName ? " " + eClass : eClass
 		}
@@ -985,7 +986,7 @@ daylight.extend({
 		var arr = name.split(" ");
 		var length = arr.length;
 		for(var i = 0; i < length; ++i) {
-			if(arr[i] == className)
+			if(arr[i] === className)
 				return true;
 		}
 		return false;
@@ -999,7 +1000,7 @@ daylight.extend({
 		if(daylight.hasClass(element, className))
 			return false;
 	
-		if(element.className == "")
+		if(element.className === "")
 			element.className = className;
 		else
 			element.className += " " + className;
@@ -1060,10 +1061,10 @@ daylight.template = function(obj, template) {
 	var type = this.type(obj);
 	var templateType = this.type(template);
 	
-	if(templateType == "daylight")
+	if(templateType === "daylight")
 		template = template.ohtml();//html 형태로 변환
 		
-	if(type == "array") {//배열이면 리스트 형태로 만든다.
+	if(type === "array") {//배열이면 리스트 형태로 만든다.
 		var contents = [];
 		var length = obj.length;
 		for(var i = 0; i < length; ++i) {
@@ -1071,10 +1072,10 @@ daylight.template = function(obj, template) {
 			contents[contents.length] = this.template(content, template);//배열의 요소를 다시 template을 만든다.
 		}
 		return contents.join(" ");
-	} else if(type == "object") {//배열의 요소를 분석해서 {key}를 바꿔준다.
+	} else if(type === "object") {//배열의 요소를 분석해서 {key}를 바꿔준다.
 		for(var k in obj) {
 			var value = obj[k];
-			if(this.type(value) == "array") {//만드는 중
+			if(this.type(value) === "array") {//만드는 중
 				var regx = new RegExp('{' + k + '}((.|\n|\r)*?){/'+ k + '}', 'g');
 				var list = template.match(regx);
 				
@@ -1130,7 +1131,7 @@ daylight.extend({
 daylight.fn.attr = function(name, value) {
 	if(value === "" || value) {
 		this.each(function(obj) {
-			if(typeof obj == "object") {//속도 저하의 원인을 찾자!! 10ms 증가
+			if(typeof obj === "object") {//속도 저하의 원인을 찾자!! 10ms 증가
 				obj.setAttribute? obj.setAttribute(name, value) : obj[name] = value;
 			}
 		});
@@ -1138,7 +1139,7 @@ daylight.fn.attr = function(name, value) {
 	}
 	
 	var o = this.o[0];
-	if(typeof o == "object")	
+	if(typeof o === "object")	
 		return  o.getAttribute ? o.getAttribute(name) : o[name];
 	else
 		return;
@@ -1199,7 +1200,7 @@ daylight.fn.extend({
 * @desc CSS 변경하거나 CSS값을 가져온다.
 */
 daylight.fn.css = function(name, value, isNoObject) {
-	if(this.length == 0)
+	if(this.length === 0)
 		return;
 		
 	if(name === undefined)
@@ -1316,7 +1317,7 @@ daylight.fn.extend({
 				return;
 			
 			
-			if(daylight(this).has(e.target, true).size() == 0) {
+			if(daylight(this).has(e.target, true).size() === 0) {
 				mouseUp.call(this, e);
 				console.log("mouseleave");
 			}
@@ -1532,10 +1533,10 @@ daylight.fn.extend({
 	*/
 	toggleClass : function(className, className2) {
 		//var obj = this;
-		if(this.length == 0)
+		if(this.length === 0)
 			return;
 		
-		//if(this.size == 1)
+		//if(this.size === 1)
 		//	return daylight.toggleClass(this.o[0], className, className2);
 			
 		this.each(function(e, index) {
@@ -1690,7 +1691,7 @@ daylight.fn.extend({
 		if(index === undefined)
 			return this.o;
 		var length = this.length;	
-		if(length == 0)
+		if(length === 0)
 			return null;
 			
 		while(index < 0) {index = length + index;}
@@ -1699,13 +1700,13 @@ daylight.fn.extend({
 		return this.o[index];
 	},
 	first : function() {
-		if(this.size == 0)
+		if(this.length === 0)
 			return;
 		
 		return daylight(this.get(0));
 	},
 	last : function() {
-		if(this.size == 0)
+		if(this.length === 0)
 			return;
 			
 		return daylight(this.get(-1));
@@ -2222,7 +2223,7 @@ daylight.browser = function() {
 		}else if(info.safari || info.msafari){
 			ver = parseFloat(u.match(/Safari\/([0-9.]+)/)[1]);
 			
-			if(ver == 100){
+			if(ver === 100){
 				ver = 1.1;
 			}else{
 				if(u.match(/Version\/([0-9.]+)/)){
