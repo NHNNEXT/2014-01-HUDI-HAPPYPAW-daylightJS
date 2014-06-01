@@ -240,8 +240,6 @@ tools.setFigure = function() {
 	
 	figure.css("width", width+"px");
 	figure.css("height", height+"px");
-
-	tools.setOrigin();
 	
 	
 }

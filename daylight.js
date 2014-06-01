@@ -1294,7 +1294,6 @@ daylight.fn.extend({
 			
 			
 			if(returnValue === false) {
-				console.log("false");
 				if(e.preventDefault) e.preventDefault();
 				e.returnValue = false;
 			}
@@ -2057,14 +2056,13 @@ daylight.fn.extend({
 			//console.log(daylight.css( offsetParent.o[0], "marginTop"));
 		}
 
-		// Subtract parent offsets and element margins
 		return {
 			top: offset.top - parentOffset.top - daylight.css( elem, "marginTop", true ),
 			left: offset.left - parentOffset.left - daylight.css( elem, "marginLeft", true )
 		};
 
 	}
-	//jQuery를 거의 그대로 퍼옴.
+	//reference to jQuery offset
 	,offset: function() {
 		//contents의 위치
 		var element = this.o[0];		
@@ -2087,7 +2085,7 @@ daylight.fn.extend({
 
 //animation Effect
 daylight.fn.extend({
-	animation : function() {
+	animate : function() {
 		
 	},
 	show : function() {

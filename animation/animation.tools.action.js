@@ -27,10 +27,12 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.oright = tools.nowSelectElement.css("right");
 	} else {
 		var motion = tools.getMotion(tools.nowTime);
-		e.dragInfo.tx = motion.tx || 0;
-		e.dragInfo.ty = motion.ty || 0;
-		e.dragInfo.scale = motion.scale || "1,1";
-		e.dragInfo.rotate = motion.rotate || "0deg";
+		
+		//고칠 수 있는 부분, transform은 전부 상속되어야하는 형태
+		e.dragInfo.tx = motion.tx || motion["tx?a"] || 0;
+		e.dragInfo.ty = motion.ty || motion["ty?a"] || 0;
+		e.dragInfo.scale = motion.scale || motion["scale?a"] || "1,1";
+		e.dragInfo.rotate = motion.rotate || motion["rotate?a"] || "0deg";
 		tools.setTransformFigure();
 	}
 	
@@ -60,14 +62,12 @@ tools.menuActions.pointer.drag = function(e) {
 	dlResizeDot = tools.transformFigure.children().has(e.dragElement, true);
 	if(dlResizeDot.size() > 0) {
 		tools.scale(e);
-		return;
 	}
-	if(tools.transformFigure.equal(e.dragElement)) {
+	else if(tools.rotateArea.equal(e.dragElement)) {
 		tools.transform.rotate(e);
-		return;
+	} else {	
+		tools.dragMouse(e);
 	}
-		
-	tools.dragMouse(e);
 	
 	tools.refresh();
 	
@@ -75,7 +75,7 @@ tools.menuActions.pointer.drag = function(e) {
 		tools.setTransformFigure();
 }
 tools.menuActions.pointer.dragend = function(e) {
-	if($(".daylightAnimationTimeline").has(e.dragElement, true).size() <= 0)
+	if($(".daylightAnimationTimeline, .day-rotate-area").has(e.dragElement, true).size() <= 0)
 		return;
 		
 	tools.refreshLayer();

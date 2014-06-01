@@ -104,7 +104,7 @@ tools.resize = function(e) {
 	}
 }
 tools.dragMouse = function(e) {
-	console.log("DRAG MOUSE");
+	console.debug("DRAG MOUSE");
 	var is_transform = tools.selectedMenu.transform;
 	var info = e.dragInfo;
 	if(!is_transform) {

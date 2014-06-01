@@ -36,6 +36,9 @@ tools.setTransformFigure = function() {
 	
 	figure.css("width", width+"px");
 	figure.css("height", height+"px");
+	
+	
+	tools.setOrigin();
 
 }
 tools.moveTransformOrigin = function(e) {
@@ -49,7 +52,7 @@ tools.setTranslate = function(x, y) {
 		
 		
 	var layer = tools.getLayer();
-	var motion = tools.getMotion(tools.nowTime);
+	var motion = {time:tools.nowTime};
 	motion.tx = parseFloat(x) + "px";
 	motion.ty = parseFloat(y) + "px";
 	motion.fill = "add";
@@ -60,6 +63,8 @@ tools.addTranslate = function(x, y) {
 }
 
 tools.transform.rotate = function(e) {
+	console.debug("rotate");
+	
 	var info = e.dragInfo;
 	var layer = tools.getLayer();
 	
@@ -79,11 +84,24 @@ tools.transform.rotate = function(e) {
 		else
 			return v;
 	}
-	var arrOrign = origin.split(" ");
-	var left = _abspx(arrOrign[0], dlElement.dimension("width"));
-	var left = _abspx(arrOrign[1], dlElement.dimension("height"));
+	var dlOrigin = tools.transformFigure.find(".origin");
+	var offset = dlOrigin.offset();
+	var dx = info.stx - offset.left;
+	var dy = info.sty - offset.top;
+	var m1 = Math.sqrt(dx * dx + dy * dy);
 	
+	var dx2 = e.pageX - offset.left;
+	var dy2 = e.pageY - offset.top;
+	var m2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);	
 	
+	// cos세타를 구하기 위한 내적 공식
+	var dot = (dx * dx2 + dy * dy2) / m1 / m2;
+	
+	motion = {time : tools.nowTime};
+	var deg = 180 * Math.acos(dot) / Math.PI;
+	motion.rotate = parseFloat(info.rotate) + deg + "deg";
+	motion.fill = "add";
+	tools.getLayer().addMotion(motion);
 }
 tools.transform.scale = function(e) {
 
@@ -103,7 +121,7 @@ tools.transform.scale = function(e) {
 }
 tools.setOrigin = function(e) {
 	var motion = tools.getMotion(tools.nowTime);
-	var figure = tools.figure;
+	var figure = tools.transformFigure;
 	var dlElement = tools.nowSelectElement;
 	
 	
