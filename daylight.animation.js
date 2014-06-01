@@ -572,6 +572,13 @@ daylight.animation.Layer.prototype.hasProperty = function(index, property) {
 	@return {motion} time 이전의 property를 가지고 있는 모션을 반환
 	@desc time 이전의 property를 가지고 있는 모션을 찾아준다.
 */
+daylight.animation.Layer.prototype.removeProperty = function(time, property) {
+	var _motion = this.getMotion(time);
+	if(!_motion)
+		return;
+
+	delete _motion[property];
+}
 daylight.animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
 	var max_time = -2;
 	var value = {};
@@ -726,7 +733,7 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 	    if(is_success)
 		    this._fillNextMotions(motion, time);
 		
-		this.optimize();
+		//this.optimize();
 
 		return this;
 	}

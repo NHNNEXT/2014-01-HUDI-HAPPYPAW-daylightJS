@@ -10,56 +10,99 @@ tools.setting = {
 		if(!key.enter)	
 			return;
 			
-		tools.applySetting(dlItem);
+		tools.setting.applyProperty(dlItem);
 		return;
 		
 	},
 	items: null
 }
-tools.applySetting = function(dlItem) {
+tools.setting.removeProperty = function(dlItem) {
+	if(!tools.nowSelectElement)
+		return;
+		
+	var property = dlItem.attr("data-item");
+	if(!property)
+		return;
+	console.debug("removeProperty", property);
+	delete tools.getMotion(tools.nowTime)[property];
+	dlItem.parent().prev().removeClass("has-property");
+}
+tools.setting.applyProperty = function(dlItem) {
+	if(!tools.nowSelectElement)
+		return;
 	var item = dlItem.attr("data-item");
 	if(!item)
 		return;
-	console.log("applySetting", item, dlItem.val());	
+		
+	console.debug("applyProperty", item, dlItem.val());	
 
 	var dlElement = tools.nowSelectElement;
 	var layer = tools.getLayer();
-	var motion = tools.getNowMotion();
+	
+	var motion = tools.getMotion(tools.nowTime);
 	motion.fill = "add";
 	motion[item] = dlItem.val();
 	
-
 	layer.addMotion(motion);
 	
+	dlItem.parent().prev().addClass("has-property");
 	tools.refresh();
 	tools.refreshStatus();
 }
-tools.refreshSetting = function() {
-	var motion = tools.getNowMotion();
+tools.setting.refresh = function() {
+	var nowMotion = tools.getNowMotion();
+	var motion = tools.getMotion(tools.nowTime)
 	var dlElement = tools.nowSelectElement;
 	if(!dlElement)
 		return;
+		
 	tools.setting.items.each(function() {
 		var dlItem = $(this);
 		var item = dlItem.attr("data-item");
 		if(!item)
 			return;
-		dlItem.val(motion[item] || dlElement.css(item));
+		var is_motion = !!motion[item];
+		var value = nowMotion[item];		
+		if(!value) {
+			is_motion = false;
+			value = dlElement.css(item);
+		}
+		if(is_motion)
+			dlItem.parent().prev().addClass("has-property");
+		else
+			dlItem.parent().prev().removeClass("has-property");
+			
+		dlItem.val(value);
 	});
 }
-tools.refreshItem = function(item, value) {
+tools.setting.refreshItem = function(item, value) {
 	var dlItem = $('.day-tools-properties [data-item="'+item+'"]');
+	dlItem.parent().prev().addClass("has-property");
 	dlItem.val(value);
 }
 tools.setting.init = function() {
 	console.debug("init setting");
-	tools.setting.items = $(".day-tools-properties [data-item]");
-	tools.setting.select = $(".day-tools-properties select[data-item]");
-
+	tools.setting.properties = $(".day-tools-properties");
+	tools.setting.items = tools.setting.properties.find("[data-item]");
+	tools.setting.select = tools.setting.properties.find("select[data-item]");
+	
 	tools.setting.select.on("change", function(e) {
 		console.log("SELECT");
+		tools.setting.apply($(this));
+	});
+	tools.setting.properties.click(function(e) {
+		var eTarget = e.target;
+		if(!daylight.hasClass(eTarget, "day-item-property"))
+			return;
 		
-		tools.applySetting($(this));
+		var dlTarget = $(eTarget);
+		var dlItem = dlTarget.next().find("[data-item]");		
+		if(dlTarget.hasClass("has-property")) {
+			tools.setting.removeProperty(dlItem);
+		} else {
+			tools.setting.applyProperty(dlItem);
+		}
+		
 	});
 	$(".day-layers").on("click", function(e) {
 		var dlLayerLabel = $(".day-layer").has(e.target, true);
@@ -76,16 +119,34 @@ tools.setting.init = function() {
 			
 		console.log("CLICK : " + layer.id);
 		tools.nowSelectElement = layer.dl_object;
-		tools.refreshSetting();
+		tools.setting.refresh();
 		tools.refreshStatus();
-		tools.refreshLayerWindow();
+		tools.setting.refreshLayerWindow();
 	});
-	
+	$(".day-layers").on("click", function(e) {
+		var dlLayerLabel = $(".day-layer").has(e.target, true);
+
+		if(dlLayerLabel.size() == 0)
+			return;
+			
+		if(dlLayerLabel.size() > 1)
+			return;
+		
+		var layer = tools.timeline.getLayer(dlLayerLabel.attr("data-layer") || "");
+		if(!layer)
+			return;
+			
+		console.log("CLICK : " + layer.id);
+		tools.nowSelectElement = layer.dl_object;
+		tools.setting.refresh();
+		tools.refreshStatus();
+		tools.setting.refreshLayerWindow();
+	});	
 	tools.layerTemplate = $(".day-layer").ohtml();
-	tools.refreshLayerWindow();
+	tools.setting.refreshLayerWindow();
 }
 
-tools.refreshLayerWindow = function() {
+tools.setting.refreshLayerWindow = function() {
 	var layer;
 	if(tools.nowSelectElement)
 		layer = tools.getLayer();

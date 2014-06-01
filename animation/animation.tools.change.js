@@ -37,7 +37,7 @@ tools.setProperty = function(pos, time) {
 		if(figure)
 			figure.css(key, value);
 			
-		tools.refreshItem(key, value);
+		tools.setting.refreshItem(key, value);
 		
 	}
 	motion.fill = "add";

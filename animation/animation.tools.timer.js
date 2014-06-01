@@ -21,8 +21,8 @@ tools.timer.timer = function() {
 	for(var i = 0; i < length; ++i) {
 		layers[i].timer(now);
 	}
-	tools.refreshSetting();
-	tools.keyframes.refresh();
+	tools.setting.refresh();
+	tools.keyframes.refreshTime();
 	
 	tools.timer.prevTime = Date.now() / 1000;
 	requestAnimFrame(tools.timer.timer);

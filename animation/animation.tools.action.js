@@ -6,7 +6,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 	
 	if($(".day-figure, .day-rotate-area").has(e.dragElement, true).size() == 0) {
 		tools.nowSelectElement = $(e.dragElement);
-		tools.refreshSetting();
+		tools.setting.refresh();
 	}
 	if($(".day-tool").has(e.dragElement, true).size() > 0)
 		return;
@@ -30,10 +30,11 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.tx = motion.tx || 0;
 		e.dragInfo.ty = motion.ty || 0;
 		e.dragInfo.scale = motion.scale || "1,1";
+		e.dragInfo.rotate = motion.rotate || "0deg";
 		tools.setTransformFigure();
 	}
 	
-	tools.refreshLayerWindow();
+	tools.setting.refreshLayerWindow();
 
 };
 tools.menuActions.pointer.drag = function(e) {
@@ -61,8 +62,11 @@ tools.menuActions.pointer.drag = function(e) {
 		tools.scale(e);
 		return;
 	}
-	
-	
+	if(tools.transformFigure.equal(e.dragElement)) {
+		tools.transform.rotate(e);
+		return;
+	}
+		
 	tools.dragMouse(e);
 	
 	tools.refresh();
@@ -74,7 +78,7 @@ tools.menuActions.pointer.dragend = function(e) {
 	if($(".daylightAnimationTimeline").has(e.dragElement, true).size() <= 0)
 		return;
 		
-	tools.refresh();
+	tools.refreshLayer();
 }
 
 

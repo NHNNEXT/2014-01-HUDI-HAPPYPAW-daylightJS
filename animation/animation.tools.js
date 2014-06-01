@@ -14,25 +14,42 @@ var tools = {
 	menuActions : {
 		
 	},
+	tmp: {
+		isCreateLayer: false,
+		isRemoveLayer: false,
+		isAddMotion: false,
+		isRemoveMotion: false
+	},
 	getLayer: function() {
 		if(!this.nowSelectElement)
 			return;
 		
 		var timeline = this.timeline;
-		var layer = timeline.getLayer(this.nowSelectElement) || timeline.createLayer(this.nowSelectElement);
+		var layer = timeline.getLayer(this.nowSelectElement); 
+		if(!layer) {
+			layer = timeline.createLayer(this.nowSelectElement);
+			this.tmp.isCreateLayer = true;
+		}
 		return layer;
+	},
+	getTimeMotion: function(time) {
+		var layer = this.getLayer();
+		if(!layer)
+			return;
+			
+		var motion = layer.getTimeMotion(time) || {time: time};
+		return motion;
 	},
 	getMotion: function(time) {
 		var layer = this.getLayer();
 		if(!layer)
-			return {time:time};
+			return;
 			
-			
-		var motion = layer.getTimeMotion(time);
-		return motion || {time:time};
+		var motion = layer.getMotion(time) || {time: time};
+		return motion;
 	},
 	getNowMotion: function() {
-		return this.getMotion(this.nowTime);
+		return this.getTimeMotion(this.nowTime);
 	},
 	pause: function() {
 		tools.timeline.addClass("animationPause");
@@ -165,6 +182,21 @@ tools.init = function(timeline) {
 tools.refresh = function() {
 	tools.getLayer().timer(tools.nowTime);
 }
+tools.refreshLayer = function() {
+	var layer = tools.getLayer();
+	layer.timer(tools.nowTime);
+	if(tools.tmp.isCreateLayer || tools.tmp.isRemoveLayer) {
+		console.debug("Create Layer");
+		tools.keyframes.refresh();
+		tools.tmp.isCreateLayer = tools.tmp.isRemoveLayer = false;
+		tools.tmp.isCreateMotion = tools.tmp.isRemoveMotion = false;
+	}
+	else {
+		console.debug("add Motion");
+		tools.keyframes.refreshLayer(layer);
+		tools.tmp.isCreateMotion = tools.tmp.isRemoveMotion = false;
+	}
+}
 tools.refreshTimeline = function() {
 	var layers = tools.timeline.layers;
 	var length = layers.length;
@@ -176,7 +208,7 @@ tools.refreshTimeline = function() {
 	
 	tools.refreshStatus();
 
-	tools.refreshSetting();
+	tools.setting.refresh();
 }
 tools.setFigure = function() {
 	
@@ -315,11 +347,10 @@ tools.keyup = function(e) {
 			tools.nowSelectElement.remove();
 			tools.nowSelectElement = null;
 		}
-		tools.refreshLayerWindow();
-		tools.refreshStatus();
+		tools.setting.refreshLayerWindow();
 		break;
 	}
-	
+	tools.refreshStatus();
 	tools.refreshMenu();
 	tools.key = key;
 }

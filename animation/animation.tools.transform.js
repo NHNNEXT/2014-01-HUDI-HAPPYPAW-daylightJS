@@ -1,5 +1,6 @@
+tools.transform = {};
+
 tools.setTransformFigure = function() {
-	
 	var dlElement = $(tools.nowSelectElement);
 	var offsetParentPos = dlElement.offsetParent().offset();
 	var pos = dlElement.position();
@@ -58,8 +59,33 @@ tools.addTranslate = function(x, y) {
 
 }
 
-
-tools.scale = function(e) {
+tools.transform.rotate = function(e) {
+	var info = e.dragInfo;
+	var layer = tools.getLayer();
+	
+	var motion = tools.getNowMotion();	
+	
+	var origin = motion.origin;
+	var dlElement = tools.nowSelectElement;
+	//var style = dlElement.css();
+	origin = origin || "50% 50%";
+	
+	var dimensionType = ["px", "em", "%"]
+	
+	function _abspx(a, p100) {
+		var v = parseFloat(a);
+		if(p100 && a.indexOf("%") > -1)
+			return v * p100 / 100;
+		else
+			return v;
+	}
+	var arrOrign = origin.split(" ");
+	var left = _abspx(arrOrign[0], dlElement.dimension("width"));
+	var left = _abspx(arrOrign[1], dlElement.dimension("height"));
+	
+	
+}
+tools.transform.scale = function(e) {
 
 	var info = e.dragInfo;
 	var btn = $(e.dragElement);
