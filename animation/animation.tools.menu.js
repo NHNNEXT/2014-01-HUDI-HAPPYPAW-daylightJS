@@ -1,3 +1,4 @@
+tools.menu = {};
 tools.initMenu = function() {
 	var dlMenu = $(".day-tools-menu");
 	
@@ -17,25 +18,27 @@ tools.initMenu = function() {
 		if(!sItem)
 			return;
 			
-		
-		var bSelected = tools.selectedMenu[sItem];
-		if(!bSelected) {
-			for(var _item in tools.selectedMenu) {
-				tools.selectedMenu[_item] = false;
-			}
-			
-			tools.selectedMenu[sItem] = true;
-			if(sItem === "transform")
-				tools.selectedMenu["pointer"] = true;	
-		}
-		if(bSelected && sItem === "transform") {
-			tools.selectedMenu[sItem] = false;
-		}
-		tools.refreshMenu();
-		tools.refreshStatus();
+		tools.menu.changeMenu(sItem);
 	});
 	
 	tools.refreshMenu();
+}
+tools.menu.changeMenu = function(sItem) {		
+	var bSelected = tools.selectedMenu[sItem];
+	if(!bSelected) {
+		for(var _item in tools.selectedMenu) {
+			tools.selectedMenu[_item] = false;
+		}
+		
+		tools.selectedMenu[sItem] = true;
+		if(sItem === "transform")
+			tools.selectedMenu["pointer"] = true;	
+	}
+	if(bSelected && sItem === "transform") {
+		tools.selectedMenu[sItem] = false;
+	}
+	tools.refreshMenu();
+	tools.refreshStatus();
 }
 tools.refreshMenu = function() {
 	var li = $(".day-tools-menu li");//.removeClass("selected");

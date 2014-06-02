@@ -14,7 +14,8 @@ tools.setting = {
 		return;
 		
 	},
-	items: null
+	items: null,
+	property2stageTemplate: '<tr><td class="day-item-property">{property-name}</td><td class="day-item-value"><input type="input" data-item="{property}/></td></tr>'
 }
 tools.setting.removeProperty = function(dlItem) {
 	if(!tools.nowSelectElement)

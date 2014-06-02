@@ -135,7 +135,7 @@ tools.menuActions.shape.dragend = function(e) {
 		tools.nowSelectElement = $(e.dragElement);
 	}
 	
-	tools.refreshStatus();
+	tools.menu.changeMenu("pointer");
 	tools.setting.refresh();
 	tools.setting.refreshLayerWindow();
 	
