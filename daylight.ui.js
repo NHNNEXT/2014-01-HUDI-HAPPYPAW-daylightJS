@@ -20,11 +20,27 @@ daylight.UI.resize.dragstart = function(e) {
 	var dlResizeTarget = $(".day-resize").has(e.dragElement, true);
 	if(dlResizeTarget.size() === 0)
 		return;
-		
+	var i, length = dlResizeTarget.size(),
+		dlRemoveTarget;
+
+	//day-resize 안에 day-reisze가 있는 경우.
+	while(dlResizeTarget.size() > 1) {
+		for(i = 0; i < length; ++i) {
+			dlRemoveTarget = dlResizeTarget.has(dlResizeTarget.get(i));
+			if(dlRemoveTarget.size() > 0)
+				break;
+		}
+		//removeLength = dlRemoveTarget.size();
+		dlRemoveTarget.each(function() {
+			dlResizeTarget.subtract(this);
+		});
+		length = dlResizeTarget.size();
+	}
+	
 	var dlDragElement = daylight(e.dragElement);
 
-	console.log("resize");
-	
+	console.debug("resize");
+	e.dragInfo.dlResizeTarget = dlResizeTarget;
 	e.dragInfo.owidth = dlResizeTarget.css("width");
 	e.dragInfo.oheight = dlResizeTarget.css("height");
 	e.dragInfo.otop = dlResizeTarget.css("top");
@@ -32,12 +48,32 @@ daylight.UI.resize.dragstart = function(e) {
 	e.dragInfo.obottom = dlResizeTarget.css("bottom");
 	e.dragInfo.oright = dlResizeTarget.css("right");
 	e.dragInfo.pos = dlDragElement.attr("data-direction");	
+	
 }
 daylight.UI.resize.drag = function(e) {
-	var dlResizeTarget = $(".day-resize").has(e.dragElement, true);
+	if(!e.dragInfo.dlResizeTarget)
+		return;
+		
+	var dlResizeTarget = e.dragInfo.dlResizeTarget;
+
 	if(dlResizeTarget.size() === 0)
 		return;
 
+
+	while(dlResizeTarget.size() > 1) {
+		for(i = 0; i < length; ++i) {
+			dlRemoveTarget = dlResizeTarget.has(dlResizeTarget.get(i));
+			if(dlRemoveTarget.size() > 0)
+				break;
+		}
+		//removeLength = dlRemoveTarget.size();
+		dlRemoveTarget.each(function() {
+			dlResizeTarget.subtract(this);
+		});
+		
+		length = dlResizeTarget.size();
+	}
+	
 	var info = e.dragInfo;
 	var pos = info.pos;
 	var properties = {};
@@ -85,8 +121,15 @@ daylight.UI.resize.drag = function(e) {
 		dlResizeTarget.css(property, properties[property] + "px");
 	}
 	
+	dlResizeTarget.trigger("resize", {direction:{n:bPosN, s:bPosS, w:bPosW, e:bPosE}});
+	
 }
 daylight.UI.resize.dragend = function(e) {
+	if(!e.dragInfo.dlResizeTarget)
+		return;
+		
+		
+	e.dragInfo.dlResizeTarget.trigger("endresize");
 }
 
 $(document).ready(function() {
@@ -115,7 +158,12 @@ $(document).ready(function() {
 			daylight.UI.resize.drag(e);
 	});
 	$("body").on("dragend", function(e) {
-		e.stopPropagation();
+		
+		var dlElement = $(e.dragElement);
+		if(dlElement.hasClass("day-drag-draggable"))
+			daylight.UI.drag.dragend(e);
+		else if(dlElement.hasClass("day-resize-draggable"))
+			daylight.UI.resize.dragend(e);
 	});
 
 });

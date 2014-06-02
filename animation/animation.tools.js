@@ -71,11 +71,15 @@ tools.size = "-6px";
 			padding:"20px",
 			cursor:"move",
 			display: "none", 
+			border:"0px!important",
+			"border-radius":"0px!important",
+			background:"transparent!important",
 			"z-index":0
 		},
 		".day-transform-figure, .day-figure": {
 			position: "absolute",
-			border:"1px solid #72BCEB",
+			border:"1px solid #72BCEB!important",
+			"border-radius":"0px!important",
 			display: "none"
 		},
 		".day-transform-figure": {
@@ -93,7 +97,7 @@ tools.size = "-6px";
 			width: "8px",
 			height: "8px",
 			background:"#fff",
-			border:"1px solid #72BCEB",
+			border:"1px solid #72BCEB!important",
 			"border-radius":"50%",
 			"z-index":3
 		},
@@ -252,10 +256,8 @@ tools.setShapeFigure = function() {
 		
 	
 	var dlElement = tools.nowSelectElement;
-	
-	
-	var width = dlElement.outerWidth();
-	var height = dlElement.outerHeight();
+	var width = dlElement.outerWidth() + 2;
+	var height = dlElement.outerHeight() + 2;
 	dlElement.parent().prepend(figure);
 	
 
@@ -268,10 +270,15 @@ tools.setShapeFigure = function() {
 	
 	figure.addClass("show");
 	figure.attr("style", "");
-	figure.css("left", left + "px");
-	figure.css("top", top + "px");
-	figure.css("margin-top", -1);
-	figure.css("margin-left", -1);
+	figure.css("left", dlElement.css("left"));
+	figure.css("top", dlElement.css("top") + "");
+	figure.css("bottom", dlElement.css("bottom"));
+	figure.css("right", dlElement.css("right"));
+	
+	figure.css("margin-top", parseFloat(dlElement.css("margin-top")) - 1 + "px");
+	figure.css("margin-left", parseFloat(dlElement.css("margin-left")) - 1 + "px");
+	figure.css("margin-right", parseFloat(dlElement.css("margin-right")) - 1 + "px");
+	figure.css("margin-bottom", parseFloat(dlElement.css("margin-bottom")) - 1 + "px");	
 	figure.css("width", width+"px");
 	figure.css("height", height+"px");
 }

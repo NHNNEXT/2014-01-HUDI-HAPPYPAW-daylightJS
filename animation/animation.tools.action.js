@@ -26,7 +26,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.obottom = tools.nowSelectElement.css("bottom");
 		e.dragInfo.oright = tools.nowSelectElement.css("right");
 	} else {
-		var motion = tools.getMotion(tools.nowTime);
+		var motion = tools.getNowMotion();
 		
 		//고칠 수 있는 부분, transform은 전부 상속되어야하는 형태
 		e.dragInfo.tx = motion.tx || motion["tx?a"] || 0;
@@ -117,24 +117,27 @@ tools.menuActions.shape.drag = function(e) {
 	motion.top = y + "px";
 	motion.width = width + "px";
 	motion.height = height + "px";
-	motion.time = -1;
+	motion.time = 0;
 	motion.fill = "add";
 	tools.getLayer().addMotion(motion);
 	tools.refresh();
 	tools.setShapeFigure();
 }
 tools.menuActions.shape.dragend = function(e) {
+
 	if(!e.dragInfo.newShape)
 		return;
-		
+	
 
 	if(e.dragX == 0 && e.dragY == 0) {
 		console.log("제거");
 		e.dragInfo.newShape.remove();
 		tools.nowSelectElement = $(e.dragElement);
 	}
+	
 	tools.refreshStatus();
-	tools.refreshLayerWindow();
+	tools.setting.refresh();
+	tools.setting.refreshLayerWindow();
 	
 	
 	e.dragInfo.newShape = false;

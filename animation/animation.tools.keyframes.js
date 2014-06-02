@@ -11,7 +11,8 @@ tools.keyframes = {
 	keyframeTimeTemplate: "",
 	keyframeGroupTemplate: '<div class="day-keyframes-group">{keyframes}</div>',
 	dist: 10,
-	keyframeLength: 20
+	keyframeLength: 20,
+	keyframeWidth: 20,
 };
 tools.keyframes.getTime = function(totalMilliSeconds) {
 	var m = parseInt(totalMilliSeconds / 60 / 100) % 60;
@@ -24,12 +25,16 @@ tools.keyframes.getTime = function(totalMilliSeconds) {
 }
 tools.keyframes.init = function() {
 	tools.keyframes.dlKeyframes = $(".day-keframes");
+	tools.keyframes.dlTimelineTotalTime = $(".day-keyframes-timeline-totalTime");
 	tools.keyframes.dlHead = $(".day-keyframes-head");
 	tools.keyframes.dlLine = $(".day-keyframes-line");
 	tools.keyframes.dlkeyframesGroups = $(".day-keyframes-groups");
 	tools.keyframes.dlkeyframesGroup = $(".day-keyframes-group");
 	tools.keyframes.dlTimeLabel = $(".day-tools-timeline-time");
 	tools.keyframes.dlBtnInit = $(".day-tools-timeline-btn-init");
+	
+	
+	
 	tools.keyframes.keyframeTimeTemplate = $(".day-keyframes-time").ohtml();
 	tools.keyframes.keyframes = [];
 	
@@ -37,6 +42,26 @@ tools.keyframes.init = function() {
 	tools.keyframes.refresh();
 
 	
+	tools.keyframes.dlTimelineTotalTime.on("endresize", function(e) {
+		var dlSelf = $(this);
+		var width = dlSelf.width();
+		
+		//반올림 처리하기
+		var keyframeWidth = tools.keyframes.keyframeWidth;
+		var tmp = width % keyframeWidth;
+		var count = 0;
+		if(tmp >= keyframeWidth / 2)
+			count = parseInt(width / keyframeWidth) + 1
+		else
+			count = parseInt(width / keyframeWidth);
+		
+		width = count * keyframeWidth;
+		
+		tools.timeline.totalTime = count * tools.keyframes.dist / 100;
+		
+		dlSelf.css("width", width +"px");
+		 
+	});
 	tools.keyframes.dlKeyframes.click(function(e) {
 		var target = e.target;
 		if(!daylight(target).hasClass("day-keyframe"))
@@ -108,7 +133,7 @@ tools.keyframes.refresh = function() {
 		children = keyframeGroup.children;		
 
 		daylight.each(layer.motions, function() {
-			var time = this.time;
+			var time = this.time < 0 ? 0 : this.time;
 			var index = Math.round(time * 10);
 			daylight.addClass(children[index], "has-keyframe");
 		});

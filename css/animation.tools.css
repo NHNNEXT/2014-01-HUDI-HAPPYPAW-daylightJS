@@ -222,6 +222,22 @@ body {
 	top:0;
 	z-index: 4;
 }
+.day-keyframes-timeline-totalTime {
+	position: absolute;
+	height: 7px;
+	background: yellow;
+	width: 100px;
+	top:0;
+	z-index: 5;
+}
+.day-keyframes-timeline-totalTime .day-resize-draggable{
+	width: 20px;
+	position: absolute;
+	right: 0px;
+	height: 100%;
+	background: #a3a300;
+}
+
 .day-keyframes-head {
 	border-bottom: 1px solid #444;
 	white-space: nowrap;

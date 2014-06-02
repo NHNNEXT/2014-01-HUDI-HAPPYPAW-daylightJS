@@ -1260,11 +1260,13 @@ daylight.fn.extend({
 		var bScreenPosition = false;
 		var bStopProgation = bObject && dragFunc.stopProgation;
 		var pos;
+		
+
 		var mouseDown = function(e) {
 			prePosition = daylight.$E.cross(e);
 			isScreenPosition = prePosition.screenX !== undefined;
 			pos = bScreenPosition ? {x:"screenX", y:"screenY"} : {x:"pageX", y:"pageY"};
-			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0, is_touch:prePosition.is_touch};
+			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0, is_touch:prePosition.is_touch, is_drag: false};
 			dragObject = e.target || e.srcElement;
 			is_drag = true;
 	
@@ -1287,6 +1289,8 @@ daylight.fn.extend({
 			dragDistance.y = position[pos.y] - dragDistance.sty;
 	
 			prePosition = position;
+			
+			dragDistance.is_drag = true;
 			
 			
 			var extra = self.dragEvent(e, dragDistance, dragObject);
