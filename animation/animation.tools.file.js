@@ -8,7 +8,6 @@ tools.file.createElement = function(timeline, json) {
 	if(json.hasOwnProperty("motions")) {
 		tools.file.createLayer(timeline, element, json);
 	}
-	
 	if(!json.hasOwnProperty("childNodes"))
 		return element;
 
@@ -20,7 +19,7 @@ tools.file.createElement = function(timeline, json) {
 		if(typeof value !== "object")
 			element.insertAdjacentHTML("beforeend", value);
 		else
-			element.appendChild(tools.file.createElement(timeline, json.childNodes[i]));
+			element.appendChild(this.createElement(timeline, json.childNodes[i]));
 	}
 
 	return element;
@@ -43,7 +42,7 @@ tools.file.createTimeline = function(json) {
 	var timeline = new daylight.Timeline(elTimeline);
 	
 	if(json.hasOwnProperty("motions")) {
-		tools.file.createLayer(timeline, elTimeline, json);
+		this.createLayer(timeline, elTimeline, json);
 	}
 	
 	if(!json.hasOwnProperty("childNodes"))
@@ -58,7 +57,7 @@ tools.file.createTimeline = function(json) {
 		if(typeof value !== "object")
 			elTimeline.insertAdjacentHTML("beforeend", value);
 		else
-			elTimeline.appendChild(tools.file.createElement(timeline, json.childNodes[i]));
+			elTimeline.appendChild(this.createElement(timeline, json.childNodes[i]));
 	}
 
 	

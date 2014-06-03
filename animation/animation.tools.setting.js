@@ -60,7 +60,7 @@ tools.setting.refresh = function() {
 	if(!dlElement)
 		return;
 		
-	tools.setting.items.each(function() {
+	this.items.each(function() {
 		var dlItem = $(this);
 		var item = dlItem.attr("data-item");
 		if(!item)
@@ -86,15 +86,15 @@ tools.setting.refreshItem = function(item, value) {
 }
 tools.setting.init = function() {
 	console.debug("init setting");
-	tools.setting.properties = $(".day-tools-properties");
-	tools.setting.items = tools.setting.properties.find("[data-item]");
-	tools.setting.select = tools.setting.properties.find("select[data-item]");
+	this.properties = $(".day-tools-properties");
+	this.items = tools.setting.properties.find("[data-item]");
+	this.select = tools.setting.properties.find("select[data-item]");
 	
-	tools.setting.select.on("change", function(e) {
+	this.select.on("change", function(e) {
 		console.log("SELECT");
 		tools.setting.apply($(this));
 	});
-	tools.setting.properties.click(function(e) {
+	this.properties.click(function(e) {
 		var eTarget = e.target;
 		if(!daylight.hasClass(eTarget, "day-item-property"))
 			return;
@@ -156,7 +156,7 @@ tools.setting.init = function() {
 	$(".btn-save").click(function(e) {
 		alert("save");
 	});	
-	tools.setting.refreshLayerWindow();
+	this.refreshLayerWindow();
 }
 
 tools.setting.refreshLayerWindow = function() {
@@ -169,7 +169,7 @@ tools.setting.refreshLayerWindow = function() {
 	var info = daylight.map(tools.timeline.layers, function() {
 		return {id:this.id};
 	});
-	$(".day-layers").template(info, tools.setting.layerTemplate);
+	$(".day-layers").template(info, this.layerTemplate);
 	
 	if(layer)
 		$('.day-layer[data-layer="'+layer.id+'"]').addClass("selected");
