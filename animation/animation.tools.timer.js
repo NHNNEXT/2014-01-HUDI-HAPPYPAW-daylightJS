@@ -3,7 +3,13 @@ tools.timer = {
 	bPause: true,
 	time: 0
 };
-
+tools.timer.layerTimer = function(time) {
+	var layers = tools.timeline.layers;
+	var length = layers.length;
+	for(var i = 0; i < length; ++i) {
+		layers[i].timer(time);
+	}
+}
 tools.timer.timer = function() {
 	if(tools.timer.bPause)
 		return;
@@ -15,12 +21,12 @@ tools.timer.timer = function() {
 	
 	tools.timer.time  = tools.timeline.totalTime === tools.timer.time ? tools.timeline.totalTime : tools.timer.time % tools.timeline.totalTime;
 	tools.nowTime = parseInt(tools.timer.time * 10) / 10;
-	var layers = tools.timeline.layers;
-	var length = layers.length;
+	
 	var now = tools.nowTime;
-	for(var i = 0; i < length; ++i) {
-		layers[i].timer(now);
-	}
+	
+	
+	tools.timer.layerTimer(now);
+	
 	tools.setting.refresh();
 	tools.keyframes.refreshTime();
 	

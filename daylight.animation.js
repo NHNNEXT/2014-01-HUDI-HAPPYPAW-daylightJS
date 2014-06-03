@@ -1406,7 +1406,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 (function() {
 	var browserPrefix = daylight.animation.CONSTANT.browserPrefix;
 	var NO_CHILD = ["IMG"];
-	var EXPORT_PROPERTIES = {"opacity":1, "box-sizing":"content-box", width:"0px", height:"0px" , "border-radius":"0px", "color":"rgb(255, 255, 255)"};
+	var EXPORT_PROPERTIES = {"opacity":1, "box-sizing":"content-box", width:"0px", height:"0px" , "border-radius":"0px", "color":"rgb(255, 255, 255)", position:"static"};
 	var POS = ["left","top", "right", "bottom"];
 	var BACKGROUND = "background-";
 	EXPORT_PROPERTIES[BACKGROUND + "color"] = "rgba(0, 0, 0, 0)";
@@ -1440,6 +1440,8 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 				
 				exportStyle[property] = propertyValue;
 			}
+			if(!exportStyle.position || exportStyle.postion === "static")
+				exportStyle.position = "relative";
 		} catch (e){
 			console.log(element, "type : " + element.nodeType, property);
 		}			
