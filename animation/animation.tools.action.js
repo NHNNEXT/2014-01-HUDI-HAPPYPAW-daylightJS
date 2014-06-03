@@ -1,6 +1,7 @@
 
 tools.menuActions.pointer = {};
 tools.menuActions.pointer.dragstart = function(e) {
+
 	if($(".daylightAnimationTimeline, .day-rotate-area, .day-figure").has(e.dragElement, true).size() <= 0)
 		return;
 	
@@ -10,7 +11,9 @@ tools.menuActions.pointer.dragstart = function(e) {
 	}
 	if($(".day-tool").has(e.dragElement, true).size() > 0)
 		return;
-		
+
+	if(!tools.timeline)
+		return;		
 		
 	if(!tools.nowSelectElement)
 		return;
@@ -44,6 +47,10 @@ tools.menuActions.pointer.drag = function(e) {
 		return;
 	
 	if($(".day-tool").has(e.dragElement, true).size() > 0)
+		return;
+		
+	
+	if(!tools.timeline)
 		return;
 		
 		
@@ -90,6 +97,9 @@ tools.menuActions.shape.dragstart = function(e) {
 	var size = $(".daylightAnimationShape").size();
 	console.log("-" + size);
 	
+	if(!tools.timeline)
+		return;		
+		
 	var shape = daylight.createElement("div", {class:"daylightAnimationShape day-shape" + (size + 1)});
 	e.dragInfo.newShape = shape;
 	shape.style.position = "absolute";
@@ -98,6 +108,14 @@ tools.menuActions.shape.dragstart = function(e) {
 	
 };
 tools.menuActions.shape.drag = function(e) {
+	if(!tools.timeline)
+		return;		
+	
+
+	if(!e.dragInfo.newShape)
+		return;
+	
+		
 	if(tools.dlTool.has(e.dragElement, true).size() > 0)
 		return;
 	

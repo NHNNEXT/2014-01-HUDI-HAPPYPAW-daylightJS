@@ -15,7 +15,8 @@ tools.setting = {
 		
 	},
 	items: null,
-	property2stageTemplate: '<tr><td class="day-item-property">{property-name}</td><td class="day-item-value"><input type="input" data-item="{property}/></td></tr>'
+	property2stageTemplate: '<tr><td class="day-item-property">{property-name}</td><td class="day-item-value"><input type="input" data-item="{property}/></td></tr>',
+	layerTemplate: '<div class="day-layer" data-layer="{id}"><div>{id}</div></div>'
 }
 tools.setting.removeProperty = function(dlItem) {
 	if(!tools.nowSelectElement)
@@ -51,6 +52,8 @@ tools.setting.applyProperty = function(dlItem) {
 	tools.refreshStatus();
 }
 tools.setting.refresh = function() {
+	if(!tools.timeline)
+		return;
 	var nowMotion = tools.getNowMotion();
 	var motion = tools.getMotion(tools.nowTime)
 	var dlElement = tools.nowSelectElement;
@@ -143,18 +146,30 @@ tools.setting.init = function() {
 		tools.refreshStatus();
 		tools.setting.refreshLayerWindow();
 	});	
-	tools.layerTemplate = $(".day-layer").ohtml();
+	$(".btn-preview").click(function(e) {
+		tools.timeline.init().start();
+		tools.nowTime = 0;
+	});	
+	$(".btn-load").click(function(e) {
+		alert("load");
+	});	
+	$(".btn-save").click(function(e) {
+		alert("save");
+	});	
 	tools.setting.refreshLayerWindow();
 }
 
 tools.setting.refreshLayerWindow = function() {
+	if(!tools.timeline)
+		return;
+	
 	var layer;
 	if(tools.nowSelectElement)
 		layer = tools.getLayer();
 	var info = daylight.map(tools.timeline.layers, function() {
 		return {id:this.id};
 	});
-	$(".day-layers").template(info, tools.layerTemplate);
+	$(".day-layers").template(info, tools.setting.layerTemplate);
 	
 	if(layer)
 		$('.day-layer[data-layer="'+layer.id+'"]').addClass("selected");

@@ -57,7 +57,8 @@ tools.keyframes.init = function() {
 		
 		width = count * keyframeWidth;
 		
-		tools.timeline.totalTime = count * tools.keyframes.dist / 100;
+		if(tools.timeline)
+			tools.timeline.totalTime = count * tools.keyframes.dist / 100;
 		
 		dlSelf.css("width", width +"px");
 		 
@@ -76,10 +77,6 @@ tools.keyframes.init = function() {
 
 		tools.refreshTimeline();
 	});
-	$(".btn-preview").click(function(e) {
-		tools.timeline.init().start();
-		tools.nowTime = 0;
-	});	
 };
 tools.keyframes.refreshTime = function() {
 	tools.keyframes.dlLine.css("left", tools.nowTime * 200 + "px");
@@ -107,6 +104,10 @@ tools.keyframes.initKeyframesTime = function() {
 	tools.keyframes.keyframeGroupTemplate = tools.keyframes.keyframeGroupTemplate.replace("{keyframes}", daylight.template(keyframes, sKeyframeTemplate));
 }
 tools.keyframes.refresh = function() {
+	if(!tools.timeline)
+		return;
+		
+	
 	var length = tools.keyframes.dlkeyframesGroup.size();
 	var layerLength = tools.timeline.layers.length;
 	var dist = layerLength - length;
@@ -141,6 +142,10 @@ tools.keyframes.refresh = function() {
 	}	
 }
 tools.keyframes.refreshLayer = function(layer) {
+	if(!tools.timeline)
+		return;
+		
+	
 	var type = daylight.type(layer);
 	var index = -1;
 	if(type === "number") {

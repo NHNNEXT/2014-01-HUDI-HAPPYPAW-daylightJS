@@ -171,10 +171,9 @@ body {
 	padding: 5px;
 	box-sizing: border-box;
 }
-.btn-preview {
+.btn-preview, .btn-save, .btn-load {
 	display: inline-block;
 	padding:2px 10px;
-	width: 100px;
 }
 .day-tools-timeline-left {
 	position: relative;

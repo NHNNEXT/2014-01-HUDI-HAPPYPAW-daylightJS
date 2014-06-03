@@ -1,16 +1,18 @@
 var tools = {
 	nowselectedMenu:"",
 	nowSelectElement: "",
+	
 	figure: null,
 	transformFigure: null,
 	rotateArea: null,
 	dlTool: null,
-	selectedMenu : {
-	"pointer": true,
-	"transform": false,
-	"shape": false
+	selectedMenu : {		
+		"pointer": true,
+		"transform": false,
+		"shape": false
 	},
 	nowTime : 0,
+	timelines: [],
 	menuActions : {
 		
 	},
@@ -24,7 +26,7 @@ var tools = {
 		if(!this.nowSelectElement)
 			return;
 		
-		var timeline = this.timeline;
+		var timeline = this.timelines[0];
 		var layer = timeline.getLayer(this.nowSelectElement); 
 		if(!layer) {
 			layer = timeline.createLayer(this.nowSelectElement);
@@ -52,6 +54,9 @@ var tools = {
 		return this.getTimeMotion(this.nowTime);
 	},
 	pause: function() {
+		if(!tools.timeline)
+			return;
+			
 		tools.timeline.addClass("animationPause");
 		this.is_pause = !this.is_pause;
 		if(!this.is_pause) {
@@ -135,8 +140,11 @@ tools.objectToCSS = function(css) {
 };
 
 tools.init = function(timeline) {
-	tools.timeline = timeline;
-	timeline.pause();
+	
+	//tools.timeline = timeline;
+	//tools.timelines = [timeline];
+	if(timeline)
+		timeline.pause();
 	this.figure = $(".day-figure");
 	this.rotateArea = $(".day-rotate-area");
 	this.transformFigure = $(".day-transform-figure");
@@ -187,6 +195,10 @@ tools.refresh = function() {
 	tools.getLayer().timer(tools.nowTime);
 }
 tools.refreshLayer = function() {
+	if(!tools.timeline)
+		return;
+		
+	
 	var layer = tools.getLayer();
 	layer.timer(tools.nowTime);
 	if(tools.tmp.isCreateLayer || tools.tmp.isRemoveLayer) {
@@ -202,6 +214,8 @@ tools.refreshLayer = function() {
 	}
 }
 tools.refreshTimeline = function() {
+	if(!tools.timeline)
+		return;
 	var layers = tools.timeline.layers;
 	var length = layers.length;
 	var now = tools.nowTime;

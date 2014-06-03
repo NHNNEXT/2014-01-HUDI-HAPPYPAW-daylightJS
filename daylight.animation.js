@@ -424,7 +424,7 @@ daylight.animation.Motion.prototype = {
 *
 */
 daylight.animation.Layer = function Layer(selector, initMotion) {
-	var type = daylight.type(selector);
+	var type = daylight.type(selector, true);
 	
 	this.dl_object = daylight(selector);
 	
@@ -1031,7 +1031,21 @@ daylight.animation.Layer.prototype.print = function() {
 daylight.animation.Timeline = function Timeline(selector) {
 	console.log("NEW TIMELINE");
 	
+	var type = daylight.type(selector, true);
+	
+	this.dl_object = daylight(selector);
+	
+	if(type === "element" || type === "daylight") {
+		var id =  this.dl_object.attr("id");
+		var className =  this.dl_object.attr("class");
+		selector = id ? "#" + id  : "." + className.replaceAll(" ", " .");
+	}
+	else if(type !== "string") {
+		console.error("selector : " + selector, type)
+		throw new Error(daylight.animation.ERRORMESSAGE.WRONGTYPE);
+	}
 	this.selector = selector;
+	
 	var id = daylight.animation.makeId(selector);
 	this.id = id;
 	
@@ -1051,6 +1065,12 @@ daylight.animation.Timeline.prototype.exportToJSON = function() {
 	var id = "";
 	var dl_object = this.dl_object;
 	var element = dl_object.o[0];
+	this.stop();
+	var layers = this.layers;
+	var layerLength = layers.length;
+	for(var i = 0; i < layerLength; ++i)
+		layers[i].timer(0);
+		
 	return JSON.stringify(this._exportToJSON(element));
 }
 daylight.animation.Timeline.prototype.hasLayer = function(layer) {
@@ -1407,16 +1427,19 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	daylight.animation.Timeline.prototype._exportStyle = function(element) {
 		var exportStyle = {};
 		var styles = window.getComputedStyle(element);
-		
-		for(var property in EXPORT_PROPERTIES) {
-			var propertyValue = styles[property];
-			var propertyDefaultValue = EXPORT_PROPERTIES[property];
-			if(typeof propertyValue === "undefined" || propertyValue === "" || propertyValue === propertyDefaultValue)
-				continue;
-			
-			exportStyle[property] = propertyValue;
-		}
-		
+		try {		
+			for(var property in EXPORT_PROPERTIES) {
+	
+				var propertyValue = styles[property];
+				var propertyDefaultValue = EXPORT_PROPERTIES[property];
+				if(typeof propertyValue === "undefined" || propertyValue === "" || propertyValue === propertyDefaultValue)
+					continue;
+				
+				exportStyle[property] = propertyValue;
+			}
+		} catch (e){
+			console.log(element, "type : " + element.nodeType, property);
+		}			
 		return exportStyle;
 	}
 	daylight.animation.Timeline.prototype._exportToJSON = function(element) {
@@ -1425,6 +1448,15 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		switch(json.name) {
 		case "IMG": json.src = element.src;break;
 		}
+		
+		var layer = this.getLayer(element);
+		if(layer) {
+			json.motions = layer.motions;
+			json.totalTime = layer.totalTime;
+			json.properties = layer.properties;
+		}
+		
+	
 	
 		var childNodes = element.childNodes;
 		var length = childNodes && childNodes.length; 
@@ -1434,6 +1466,9 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		
 		for(var i = 0; i < length; ++i) {
 			node = childNodes[i];
+			//주석
+			if(node.nodeType === 8)
+				continue;
 			value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
 			if(value) json.childNodes.push(value)
 		}
