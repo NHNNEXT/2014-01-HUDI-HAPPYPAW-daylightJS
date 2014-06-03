@@ -1033,7 +1033,8 @@ daylight.animation.Timeline = function Timeline(selector) {
 	
 	var type = daylight.type(selector, true);
 	
-	this.dl_object = daylight(selector);
+
+	var dl_object = this.dl_object = daylight(selector);
 	
 	if(type === "element" || type === "daylight") {
 		var id =  this.dl_object.attr("id");
@@ -1049,7 +1050,6 @@ daylight.animation.Timeline = function Timeline(selector) {
 	var id = daylight.animation.makeId(selector);
 	this.id = id;
 	
-	var dl_object = this.dl_object = daylight(selector);
 	this.layers = [];
 	this.totalTime = 0;
 	this.animationType = "ease";
@@ -1061,7 +1061,7 @@ daylight.animation.Timeline = function Timeline(selector) {
 }
 
 
-daylight.animation.Timeline.prototype.exportToJSON = function() {
+daylight.animation.Timeline.prototype.exportToJSON = function(is_object) {
 	var id = "";
 	var dl_object = this.dl_object;
 	var element = dl_object.o[0];
@@ -1070,7 +1070,10 @@ daylight.animation.Timeline.prototype.exportToJSON = function() {
 	var layerLength = layers.length;
 	for(var i = 0; i < layerLength; ++i)
 		layers[i].timer(0);
-		
+	
+	if(is_object)
+		return this._exportToJSON(element);
+
 	return JSON.stringify(this._exportToJSON(element));
 }
 daylight.animation.Timeline.prototype.hasLayer = function(layer) {

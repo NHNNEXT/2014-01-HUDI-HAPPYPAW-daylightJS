@@ -107,7 +107,7 @@ tools.keyframes.refresh = function() {
 	if(!tools.timeline)
 		return;
 		
-	
+	this.dlTimelineTotalTime.css("width",tools.timeline.totalTime * this.dist * this.keyframeWidth +"px");
 	var length = tools.keyframes.dlkeyframesGroup.size();
 	var layerLength = tools.timeline.layers.length;
 	var dist = layerLength - length;

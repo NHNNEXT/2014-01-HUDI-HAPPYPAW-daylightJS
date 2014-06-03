@@ -127,25 +127,6 @@ tools.setting.init = function() {
 		tools.refreshStatus();
 		tools.setting.refreshLayerWindow();
 	});
-	$(".day-layers").on("click", function(e) {
-		var dlLayerLabel = $(".day-layer").has(e.target, true);
-
-		if(dlLayerLabel.size() == 0)
-			return;
-			
-		if(dlLayerLabel.size() > 1)
-			return;
-		
-		var layer = tools.timeline.getLayer(dlLayerLabel.attr("data-layer") || "");
-		if(!layer)
-			return;
-			
-		console.log("CLICK : " + layer.id);
-		tools.nowSelectElement = layer.dl_object;
-		tools.setting.refresh();
-		tools.refreshStatus();
-		tools.setting.refreshLayerWindow();
-	});	
 	$(".btn-preview").click(function(e) {
 		tools.timeline.init().start();
 		tools.nowTime = 0;
@@ -154,7 +135,8 @@ tools.setting.init = function() {
 		daylight(".day-tool.day-tool-load").addClass("show");
 	});	
 	$(".btn-save").click(function(e) {
-		alert("save");
+		daylight(".day-tool.day-tool-save").find("textarea").val(tools.file.saveJSON());
+		daylight(".day-tool.day-tool-save").addClass("show");
 	});	
 	this.refreshLayerWindow();
 }

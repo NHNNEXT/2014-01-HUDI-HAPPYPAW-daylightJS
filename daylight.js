@@ -359,10 +359,10 @@ var _value = {
 	},
 	textarea : {
 		get : function(element) {
-			return element.innerText;
+			return element.value || element.innerText;
 		},
 		set : function(element, key) {
-			element.innerText = key;
+			element.value = element.innerText = key;
 		}
 	},
 	radio : {
