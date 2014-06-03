@@ -182,10 +182,12 @@ tools.init = function(timeline) {
 	});
 	$(window).keyup(tools.keyup);
 	$(window).keydown(tools.keydown);
-	tools.initMenu();
-	tools.setting.init();
-	tools.keyframes.init();
-
+	
+	this.initMenu();
+	this.setting.init();
+	this.keyframes.init();
+	this.file.init();
+	
 	$(window).resize(function() {
 		$("body").css("min-height", $("body").scrollHeight() );
 	});
@@ -355,6 +357,9 @@ tools.keyup = function(e) {
 		break;
 	case "D":
 		//삭제
+		if(!tools.timeline)
+			break;
+		
 		var layers = tools.timeline.layers;
 		var layer = tools.getLayer()
 		var index = layers.indexOf(layer);

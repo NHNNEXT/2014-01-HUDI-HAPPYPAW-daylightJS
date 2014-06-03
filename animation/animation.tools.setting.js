@@ -151,7 +151,7 @@ tools.setting.init = function() {
 		tools.nowTime = 0;
 	});	
 	$(".btn-load").click(function(e) {
-		alert("load");
+		daylight(".day-tool.day-tool-load").addClass("show");
 	});	
 	$(".btn-save").click(function(e) {
 		alert("save");

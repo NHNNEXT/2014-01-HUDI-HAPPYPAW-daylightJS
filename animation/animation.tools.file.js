@@ -1,7 +1,29 @@
 tools.file = {
-	loadTemplate: "",
-	saveTemplate: "",
+	loadJSONTemplate: '<div class="day-tool day-tool-load"><h1>LOAD</h1><textarea></textarea><div class="day-btn-area"><button class="day-btn day-btn-load">Load</button><button class="day-btn day-btn-cancel">Cancel</button></div></div>',
+	saveJSONTemplate: '<div class="day-tool day-tool-save"></div>',
 };
+tools.file.init = function(){
+	daylight("body").append(this.loadJSONTemplate);
+	daylight(".day-tool.day-tool-load").click(function(e) {
+		var dlLoadArea = $(this);
+		var eTarget = e.target;
+		var dlTarget = daylight(eTarget);
+		if(dlTarget.hasClass("day-btn-load")) {
+			var json = dlLoadArea.find("textarea").val();
+			console.log(json);
+			try {
+				tools.file.loadJSON(json);
+				dlLoadArea.removeClass("show");
+			} catch(e) {
+				alert("잘못된 형식입니다.");
+			}
+			
+		} else if(dlTarget.hasClass("day-btn-cancel")) {
+			dlLoadArea.find("textarea").val("");
+			dlLoadArea.removeClass("show");
+		}
+	});
+}
 tools.file.createElement = function(timeline, json) {
 	var element = daylight.createElement(json.name, {id:json.id, class:json.className});
 	
@@ -80,6 +102,7 @@ tools.file.loadJSON = function(json) {
 	} catch(e){
 		console.log(e);
 		console.log(e.stack);
+		throw new Error("잘못된 형식입니다.");
 	}
 	tools.setting.refreshLayerWindow();
 	tools.refreshStatus();
