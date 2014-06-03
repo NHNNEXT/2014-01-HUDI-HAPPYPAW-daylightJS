@@ -1,6 +1,7 @@
 tools.transform = {};
 
 tools.setTransformFigure = function() {
+	//변수에 헝가리안 표기법 똑바로 적용하기. 할테면 하고 안할거면 하지말고.
 	var dlElement = $(tools.nowSelectElement);
 	var offsetParentPos = dlElement.offsetParent().offset();
 	var pos = dlElement.position();

@@ -24,6 +24,9 @@ tools.keyframes.getTime = function(totalMilliSeconds) {
 	return m +":" + s + ":" + ms;
 }
 tools.keyframes.init = function() {
+	//이런구조에서 이걸 다 쓰기보다..
+	//var _htKF = tools.keyframes;  라고 저장해놔도 좋겠음.
+	// _htKF.dlKeyframes = ...
 	tools.keyframes.dlKeyframes = $(".day-keframes");
 	tools.keyframes.dlTimelineTotalTime = $(".day-keyframes-timeline-totalTime");
 	tools.keyframes.dlHead = $(".day-keyframes-head");
@@ -92,7 +95,7 @@ tools.keyframes.initKeyframesTime = function() {
 	var arr = [];
 	var keyframes = [];
 	var i,j;
-	for(i = 0; i < 20; ++i) {
+	for(i = 0; i < 20; ++i) { //20은 뭐지..쌩뚱맞음. 뒤에 100, 5도 다 마찬가지.
 		var totalMilliSeconds = i * 50;
 		var time = tools.keyframes.getTime(totalMilliSeconds);
 		arr.push({time:time, left:i * 100});
@@ -102,6 +105,8 @@ tools.keyframes.initKeyframesTime = function() {
 	}
 	tools.keyframes.dlkeyframesGroups.css("width",  tools.keyframes.keyframeLength * 5 * 20 + "px");
 	
+	//이런것도 같은 레벨의 컨텍스트라면 this를 사용할 수 있을텐데.
+	//this.dlHead.css(.... this.keyfrmaeLenght...)
 	tools.keyframes.dlHead.css("width", tools.keyframes.keyframeLength * 100 + "px");
 	tools.keyframes.dlHead.template(arr, sKeyFrameTimeTemplate);
 	tools.keyframes.keyframeGroupTemplate = tools.keyframes.keyframeGroupTemplate.replace("{keyframes}", daylight.template(keyframes, sKeyframeTemplate));
