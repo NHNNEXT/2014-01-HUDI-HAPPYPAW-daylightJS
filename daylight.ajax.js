@@ -1,3 +1,4 @@
+(function(daylight) {
 /*
 Setting
 autoSend(자동으로 보내기) : true
@@ -297,3 +298,6 @@ daylight.ajax.prototype.extend({
 });
 
 
+
+
+})(daylight);

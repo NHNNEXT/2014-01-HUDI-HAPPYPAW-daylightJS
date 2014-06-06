@@ -446,6 +446,8 @@ daylight.animation.Layer = function Layer(selector, initMotion) {
 	}
 	
 	this.motions = [];
+	this.actions = [];
+	
 	this.timeSchedule = {};
 	this.initMotion = initMotion;
 	this.totalTime = 0;
