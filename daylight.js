@@ -654,6 +654,9 @@ daylight.extend( {
 			// error;
 			return;
 		};
+	},
+	noConflict: function() {
+		
 	}
 });
 
