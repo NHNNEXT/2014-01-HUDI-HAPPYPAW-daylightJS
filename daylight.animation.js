@@ -223,7 +223,9 @@ daylight.animation = {
 		var limit_char = /[~!\#$^&*\=+|:;?"<,.>']/;
 		id = id.replace(limit_char, "");
 		return id;
-	}
+	},
+	animationControl: true,
+	timelines: []
 };
 
 daylight.animation.animationActions = {
@@ -1056,6 +1058,9 @@ daylight.animation.Timeline = function Timeline(selector) {
 	this.totalTime = 0;
 	this.animationType = "ease";
 	this.count = "infinite";
+	
+	if(daylight.animation.animationControl)
+		daylight.animation.timelines.push(this);
 	
 	dl_object.addClass("daylightAnimationTimeline");
 	dl_object.scroll(function(e) {e.preventDefault();});

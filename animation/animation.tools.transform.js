@@ -1,5 +1,7 @@
 tools.transform = {};
-
+tools.transform.translate = function(x, y) {
+	
+}
 tools.setTransformFigure = function() {
 	var dlElement = $(tools.nowSelectElement);
 	var offsetParentPos = dlElement.offsetParent().offset();
@@ -55,6 +57,8 @@ tools.setTranslate = function(x, y) {
 	var motion = {time:tools.nowTime};
 	motion.tx = parseFloat(x) + "px";
 	motion.ty = parseFloat(y) + "px";
+	tools.setting.refreshItem("tx", motion.tx);
+	tools.setting.refreshItem("ty", motion.ty);
 	motion.fill = "add";
 	layer.addMotion(motion);
 }
@@ -100,6 +104,7 @@ tools.transform.rotate = function(e) {
 	motion = {time : tools.nowTime};
 	var deg = 180 * Math.acos(dot) / Math.PI;
 	motion.rotate = parseFloat(info.rotate) + deg + "deg";
+	tools.setting.refreshItem("rotate", motion.rotate);
 	motion.fill = "add";
 	tools.getLayer().addMotion(motion);
 }

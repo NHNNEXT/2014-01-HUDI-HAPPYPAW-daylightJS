@@ -72,7 +72,7 @@ tools.size = "-6px";
 	var relative = "relative", none = "none", absolute = "absolute", block="block",center="center", left="left", hidden="hidden";
 	tools.css = {
 		".day-rotate-area": {
-			position:"absolute",
+			position:"absolute!important",
 			padding:"20px",
 			cursor:"move",
 			display: "none", 
@@ -107,7 +107,7 @@ tools.size = "-6px";
 			"z-index":3
 		},
 		".day-transform-figure, .day-transform-figure div": {
-			border: "1px solid #E24E58"
+			border: "1px solid #E24E58!important"
 		},
 		".day-transform-figure .nw, .day-figure .nw" : {top:0, left:0, "margin-left":tools.size, "margin-top":tools.size},
 		".day-transform-figure .origin, .day-figure .origin" : {"margin-left":tools.size, "margin-top":tools.size},
@@ -332,7 +332,7 @@ tools.keyup = function(e) {
 	}
 	
 	var key = $.Event(e).key();
-	
+	tools.key = {};
 	var keyCode = key.keyCode;
 	console.debug("keycode", keyCode);
 	switch(keyCode) {
@@ -377,7 +377,7 @@ tools.keyup = function(e) {
 	}
 	tools.refreshStatus();
 	tools.refreshMenu();
-	tools.key = key;
+
 }
 
 

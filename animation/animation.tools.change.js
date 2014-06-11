@@ -71,31 +71,33 @@ tools.resize = function(e) {
 		var width = parseFloat(info.owidth);
 		var height = parseFloat(info.oheight);
 		
+		var x = e.dragX;
+		var y = e.dragY;
 		if(bPosE) {
-			width = width + e.dragX;
+			width = width + x;
 			properties.width = width;
 			if(info.oright !== "auto")
-				properties.right = parseFloat(info.oright) - e.dragX;
+				properties.right = parseFloat(info.oright) - x;
 		}
 		if(bPosS) {
 			if(info.obottom !== "auto")
-				properties.bottom = parseFloat(info.obottom) + e.dragY;
+				properties.bottom = parseFloat(info.obottom) + y;
 				
-			height = height + e.dragY;
+			height = height + y;
 			properties.height = height;
 		}
 		if(bPosN) {
 			if(info.obottom === "auto")
-				properties.top = (parseFloat(info.otop) || 0) + e.dragY;
+				properties.top = (parseFloat(info.otop) || 0) + y;
 
 			
-			properties.height = height - e.dragY;
+			properties.height = height - y;
 		}
 		if(bPosW) {
 			if(info.oright === "auto")
-				properties.left = (parseFloat(info.oleft) || 0) + e.dragX;
+				properties.left = (parseFloat(info.oleft) || 0) + x;
 
-			width = width - e.dragX;
+			width = width - x;
 			properties.width = width;
 		}	
 		tools.setProperty(properties);

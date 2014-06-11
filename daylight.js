@@ -1990,8 +1990,9 @@ daylight.each(["Width", "Height"], function(name) {
 		if(o["inner" + name] > 0)
 			return o["inner" + name]
 
-		if(o["client" + name] > 0)
-			return o["client" + name]
+		//if(o["client" + name] > 0)
+		//	return o["client" + name]
+
 
 
 		var dimension = o["offset" + name];

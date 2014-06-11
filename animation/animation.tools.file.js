@@ -34,6 +34,14 @@ tools.file.init = function(){
 		}
 	});
 }
+tools.file.getStyle = function(properties) {
+	var style = "";
+	properties.position = properties.position || "relative";
+	for(var property in properties) {
+		style += property +":" + properties[property] +";";
+	}
+	return style;
+}
 tools.file.createElement = function(timeline, json) {
 	var element = daylight.createElement(json.name, {id:json.id, class:json.className});
 	
@@ -42,10 +50,8 @@ tools.file.createElement = function(timeline, json) {
 	}
 	
 	var properties = json.style;
-	var style= "";
-	for(var property in properties) {
-		style += property +":" + properties[property] +";";
-	}
+	var style= this.getStyle(properties);
+	
 	console.log(style);
 	element.setAttribute("style", style);
 	element.setAttribute("data-style", style);	
@@ -79,11 +85,9 @@ tools.file.createLayer = function(timeline, element, json) {
 }
 tools.file.createTimeline = function(json) {
 	var elTimeline = daylight.createElement(json.name, {id:json.id, class:json.className});
-	var properties = json.style;
-	var style= "";
-	for(var property in properties) {
-		style += property +":" + properties[property] +";";
-	}
+	var properties = json.style || {};
+	var style = this.getStyle(properties);
+	
 	elTimeline.setAttribute("style", style);
 	elTimeline.setAttribute("data-style", style);
 	
@@ -119,10 +123,16 @@ tools.file.loadTimeline = function(json) {
 	tools.timelines.push(elTimeline);
 	tools.timeline = elTimeline;
 }
+tools.file.newDocument = function() {
+	this.loadJSON({name:"DIV",id:"", className: "", totalTime: 0, style: {width: "500px", height: "500px", left:"10%", top: "10%"}, motions:[]});
+}
 tools.file.loadJSON = function(json) {
+
 	try {
-		json = JSON.parse(json);
+		if(typeof json !== "object")		
+			json = JSON.parse(json);
 		
+		$(".daylightAnimationTimeline").remove();
 		
 		if(!json.hasOwnProperty("timelines")) {
 			if(!json.hasOwnProperty("name"))

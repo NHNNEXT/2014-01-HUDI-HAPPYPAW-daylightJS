@@ -131,6 +131,9 @@ tools.setting.init = function() {
 		tools.timeline.init().start();
 		tools.nowTime = 0;
 	});	
+	$(".btn-new").click(function(e) {
+		tools.file.newDocument();
+	});
 	$(".btn-load").click(function(e) {
 		daylight(".day-tool.day-tool-load").addClass("show");
 	});	
