@@ -184,6 +184,7 @@ tools.init = function(timeline) {
 	$(window).keydown(tools.keydown);
 	
 	this.initMenu();
+	this.window.init();
 	this.setting.init();
 	this.keyframes.init();
 	this.file.init();
