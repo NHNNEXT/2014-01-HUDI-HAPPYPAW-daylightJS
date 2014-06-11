@@ -103,8 +103,14 @@ tools.menuActions.shape.dragstart = function(e) {
 	var shape = daylight.createElement("div", {class:"daylightAnimationShape day-shape" + (size + 1)});
 	e.dragInfo.newShape = shape;
 	shape.style.position = "absolute";
-	tools.timeline.dl_object.append(shape);
+	var dlTimeline = tools.timeline.dl_object;
+	
+	dlTimeline.append(shape);
 	tools.nowSelectElement = $(e.dragInfo.newShape);
+	var offset = dlTimeline.offset();
+	var x = e.stx - offset.left;
+	var y = e.sty - offset.top;
+	e.pageInfo.fixX = 
 	
 };
 tools.menuActions.shape.drag = function(e, shape) {
