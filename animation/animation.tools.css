@@ -341,3 +341,15 @@ body {
 	display: block;
 	
 }
+
+.datl-scenes {
+	margin:10px 0px;
+}
+.datl-scene {
+	width: 150px;
+	height: 100px;
+	border:1px solid #ccc;
+}
+.datl-scene.selected {
+	border-color: #579EE8;
+}
