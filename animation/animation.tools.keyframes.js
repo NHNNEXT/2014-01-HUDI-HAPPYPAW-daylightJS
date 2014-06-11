@@ -28,10 +28,11 @@ tools.keyframes.init = function() {
 	tools.keyframes.dlTimelineTotalTime = $(".day-keyframes-timeline-totalTime");
 	tools.keyframes.dlHead = $(".day-keyframes-head");
 	tools.keyframes.dlLine = $(".day-keyframes-line");
+	
 	tools.keyframes.dlkeyframesGroups = $(".day-keyframes-groups");
 	tools.keyframes.dlkeyframesGroup = $(".day-keyframes-group");
 	tools.keyframes.dlTimeLabel = $(".day-tools-timeline-time");
-	tools.keyframes.dlBtnInit = $(".day-tools-timeline-btn-init");
+	
 	
 	
 	
