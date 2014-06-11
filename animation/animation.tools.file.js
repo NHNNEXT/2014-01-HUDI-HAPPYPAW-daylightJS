@@ -126,12 +126,38 @@ tools.file.loadTimeline = function(json) {
 tools.file.newDocument = function() {
 	this.loadJSON({name:"DIV",id:"", className: "", totalTime: 0, style: {width: "500px", height: "500px", left:"10%", top: "10%"}, motions:[]});
 }
+tools.file.checkLayerEasyMode = function(layer, scene) {
+	//layer에 들어가 있는 시간이 씬에 있는 시간이 맞는지 확인 일치 없으면 전문가 모드 전부 일치하면 이지 모드 
+	var motions = layer.motions;
+	var motionsLength = motions.length;
+	var time = 0;
+	for(var i = 0; i < motionsLength; ++i) {
+		time = motions[i].time;
+		if(time !== 0 && scene.indexOf(time) === -1)
+			return;
+	}
+	return true;
+}
+tools.file.checkTimelineEasyMode = function(timeline) {
+	var scene = timeline.scene || [];
+	var layerTimes;
+	var layer;
+	var bEasyMode = false;
+	for(var i = 0; i < timeline.layers; ++i) {
+		layer = timeline.layers[i];
+		bEasyMode = this.checkLayerEasyMode(layer, scene);
+		if(!bEasyMode)
+			return false;
+		
+	}
+	
+	return true;
+}
 tools.file.loadJSON = function(json) {
 
 	try {
 		if(typeof json !== "object")		
 			json = JSON.parse(json);
-		
 		$(".daylightAnimationTimeline").remove();
 		
 		if(!json.hasOwnProperty("timelines")) {
@@ -151,6 +177,7 @@ tools.file.loadJSON = function(json) {
 		console.log(e.stack);
 		throw new Error("잘못된 형식입니다.");
 	}
+	tools.mode = this.checkTimelineEasyMode(tools.timeline) ? "easy" : "expert";
 	tools.timer.layerTimer(0);
 	tools.setting.refreshLayerWindow();
 	tools.refreshStatus();

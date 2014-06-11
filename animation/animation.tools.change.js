@@ -73,6 +73,18 @@ tools.resize = function(e) {
 		
 		var x = e.dragX;
 		var y = e.dragY;
+		if(tools.key.shift && (bPosE || bPosW) && (bPosS || bPosN)) {
+			var ox = x;
+			var oy = y;
+			var bRevers = bPosE && bPosN || bPosW && bPosS;
+			if(bRevers)
+				oy *= -1;
+			x = y = (ox + oy) / 2;
+			if(bRevers)
+				y *= -1;
+			
+		}
+		
 		if(bPosE) {
 			width = width + x;
 			properties.width = width;
@@ -99,8 +111,9 @@ tools.resize = function(e) {
 
 			width = width - x;
 			properties.width = width;
-		}	
-		tools.setProperty(properties);
+		}
+		if(width > 0 && height > 0)
+			tools.setProperty(properties);
 	} else {
 		//scale 조정
 	}

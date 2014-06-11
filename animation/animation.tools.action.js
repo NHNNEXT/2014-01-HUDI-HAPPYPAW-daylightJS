@@ -107,7 +107,7 @@ tools.menuActions.shape.dragstart = function(e) {
 	tools.nowSelectElement = $(e.dragInfo.newShape);
 	
 };
-tools.menuActions.shape.drag = function(e) {
+tools.menuActions.shape.drag = function(e, shape) {
 	if(!tools.timeline)
 		return;		
 	
@@ -137,6 +137,9 @@ tools.menuActions.shape.drag = function(e) {
 	motion.height = height + "px";
 	motion.time = 0;
 	motion.fill = "add";
+	
+	if(shape === "oval")
+		motion["border-radius"] = "50%";
 	tools.getLayer().addMotion(motion);
 	tools.refresh();
 	tools.setShapeFigure();
@@ -159,4 +162,14 @@ tools.menuActions.shape.dragend = function(e) {
 	
 	
 	e.dragInfo.newShape = false;
+}
+tools.menuActions.oval = {};
+tools.menuActions.oval.dragstart = function(e) {
+	tools.menuActions.shape.dragstart(e);
+}
+tools.menuActions.oval.drag = function(e) {
+	tools.menuActions.shape.drag(e, "oval");
+}
+tools.menuActions.oval.dragend = function(e) {
+	tools.menuActions.shape.dragend(e);
 }
