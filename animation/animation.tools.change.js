@@ -12,6 +12,8 @@ tools.setProperty = function(pos, time) {
 	var figure = tools.selectedMenu.pointer && tools.figure ||
 				 tools.selectedMenu.shape && tools.shapeFigure || "";
 	var sSuffix = "px";
+	var cssObject = {};
+	
 	for(var key in pos) {
 		if(typeof pos[key] === "undefined")
 			continue;
@@ -31,15 +33,16 @@ tools.setProperty = function(pos, time) {
 			value = value + sSuffix;
 		}
 			
-		
-		dlElement.css(key, value);
+		cssObject[key] = value;
 		motion[key] = value;
-		if(figure)
-			figure.css(key, value);
 			
 		tools.setting.refreshItem(key, value);
 		
 	}
+	dlElement.css(cssObject);
+	if(figure)
+		figure.css(cssObject);
+		
 	motion.fill = "add";
 	tools.getLayer().addMotion(motion);
 }

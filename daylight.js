@@ -1217,9 +1217,21 @@ daylight.fn.css = function(name, value, isNoObject) {
 		var self = this;
 		var type = daylight.type(name);
 		if(type === "object") {
-			daylight.each(name, function(value, key) {
-				self.css(key, value, true);
+			daylight.each(this.o, function() {
+				var element = this;
+				var style = element.style;
+				var cssText = "";
+				if(!element.style)
+					return;
+				var length  = style.length;
+				for(var i = 0; i < length; ++i) {
+					cssText += style[i] + ": " + style[style[i]] + ";";
+				}
+				element.style.cssText = cssText;
 			});
+			//daylight.each(name, function(value, key) {
+			//	self.css(key, value, true);
+			//});
 			return this;
 		}
 	}
