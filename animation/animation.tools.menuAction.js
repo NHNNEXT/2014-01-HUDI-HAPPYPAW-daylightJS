@@ -76,7 +76,7 @@ tools.menuActions.pointer.drag = function(e) {
 		tools.dragMouse(e);
 	}
 	
-	tools.refresh();
+	//tools.refresh();
 	
 	if(tools.selectedMenu.transform)
 		tools.setTransformFigure();

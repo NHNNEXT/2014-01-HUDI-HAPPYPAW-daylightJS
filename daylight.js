@@ -1217,15 +1217,21 @@ daylight.fn.css = function(name, value, isNoObject) {
 		var self = this;
 		var type = daylight.type(name);
 		if(type === "object") {
+			//cssText를 이용한 방법
 			daylight.each(this.o, function() {
 				var element = this;
 				var style = element.style;
 				var cssText = "";
-				if(!element.style)
-					return;
+
 				var length  = style.length;
 				for(var i = 0; i < length; ++i) {
-					cssText += style[i] + ": " + style[style[i]] + ";";
+					if(name[style[i]] === 0 || name[style[i]])
+						continue;
+					name[style[i]] = style[style[i]];
+				}
+				var property;
+				for(property in name) {
+					cssText += property + ": " + name[property] +";";
 				}
 				element.style.cssText = cssText;
 			});
@@ -2065,18 +2071,21 @@ daylight.fn.extend({
 		} else {
 			offsetParent = this.offsetParent();
 			offset = this.offset();
-			if ( !daylight.nodeName( offsetParent.o[0], "html" ) ) {
+			var elOffset = offsetParent.o[0];
+			if(!elOffset)
+				return;
+
+			if ( !daylight.nodeName(elOffset, "html" ) ) {
 				parentOffset = offsetParent.offset();
 		
 			}
-
 			// Add offsetParent borders
-			parentOffset.top += _curCss(offsetParent.o[0], "borderTop") == 0 ? 0 : daylight.css( offsetParent.o[0], "borderTopWidth", true );
-			parentOffset.left +=  _curCss(offsetParent.o[0], "borderLeft") == 0 ? 0 : daylight.css( offsetParent.o[0], "borderLeftWidth", true );
+			parentOffset.top += _curCss(elOffset, "borderTop") == 0 ? 0 : daylight.css(elOffset, "borderTopWidth", true );
+			parentOffset.left +=  _curCss(elOffset, "borderLeft") == 0 ? 0 : daylight.css(elOffset, "borderLeftWidth", true );
 			//parentOffset.top -= daylight.css( offsetParent.o[0], "paddingTop", true );
 			//parentOffset.left -= daylight.css( offsetParent.o[0], "paddingLeft", true );
-			parentOffset.top -= daylight.css( offsetParent.o[0], "marginTop", true );
-			parentOffset.left -= daylight.css( offsetParent.o[0], "marginLeft", true );			
+			parentOffset.top -= daylight.css(elOffset, "marginTop", true );
+			parentOffset.left -= daylight.css(elOffset, "marginLeft", true );			
 			//console.log(daylight.css( offsetParent.o[0], "marginTop"));
 		}
 

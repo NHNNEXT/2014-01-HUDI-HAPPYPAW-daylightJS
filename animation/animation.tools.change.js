@@ -39,6 +39,7 @@ tools.setProperty = function(pos, time) {
 		tools.setting.refreshItem(key, value);
 		
 	}
+
 	dlElement.css(cssObject);
 	if(figure)
 		figure.css(cssObject);

@@ -82,7 +82,7 @@ tools.size = "-6px";
 			"z-index":0
 		},
 		".day-transform-figure, .day-figure": {
-			position: "absolute",
+			position: "absolute!important",
 			border:"1px solid #72BCEB!important",
 			"border-radius":"0px!important",
 			display: "none"
@@ -253,14 +253,16 @@ tools.setFigure = function() {
 	
 	figure.addClass("show");
 	figure.attr("style", "");
-	figure.css("left", dlElement.css("left"));
-	figure.css("top", dlElement.css("top") + "");
-	figure.css("bottom", dlElement.css("bottom"));
-	figure.css("right", dlElement.css("right"));
-	figure.css("margin", dlElement.css("margin"));
 	
-	figure.css("width", width+"px");
-	figure.css("height", height+"px");
+	figure.css({
+		left: dlElement.css("left"),
+		top:  dlElement.css("top"),
+		bottom: dlElement.css("bottom"),
+		right: dlElement.css("right"),
+		margin: dlElement.css("margin"),
+		width: width + "px",
+		height: height + "px"
+	});
 	
 	
 }
