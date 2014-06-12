@@ -11,41 +11,55 @@ tools.timer.layerTimer = function(time) {
 	}
 }
 tools.timer.timer = function() {
-	if(tools.timer.bPause)
+	if(this.bPause)
 		return;
 	
+	if(!tools.timeline.totalTime) {
+		this.pause();
+		return;
+	}
 	var now = Date.now() / 1000;
 	var dt = now - tools.timer.prevTime;
+	console.log(dt, this.time, tools.timeline.totalTime);
 	
-	tools.timer.time += dt;
+	this.time += dt;
 	
-	tools.timer.time  = tools.timeline.totalTime === tools.timer.time ? tools.timeline.totalTime : tools.timer.time % tools.timeline.totalTime;
+	this.time  = tools.timeline.totalTime === this.time ||  tools.timeline.totalTime == 0 ? tools.timeline.totalTime : this.time % tools.timeline.totalTime;
 	tools.nowTime = parseInt(tools.timer.time * 10) / 10;
 	
 	var now = tools.nowTime;
 	
 	
-	tools.timer.layerTimer(now);
+	this.layerTimer(now);
 	
 	tools.setting.refresh();
 	tools.keyframes.refreshTime();
 	
-	tools.timer.prevTime = Date.now() / 1000;
-	requestAnimFrame(tools.timer.timer);
+	this.prevTime = Date.now() / 1000;
+	requestAnimFrame(this.timer.bind(this));
 }
 tools.timer.start = function() {
 	console.debug("START TIMER");
-	tools.timer.bPause = false;
+	this.bPause = false;
 
 	
 	if(tools.nowTime < 0)
 		tools.nowTime = 0;
 
-	tools.timer.prevTime = Date.now() / 1000;
-	tools.timer.time = tools.nowTime;		
-	requestAnimFrame(tools.timer.timer);
+	this.prevTime = Date.now() / 1000;
+	this.time = tools.nowTime;		
+	requestAnimFrame(this.timer.bind(this));
 }
 tools.timer.pause = function() {
 	console.debug("PAUSE TIMER");
 	tools.timer.bPause = true;
+	if(!tools.timeline)
+		return;
+	if(tools.nowTime > tools.timeline.totalTime) {
+	
+		tools.nowTime = tools.timeline.totalTime;
+		tools.timer.layerTimer(tools.nowTime);
+		tools.setting.refresh();
+		tools.keyframes.refreshTime();
+	}
 }

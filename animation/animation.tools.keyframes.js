@@ -11,9 +11,14 @@ tools.keyframes.getTime = function(totalMilliSeconds) {
 	return m +":" + s + ":" + ms;
 }
 tools.keyframes.mode = {easy:{}, expert:{}};
-tools.keyframes.mode.easy.init = function() {
-	
-};
+(function() {
+	tools.keyframes.mode.easy = {
+	};
+	var easy = tools.keyframes.mode.easy;
+	easy.init = function() {
+		this.dlHead = $(".datl-scenes-head");		
+	};
+})();
 (function() {
 	tools.keyframes.mode.expert = {
 		scale:1,
@@ -159,9 +164,7 @@ tools.keyframes.mode.easy.init = function() {
 			index = tools.timeline.layers.indexOf(layer);
 			if(index == -1)
 				return;
-		}
-		
-		
+		}		
 		var keyframeGroup = this.dlkeyframesGroup.get(index);
 		var children = keyframeGroup.children;
 		var childrenLength = children.length;

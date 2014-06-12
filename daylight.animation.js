@@ -1275,7 +1275,10 @@ daylight.animation.Timeline.prototype.executeFunction = function(schedule, spend
 	
 }
 daylight.animation.Timeline.prototype.timer = function() {
-
+	if(!this.totalTime) {
+		this.finish();
+		return;
+	}
 	var self = this;
 	var is_timer = this.is_timer;
 	var time = Date.now();
