@@ -195,8 +195,7 @@ $(document).ready(function() {
 		dlTarget.attr("data-text", val);
 		dlTarget.html(sText);
 		
-		dlTarget.trigger("editComplete", {completeText: val});
-		
+		daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val});
 	})
 	$("body").dblclick(function(e) {
 		if(!daylight.hasClass(e.target, "day-text-editable"))
