@@ -660,6 +660,26 @@ body {
 	opacity: 1;
 	-webkit-opacity: 1;
 }
+
+.day-text-editable .day-textedit {
+	width: 100%;
+	height: 100%;
+	text-align: inherit;
+}
+.day-text-editable {
+	position: relative;
+}
+.day-text-editable.day-mode-edit:after {
+	content: "save";
+	position: absolute;
+	right:10%;
+	top:50%;
+	height: 10px;
+	line-height: 0px;
+}
+.day-text-editable.day-mode-edit:hover:after {
+	color:#000;
+}
 @-webkit-keyframes select_menu_opacity{from{opacity:0;}to{opacity:1;}}
 .day_select.select_sample_red .select_menu li{
 	border:1px solid #eee;

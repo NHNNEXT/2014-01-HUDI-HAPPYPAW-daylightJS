@@ -47,5 +47,5 @@ tools.timer.start = function() {
 }
 tools.timer.pause = function() {
 	console.debug("PAUSE TIMER");
-	tools.timer.bPause = true;	
+	tools.timer.bPause = true;
 }

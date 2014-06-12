@@ -158,6 +158,7 @@ $(document).ready(function() {
 			daylight.UI.resize.drag(e);
 	});
 	$("body").on("dragend", function(e) {
+		e.stopPropagation();
 		
 		var dlElement = $(e.dragElement);
 		if(dlElement.hasClass("day-drag-draggable"))
@@ -175,6 +176,36 @@ $(document).ready(function() {
 			
 		daylight(selector).toggleClass("collapse");
 		return;
+	});
+
+	$("body").click(function(e) {
+		if(!daylight.hasClass(e.target, "day-text-editable"))
+			return;
+			
+		if(!daylight.hasClass(e.target, "day-mode-edit"))
+			return;
+		
+		var dlTarget = $(e.target);
+		dlTarget.removeClass("day-mode-edit");
+		var dlTextEdit = dlTarget.find(".day-textedit");
+		var val = dlTextEdit.val();
+		var sPrefix = dlTarget.attr("data-edit-complete-prefix") || "";
+		var sSuffix = dlTarget.attr("data-edit-complete-suffix") || "";
+		var sText = sPrefix + val + sSuffix;
+		dlTarget.attr("data-text", val);
+		dlTarget.html(sText);
+		
+		dlTarget.trigger("editComplete", {completeText: val});
+		
+	})
+	$("body").dblclick(function(e) {
+		if(!daylight.hasClass(e.target, "day-text-editable"))
+			return;
+		
+		var dlTarget = $(e.target);
+		dlTarget.addClass("day-mode-edit");
+		dlTarget.html('<input type="text" class="day-textedit" value="'+(dlTarget.attr("data-text") || "")+'"/>');
+		
 	});
 
 });

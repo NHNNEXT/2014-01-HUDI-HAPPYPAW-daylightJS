@@ -202,6 +202,7 @@ body {
 	display: inline-block;
 	padding: 5px 0px 5px 10px;
 	font-size: 0.9em;
+	vertical-align: middle;
 }
 .day-tools-timeline-play {
 	display: inline-block;
@@ -210,6 +211,7 @@ body {
 	font-size: 0.8em;
 	text-align: center;
 	padding:2px;
+	vertical-align: middle;
 }
 .day-keframes {
 	position: absolute;
@@ -343,12 +345,61 @@ body {
 }
 
 .datl-scenes {
-	margin:10px 0px;
+	margin:10px 10px;
+}
+.datl-scenes-head {
+	background: #3B3C3B;
+	padding:10px 10px;
+}
+.datl-scene, .datl-scene-add {
+	display: inline-block;
 }
 .datl-scene {
-	width: 150px;
-	height: 100px;
-	border:1px solid #ccc;
+/* 	border-top:20px solid #EBEBE9; */
+	width: 120px;
+	height: 80px;
+	line-height: 80px;
+/* 	padding-left:10px; */
+	font-size: 14px;
+	background: #333;
+	color: #eee;
+	border:1px solid #888;
+	vertical-align: top;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+.datl-scene:hover {
+	border:1px solid #555;
+}
+
+.datl-scene-add {
+	position: relative;
+	vertical-align: top;
+	height:80px;
+	width: 80px;
+/* 	background: #eee; */
+}
+.datl-scene-add1, .datl-scene-add2 {
+	position: absolute;
+	top:50%;
+	left:50%;
+	background: #eee;
+}
+.datl-scene-add1 {
+	width: 6px;
+	height: 20px;
+	margin-left: -3px;
+	margin-top: -10px;
+}
+.datl-scene-add2 {
+	width: 20px;
+	height: 6px;
+	margin-left: -10px;
+	margin-top: -3px;
+}
+.datl-scene.playing {
+	border-color: #EE0F00;
 }
 .datl-scene.selected {
 	border-color: #579EE8;

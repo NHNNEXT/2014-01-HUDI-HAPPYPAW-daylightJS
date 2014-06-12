@@ -2165,7 +2165,7 @@ daylight.each("$Event".split(" "), function(name, index, arr) {
 });
 */
 
-daylight.each("scroll load click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart resize".split(" "), function(name, index, arr) {
+daylight.each("scroll load dblclick click mousedown mousemove mouseup mouseleave focus keydown keypress keyup select selectstart dragstart resize".split(" "), function(name, index, arr) {
 	if(typeof name !== "string")
 		return;
 		
