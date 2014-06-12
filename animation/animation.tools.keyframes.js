@@ -24,6 +24,7 @@ tools.keyframes.initKeyframesTime = function() {
 }
 tools.keyframes.refresh = function() {
 	console.debug("refresh");
+	this.mode.easy.refreshAll();
 }
 tools.keyframes.refreshLayer = function(layer) {
 	console.debug("refreshLayer");
