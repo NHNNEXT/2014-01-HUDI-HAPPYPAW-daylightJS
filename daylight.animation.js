@@ -14,6 +14,7 @@ var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-
 var tbtype = ["top", "bottom", "height", "margin-top", "margin-bottom", "padding-top", "padding-bottom"];
 //숫자로 치환할 수 있는 타입
 var dtype = ["rotate", "opacity", "tx", "ty", "gtop", "gleft"];
+var notTransitionType = ["display", "position"];
 var dimensionType = ["px", "em", "%"]
 
 function _dot(a1,a2,b1,b2) {
@@ -945,12 +946,18 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_n
 			//console.log(property, prev, next, value);
 		}
 		if(value === "transition") {
+			if(is_not_transition) {
+				motions[property] = prev[property];
+			} else {
+				motions[property] = next[property];
+			
+				if(!CONSTANT.transformList.hasOwnProperty(property)) {
+					motions["transition"] = motions["transition"]? motions["transition"] + "," : ""; 
+					motions["transition"] +=  property + " linear " + (next.time - prev.time) + "s ";
+				}
+			}
+			
 			motions[property] = next[property];
-			
-			//if(CONSTANT.transformList.hasOwnProperty(property))
-			//	property = "{prefix}transform";
-			
-			motions[property] = prev[property];
 		} else {
 			motions[property] = value;
 		}
@@ -960,8 +967,8 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_n
 	motions.time = time;
 	return motions;	
 }
-daylight.animation.Layer.prototype.timer = function(time, is_start) {
-	var motion = this.getTimeMotion(time, is_start);
+daylight.animation.Layer.prototype.timer = function(time, is_start, is_not_transition) {
+	var motion = this.getTimeMotion(time, is_start, is_not_transition);
 	var style = daylight.animation.objectToCSS(motion);
 	
 	var dl_object = this.dl_object;
