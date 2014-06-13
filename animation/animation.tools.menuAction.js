@@ -36,6 +36,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.ty = motion.ty || motion["ty?a"] || 0;
 		e.dragInfo.scale = motion.scale || motion["scale?a"] || "1,1";
 		e.dragInfo.rotate = motion.rotate || motion["rotate?a"] || "0deg";
+		e.dragInfo.origin = motion.origin || motion["origin?a"] || "50% 50%";
 		tools.setTransformFigure();
 	}
 	
@@ -59,16 +60,16 @@ tools.menuActions.pointer.drag = function(e) {
 		
 	var dlResizeDot = tools.figure.children().has(e.dragElement, true);
 	if(dlResizeDot.size() > 0) {
-		if(dlResizeDot.hasClass("origin"))
-			tools.moveTransformOrigin(e);
-		else
-			tools.resize(e);
+		tools.resize(e);
 		return;
 	}
 	
 	dlResizeDot = tools.transformFigure.children().has(e.dragElement, true);
 	if(dlResizeDot.size() > 0) {
-		tools.scale(e);
+		if(dlResizeDot.hasClass("origin"))
+			tools.transform.moveOrigin(e);
+		else
+			tools.scale(e);
 	}
 	else if(tools.rotateArea.equal(e.dragElement)) {
 		tools.transform.rotate(e);

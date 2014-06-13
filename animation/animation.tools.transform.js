@@ -17,9 +17,10 @@ tools.setTransformFigure = function() {
 	dlElement.parent().append(figure);
 	figure.attr("style", style);
 	
+	var cssObject = {};
 
 	function setPos(pos) {
-		figure.css(pos, ((parseFloat(dlElement.css(pos)) || 0) - 20) + "px");
+		cssObject[pos] = ((parseFloat(dlElement.css(pos)) || 0) - 20) + "px";
 	}
 	
 	figure.addClass("show");
@@ -34,17 +35,16 @@ tools.setTransformFigure = function() {
 		setPos("bottom");
 				
 	
-	figure.css("margin", dlElement.css("margin"));
-
-	
-	figure.css("width", width+"px");
-	figure.css("height", height+"px");
+	cssObject.margin = dlElement.css("margin");
+	cssObject.width = width + "px";
+	cssObject.height = height + "px";
+	figure.css(cssObject);
 	
 	
 	tools.setOrigin();
 
 }
-tools.moveTransformOrigin = function(e) {
+tools.transform.moveOrigin = function(ox, oy) {
 	
 }
 
@@ -109,6 +109,7 @@ tools.transform.rotate = function(e) {
 	motion.fill = "add";
 	tools.getLayer().addMotion(motion);
 }
+
 tools.transform.scale = function(e) {
 
 	var info = e.dragInfo;
@@ -147,6 +148,10 @@ tools.setOrigin = function(e) {
 	
 	figure.css("-webkit-transform-origin", origin);
 	origin = origin.split(" ");
-	figure.find(".origin").css("left", origin[0]);
-	figure.find(".origin").css("top", origin[1]);
+	var dlOrigin = figure.find(".origin");
+	dlOrigin.css({
+		left: origin[0],
+		top: origin[1]
+	});
+
 }
