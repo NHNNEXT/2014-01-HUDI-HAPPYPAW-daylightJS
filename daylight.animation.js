@@ -644,7 +644,44 @@ daylight.animation.Layer.prototype.addAction = function(name, startTime, endTime
 		throw new Error("해당하는 엑션이 없습니다.")
 	}
 }
-
+daylight.animation.Layer.prototype.optimizeRepeat = function(motion) {
+	var pos = ["top", "left", "right", "bottom"];
+	var i = 0;
+	console.log(motion);
+	var properties = this.properties, index;
+	if(motion.hasOwnProperty("border")) {
+		console.log("OTHER REMOVE");
+		for(i = 0; i < 4; ++i) {
+			if(motion.hasOwnProperty("border-" + pos[i]))
+				delete motion["border-" + pos[i]];
+			index = properties.indexOf("border-" + pos[i]);
+			if(index !== -1)
+				properties.splice(index, 1);
+		}	
+	} else if(motion.hasOwnProperty("border-left")) {
+		var border = motion["border-top"];
+		var is_repeat = true;
+		for(i = 1; i < 4; ++i) {
+			if(border !== motion["border-" + pos[i]]) {
+				is_repeat = false;
+				break;
+			}
+		}
+		if(is_repeat) {
+			console.log("MERGE");
+			for(i = 0; i < 4; ++i) {
+				if(motion.hasOwnProperty("border-" + pos[i]))
+					delete motion["border-" + pos[i]];
+										
+				index = properties.indexOf("border-" + pos[i]);
+				if(index !== -1)
+					properties.splice(index, 1);
+			}
+			motion["border"] = border;
+			properties.push("border");
+		}
+	}
+}
 daylight.animation.Layer.prototype.optimize = function() {
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	var transformList = daylight.animation.CONSTANT.transformList;
@@ -681,6 +718,7 @@ daylight.animation.Layer.prototype.optimize = function() {
 				propertyInfo.prev = motion;
 			}
 		}
+		this.optimizeRepeat(motion);
 	}
 }
 
@@ -1458,11 +1496,13 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	EXPORT_PROPERTIES[BACKGROUND + "size"] = "auto";
 	EXPORT_PROPERTIES[BACKGROUND + "position"] = "0% 0%";
 
-
+	EXPORT_PROPERTIES["margin"] = "0px none rgb(0, 0, 0, 0)";
+	EXPORT_PROPERTIES["padding"] = "0px";
+	EXPORT_PROPERTIES["border"] = "";
 	for(var i = 0; i < 4; ++i) {
-		EXPORT_PROPERTIES["border-"+ POS[i]] = {has:"0px"};
-		EXPORT_PROPERTIES["padding-"+ POS[i]] = "0px";
-		EXPORT_PROPERTIES["margin-"+ POS[i]] = "0px";
+		//EXPORT_PROPERTIES["border-"+ POS[i]] = {has:"0px"};
+		//EXPORT_PROPERTIES["padding-"+ POS[i]] = "0px";
+		//EXPORT_PROPERTIES["margin-"+ POS[i]] = "0px";
 		EXPORT_PROPERTIES[POS[i]] = "auto";
 	}
 	var prefix;
