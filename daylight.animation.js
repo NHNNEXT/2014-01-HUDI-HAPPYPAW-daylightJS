@@ -647,10 +647,8 @@ daylight.animation.Layer.prototype.addAction = function(name, startTime, endTime
 daylight.animation.Layer.prototype.optimizeRepeat = function(motion) {
 	var pos = ["top", "left", "right", "bottom"];
 	var i = 0;
-	console.log(motion);
 	var properties = this.properties, index;
 	if(motion.hasOwnProperty("border")) {
-		console.log("OTHER REMOVE");
 		for(i = 0; i < 4; ++i) {
 			if(motion.hasOwnProperty("border-" + pos[i]))
 				delete motion["border-" + pos[i]];
@@ -668,7 +666,6 @@ daylight.animation.Layer.prototype.optimizeRepeat = function(motion) {
 			}
 		}
 		if(is_repeat) {
-			console.log("MERGE");
 			for(i = 0; i < 4; ++i) {
 				if(motion.hasOwnProperty("border-" + pos[i]))
 					delete motion["border-" + pos[i]];
@@ -686,23 +683,34 @@ daylight.animation.Layer.prototype.optimize = function() {
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	var transformList = daylight.animation.CONSTANT.transformList;
 	var properties = {"test":{prev:"", count:0}};
-	var length = this.motions.length;
+	var motions = this.motions;
+	var length = motions.length;
 	var motion;
 	var property;
 	
 	var propertyInfo;
 	for(var i = 0; i < length; ++i) {
-		motion = this.motions[i]
+		motion = motions[i]
 		for(property in motion) {
+			
 			if(property.indexOf("?a") != -1) {
 				delete motion[property];
 				continue;
 			}
+
+			
 			if(ignoreCSS.indexOf(property) != -1)
 				continue;
-			if(transformList.hasOwnProperty(property) != -1)
+
+
+	
+					
+			if(transformList.hasOwnProperty(property))
 				continue;
 			
+			
+			
+		
 			if(!properties.hasOwnProperty(property)) {
 				properties[property] = {prev:motion, count:0, value: motion[property]};
 			} else if(properties[property].value !== motion[property]) {
@@ -715,6 +723,11 @@ daylight.animation.Layer.prototype.optimize = function() {
 					delete propertyInfo.prev[property];
 					propertyInfo.count--;
 				}
+				else if(propertyInfo.count == 1 && i != 0 && i + 1 === length) {
+					delete motion[property];
+					propertyInfo.count--;
+				}
+				
 				propertyInfo.prev = motion;
 			}
 		}
