@@ -60,13 +60,15 @@ tools.refreshStatus = function() {
 		tools.figure.removeClass("show");
 
 	if(tools.selectedMenu.transform && tools.nowSelectElement) {
-		tools.setTransformFigure();
+		tools.transform.setFigure();
 		tools.rotateArea.addClass("show");
 	} else
 		tools.rotateArea.removeClass("show");
 		
+/*
 	if(tools.selectedMenu.shape && tools.nowSelectElement) {
 		tools.setShapeFigure();
 	} else
 		tools.shapeFigure.removeClass("show");
+*/
 }

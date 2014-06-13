@@ -46,12 +46,16 @@ tools.window.makeWindow = function(title, obj, pos) {
 
 
 tools.window.init = function() {
-	tools.window.makeWindow("Transform", {title:"", multi:true, properties:[
+	tools.window.makeWindow("Transform", [{title:"", multi:true, properties:[
 	{name: "X", property:"tx"},
 	{name: "Y", property:"ty"},
 	{name: "scale", property:"scale"},
 	{name: "각도", property:"rotate"}
-	]}, {x:30, y:100});
+
+	]},
+	{title:"", multi:false, properties:[	{name: "기준점", property:"origin"}]}]
+	
+	, {x:30, y:100});
 	
 	tools.window.makeWindow("속성",[
 	{title:"위치", multi:true, properties:[

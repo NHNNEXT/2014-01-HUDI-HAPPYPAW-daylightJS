@@ -20,7 +20,6 @@ tools.timer.timer = function() {
 	}
 	var now = Date.now() / 1000;
 	var dt = now - tools.timer.prevTime;
-	console.log(dt, this.time, tools.timeline.totalTime);
 	
 	this.time += dt;
 	
@@ -47,6 +46,8 @@ tools.timer.start = function() {
 	console.debug("START TIMER");
 	this.bPause = false;
 	tools.cancelSelect();
+	if(tools.nowTime === tools.timeline.totalTime)
+		tools.nowTime = 0;
 	
 	if(tools.nowTime < 0)
 		tools.nowTime = 0;

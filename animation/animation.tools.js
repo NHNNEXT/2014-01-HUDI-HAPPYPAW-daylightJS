@@ -26,7 +26,7 @@ var datl = tools = {
 		if(!this.nowSelectElement)
 			return;
 		
-		var timeline = this.timelines[0];
+		var timeline = this.timeline;
 		var layer = timeline.getLayer(this.nowSelectElement); 
 		if(!layer) {
 			layer = timeline.createLayer(this.nowSelectElement);
@@ -84,7 +84,9 @@ tools.size = "-6px";
 		".day-transform-figure, .day-figure": {
 			border:"1px solid #72BCEB!important",
 			"border-radius":"0px!important",
-			display: "none"
+			display: "none",
+			"box-sizing":"border-box",
+			background:"transparent!important"
 		},
 		".day-figure": {
 			position: "absolute!important"	
@@ -101,8 +103,8 @@ tools.size = "-6px";
 		},
 		".day-transform-figure div, .day-figure div" : {
 			position: "absolute",
-			width: "8px",
-			height: "8px",
+			width: "10px",
+			height: "10px",
 			background:"#fff",
 			border:"1px solid #72BCEB!important",
 			"border-radius":"50%",
@@ -252,15 +254,17 @@ tools.setFigure = function() {
 	var height = dlElement.innerHeight();
 	dlElement.parent().prepend(tools.figure);
 	
-	var top = pos.top - offsetParentPos.top;
-	var left = pos.left - offsetParentPos.left;
+	//var top = pos.top - offsetParentPos.top;
+	//var left = pos.left - offsetParentPos.left;
 	
 	figure.addClass("show");
 	figure.attr("style", "");
 	
+	var left = parseFloat(dlElement.css("left")) + parseFloat(dlElement.css("border-left-width"));
+	var top = parseFloat(dlElement.css("top")) + parseFloat(dlElement.css("border-top-width"));
 	figure.css({
-		left: dlElement.css("left"),
-		top:  dlElement.css("top"),
+		left: left + "px",
+		top:  top +"px",
 		bottom: dlElement.css("bottom"),
 		right: dlElement.css("right"),
 		margin: dlElement.css("margin"),
@@ -364,6 +368,8 @@ tools.keyup = function(e) {
 
 		tools.selectedMenu.transform = !tools.selectedMenu.transform;
 		
+		break;
+	case 'R':
 		break;
 	case "D":
 		//삭제

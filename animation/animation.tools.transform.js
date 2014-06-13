@@ -11,7 +11,7 @@
 	transform.translate = function(x, y) {
 		
 	}
-	tools.setTransformFigure = function() {
+	tools.transform.setFigure = function() {
 		//console.debug("set TRANSFORM FIGURE");
 		var dlElement = $(tools.nowSelectElement);
 		var offsetParentPos = dlElement.offsetParent().offset();
@@ -22,14 +22,16 @@
 		var top = pos.top;
 		var left = pos.left;
 		var figure = tools.rotateArea;
+
+		figure.attr("style", style);		
+		dlElement.parent()[0].appendChild(figure.o[0]);
 		
-		dlElement.parent().append(figure);
-		figure.attr("style", style);
+
 		
 		var cssObject = {};
 	
 		function setPos(pos) {
-			cssObject[pos] = ((parseFloat(dlElement.css(pos)) || 0) - 20) + "px";
+			cssObject[pos] = ((parseFloat(dlElement.css(pos)) || 0) - 20 + parseFloat(dlElement.css("border-" + pos + "-width"))) + "px";
 		}
 		
 		figure.addClass("show");
@@ -42,7 +44,8 @@
 			setPos("top");
 		else
 			setPos("bottom");
-					
+		
+		console.log(style);
 		
 		cssObject.margin = dlElement.css("margin");
 		cssObject.width = width + "px";
@@ -151,15 +154,15 @@
 	
 	}
 	tools.setOrigin = function(e) {
-		var motion = tools.getMotion(tools.nowTime);
+		var motion = tools.getNowMotion();
+		var rotateArea = tools.rotateArea;
 		var figure = tools.transformFigure;
 		var dlElement = tools.nowSelectElement;
 		
 		
-		var origin = motion.origin;
+		var origin = motion.origin || motion["origin?a"] || "50% 50%";
 	
 		var style = dlElement.css();
-		origin = origin || "50% 50%";
 		if(!origin || origin === "none")
 			return;
 		
@@ -169,14 +172,30 @@
 		
 		tools.getLayer().addMotion(motion);
 	*/
+		console.log(origin);
 		
-		figure.css("-webkit-transform-origin", origin);
-		origin = origin.split(" ");
+		origins = origin.split(" ");
+		
 		var dlOrigin = figure.find(".origin");
 		dlOrigin.css({
-			left: origin[0],
-			top: origin[1]
+			left: origins[0],
+			top: origins[1]
 		});
+		var width = dlElement.width();
+		var height = dlElement.height();
+		var ox = _abspx(origins[0], width);
+		var oy = _abspx(origins[0], height);
+		
+		ox += 20;
+		oy += 20;
+		
+		
+		console.log("f" + origin);
+		origin = ox +"px " + oy+"px";
+		
+		console.log("l" + origin);		
+
+		rotateArea.css("-webkit-transform-origin", origin);
 	
 	}
 })(tools);

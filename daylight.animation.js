@@ -657,6 +657,10 @@ daylight.animation.Layer.prototype.optimize = function() {
 	for(var i = 0; i < length; ++i) {
 		motion = this.motions[i]
 		for(property in motion) {
+			if(property.indexOf("?a") != -1) {
+				delete motion[property];
+				continue;
+			}
 			if(ignoreCSS.indexOf(property) != -1)
 				continue;
 			if(transformList.hasOwnProperty(property) != -1)
@@ -1095,10 +1099,16 @@ daylight.animation.Timeline.prototype.exportToJSON = function(is_object) {
 	for(var i = 0; i < layerLength; ++i)
 		layers[i].timer(0);
 	
-	if(is_object)
-		return this._exportToJSON(element);
 
-	return JSON.stringify(this._exportToJSON(element));
+
+
+	var json = this._exportToJSON(element);
+	json.scenes = this.scenes;
+	json.totalTime = this.totalTime;
+	if(is_object)
+		return json;
+	return JSON.stringify(json);
+	
 }
 daylight.animation.Timeline.prototype.hasLayer = function(layer) {
 	return !!this.getLayer(layer);
@@ -1458,7 +1468,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	var prefix;
 	for(var i = 0; i < browserPrefix.length; ++i) {
 		prefix = browserPrefix[i];
-		EXPORT_PROPERTIES[prefix + "transform"] = "none";
+		//EXPORT_PROPERTIES[prefix + "transform"] = "none";
 		EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
 	}
 	daylight.animation.Timeline.prototype._exportStyle = function(element) {
@@ -1489,10 +1499,12 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		}
 		
 		var layer = this.getLayer(element);
+
 		if(layer) {
 			json.motions = layer.motions;
 			json.totalTime = layer.totalTime;
 			json.properties = layer.properties;
+			layer.optimize();
 		}
 		
 	

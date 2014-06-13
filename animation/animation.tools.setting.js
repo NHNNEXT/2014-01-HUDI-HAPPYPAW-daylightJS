@@ -130,7 +130,7 @@ tools.setting.init = function() {
 	});
 	$(".btn-preview").click(function(e) {
 		tools.cancelSelect();
-		tools.timeline.init().start();
+		tools.timeline.setAnimationType("linear").init().start();
 		tools.nowTime = 0;
 	});	
 	$(".btn-new").click(function(e) {

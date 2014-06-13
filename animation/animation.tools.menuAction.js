@@ -37,7 +37,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.scale = motion.scale || motion["scale?a"] || "1,1";
 		e.dragInfo.rotate = motion.rotate || motion["rotate?a"] || "0deg";
 		e.dragInfo.origin = motion.origin || motion["origin?a"] || "50% 50%";
-		tools.setTransformFigure();
+		tools.transform.setFigure();
 	}
 	
 	tools.setting.refreshLayerWindow();
@@ -81,7 +81,7 @@ tools.menuActions.pointer.drag = function(e) {
 	
 	if(tools.selectedMenu.transform) {
 		tools.refresh();
-		tools.setTransformFigure();
+		tools.transform.setFigure();
 	}
 }
 tools.menuActions.pointer.dragend = function(e) {
@@ -138,12 +138,21 @@ tools.menuActions.shape.drag = function(e, shape) {
 	var height = Math.abs(e.dragY);
 	var x = info.fixX;
 	var y = info.fixY;
-	
+
+
+	if(tools.key.shift) {
+		if(width > height)
+			height = width;
+		else
+			width = height;	
+	}
+			
 	if(e.dragX < 0)
 		x += e.dragX;
 	
 	if(e.dragY < 0)
 		y += e.dragY;
+		
 		
 	var motion = {position: "absolute"};
 	motion.left = x + "px";
