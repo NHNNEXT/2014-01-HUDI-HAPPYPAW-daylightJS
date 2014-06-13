@@ -1896,7 +1896,8 @@ daylight.fn.extend({
 		});
 		return daylight(o);
 	},
-	prev: function() {
+	prev: function(nCount) {
+		nCount = nCount ? nCount : 1;
 		var arr = [];
 		var length = this.length;
 		for(var i = 0; i < length; ++i) {
@@ -1904,26 +1905,30 @@ daylight.fn.extend({
 			if(!daylight.isElement(e))
 				continue;
 
-			while((e = e.previousSibling) != null && e.nodeType != 1) {}
+			while((e = e.previousSibling) != null && ((e.nodeType === 1 && --nCount != 0) || e.nodeType !== 1)) {}
 	
 			if(!e)
 				continue;
-			
+			if(nCount > 0)
+				continue;
 			arr.push(e);
 		};
 		return daylight(arr);
 	},
-	next : function() {
+	next : function(nCount) {
+		nCount = nCount ? nCount : 1;
+		
 		var arr = [];
 		var length = this.length;
 		for(var i = 0; i < length; ++i) {
 			var e = this.o[i];
 			if(!daylight.isElement(e))
 				continue;
-			while((e = e.nextSibling) != null && e.nodeType != 1) {}
+			while((e = e.nextSibling) !== null &&( (e.nodeType === 1 && --nCount != 0) || e.nodeType !== 1)) {}
 			if(!e)
 				continue;
-	
+			if(nCount > 0)
+				continue;
 			arr[arr.length] = e;
 		}
 		return daylight(arr);

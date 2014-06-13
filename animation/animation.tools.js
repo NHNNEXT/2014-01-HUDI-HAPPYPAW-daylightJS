@@ -1,4 +1,4 @@
-var tools = {
+var datl = tools = {
 	nowselectedMenu:"",
 	nowSelectElement: "",
 	
@@ -79,16 +79,18 @@ tools.size = "-6px";
 			border:"0px!important",
 			"border-radius":"0px!important",
 			background:"transparent!important",
-			"z-index":0
+			"z-index":1
 		},
 		".day-transform-figure, .day-figure": {
-			position: "absolute!important",
 			border:"1px solid #72BCEB!important",
 			"border-radius":"0px!important",
 			display: "none"
 		},
+		".day-figure": {
+			position: "absolute!important"	
+		},
 		".day-transform-figure": {
-			position: "relative",
+			position: "relative!important",
 			cursor: "auto",
 			display: block,
 			width: "100%",
@@ -104,7 +106,7 @@ tools.size = "-6px";
 			background:"#fff",
 			border:"1px solid #72BCEB!important",
 			"border-radius":"50%",
-			"z-index":3
+			"z-index":1
 		},
 		".day-transform-figure, .day-transform-figure div": {
 			border: "1px solid #E24E58!important"
@@ -172,10 +174,12 @@ tools.init = function(timeline) {
 	});
 	$(document).on("drag", function(e) {
 		executeMenuActionWithEvent("drag", e);
-		if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
+		/*
+if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
 			e.preventDefault();
 			e.returnValue = false;
 		}
+*/
 	});
 	$(document).on("dragend", function(e) {
 		executeMenuActionWithEvent("dragend", e);
@@ -327,6 +331,11 @@ tools.keydown = function(e) {
 		e.returnValue = false;
 	}
 }
+tools.cancelSelect = function() {
+	tools.figure.removeClass("show");
+	tools.rotateArea.removeClass("show");
+	tools.nowSelectElement = null;
+}
 tools.keyup = function(e) {
 	if(tools.setting.items.has(e.target, true).size() > 0) {
 		tools.setting.keyup(e);
@@ -339,12 +348,10 @@ tools.keyup = function(e) {
 	console.debug("keycode", keyCode);
 	switch(keyCode) {
 	case 27://esc
-		tools.figure.removeClass("show");
-		tools.rotateArea.removeClass("show");
-		tools.nowSelectElement = null;
+		tools.cancelSelect();
 		break;
 	case 32://space
-		if(tools.timer.bPause)
+		if(tools.timer.bPause && tools.timeline.is_finish)
 			tools.timer.start();
 		else
 			tools.timer.pause();

@@ -1,16 +1,13 @@
 var dimensionType = ["px", "em", "%"];
 tools.setProperty = function(pos, time) {
-	console.log("setProperty", pos);
-	
-	
 	if(!tools.nowSelectElement)
 		return;
 		
 	var dlElement = tools.nowSelectElement;
 	var motion = tools.getMotion((typeof time !== "undefined")? time : tools.nowTime);
 	var value = "";
-	var figure = tools.selectedMenu.pointer && tools.figure ||
-				 tools.selectedMenu.shape && tools.shapeFigure || "";
+	var figure = tools.selectedMenu.pointer && tools.figure;
+	/* tools.selectedMenu.shape && tools.shapeFigure || ""*/
 	var sSuffix = "px";
 	var cssObject = {};
 	

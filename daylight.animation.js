@@ -149,6 +149,10 @@ daylight.animation = {
 	* @desc CSS값들이 있는 Object를 style로 바꿔준다.
 	*/
 	objectToCSS: function(actionList, prefix) {
+		if(!actionList)
+			return "";
+			
+		
 		var CONSTANT = this.CONSTANT;
 		var transformList = [];
 		var browserEffectList = [];
@@ -157,14 +161,22 @@ daylight.animation = {
 		var totalStyle = "";
 		var action, replaceMotion;
 		var j;
-		
+		var index;
+				
 		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix = -webkit-, -moz-, -ms-, -o-, "", "all", -1 : 고치지 않고 그대로.
-		
+
 		for(action in actionList) {
-			if(action in CONSTANT.transformList)
+			if(action in CONSTANT.transformList) {
+				if(action === "tx" || action === "ty") {
+					index = transformList.indexOf("rotate");
+					if(index !== -1) {
+						transformList.splice(index, 0, action);
+						continue;
+					}
+				}
 				transformList.push(action);
-			else if(action in CONSTANT.browserEffectCSS)
+			} else if(action in CONSTANT.browserEffectCSS)
 				browserEffectList.push(action);
 			else if(CONSTANT.ignoreCSS.indexOf(action) != -1)
 				continue;
@@ -433,7 +445,7 @@ daylight.animation.Layer = function Layer(selector, initMotion) {
 	if(type === "element" || type === "daylight") {
 		var id =  this.dl_object.attr("id");
 		var className =  this.dl_object.attr("class");
-		selector = id ? "#" + id  : "." + className.replaceAll(" ", " .");
+		selector = id ? "#" + id  : "." + className.replaceAll(" ", ".");
 	}
 	else if(type !== "string") {
 		throw new Error(daylight.animation.ERRORMESSAGE.WRONGTYPE);
@@ -890,7 +902,7 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 	}
 	return value;
 }
-daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start) {
+daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_not_transition) {
 	var properties = this.properties;
 	var length = properties.length;
 	var motions = {};
@@ -933,7 +945,7 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start) {
 			//console.log(property, prev, next, value);
 		}
 		if(value === "transition") {
-			//motions[property] = next[property];
+			motions[property] = next[property];
 			
 			//if(CONSTANT.transformList.hasOwnProperty(property))
 			//	property = "{prefix}transform";
@@ -963,11 +975,9 @@ daylight.animation.Layer.prototype.timer = function(time, is_start) {
 
 
 daylight.animation.Layer.prototype.getCSSInitMotion = function() {
-	if(this.initMotion) {
-		var styleHTML = daylight.animation.objectToCSSWithSelector(this.selector, this.initMotion);
-		return styleHTML;
-	}
-	return "";
+	var initMotion = this.motions.length > 0 && this.motions[0].time === 0 ? this.motions[0]: {};
+	var styleHTML = daylight.animation.objectToCSSWithSelector(this.selector, initMotion);
+	return styleHTML;
 }
 //count와. type 테스트 값.
 daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
@@ -1231,13 +1241,20 @@ daylight.animation.Timeline.prototype.initTimer = function() {
 		});
 	}
 	
+	this.reset();
+		
+	$("head").append(this.getInitMotionCSS());
+	return this;
+}
+/**
+* @desc 모든 것을 되돌린다.
+*/
+daylight.animation.Timeline.prototype.reset = function() {
+	$(".daylightAnimationLayer").removeClass("animationStart");
 	var style = $(".daylightAnimation"+this.id+"Style, .daylightAnimation"+this.id+"InitStyle");
 	
 	if(!style.isEmpty())//removeStyle
 		style.remove();
-		
-	$("head").append(this.getInitMotionCSS());
-	return this;
 }
 daylight.animation.Timeline.prototype.init = function() {
 	console.log("INIT TIMELINE");
@@ -1261,10 +1278,7 @@ daylight.animation.Timeline.prototype.init = function() {
 	
 	styleHTML += '</style>';
 
-	var style = $(".daylightAnimation"+this.id+"Style, .daylightAnimation"+this.id+"InitStyle");
-	
-	if(!style.isEmpty())//removeStyle
-		style.remove();
+	this.reset();
 		
 	$("head").append(styleHTML);
 	$("head").append(this.getInitMotionCSS());
@@ -1359,6 +1373,9 @@ daylight.animation.Timeline.prototype.finish = function() {
 *
 * @desc 애니메이션을 강제 종료한다.
 */
+daylight.animation.Timeline.prototype.reset = function() {
+	
+}
 daylight.animation.Timeline.prototype.stop = function() {
 	this.finish();
 	$(".daylightAnimationLayer").removeClass("animationStart");

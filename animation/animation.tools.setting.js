@@ -25,6 +25,7 @@ tools.setting.removeProperty = function(dlItem) {
 	var property = dlItem.attr("data-item");
 	if(!property)
 		return;
+		
 	console.debug("removeProperty", property);
 	delete tools.getMotion(tools.nowTime)[property];
 	dlItem.parent().prev().removeClass("has-property");
@@ -128,6 +129,7 @@ tools.setting.init = function() {
 		tools.setting.refreshLayerWindow();
 	});
 	$(".btn-preview").click(function(e) {
+		tools.cancelSelect();
 		tools.timeline.init().start();
 		tools.nowTime = 0;
 	});	

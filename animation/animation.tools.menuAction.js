@@ -76,10 +76,12 @@ tools.menuActions.pointer.drag = function(e) {
 		tools.dragMouse(e);
 	}
 	
-	//tools.refresh();
 	
-	if(tools.selectedMenu.transform)
+	
+	if(tools.selectedMenu.transform) {
+		tools.refresh();
 		tools.setTransformFigure();
+	}
 }
 tools.menuActions.pointer.dragend = function(e) {
 	if($(".daylightAnimationTimeline, .day-rotate-area").has(e.dragElement, true).size() <= 0)
@@ -149,7 +151,7 @@ tools.menuActions.shape.drag = function(e, shape) {
 		motion["border-radius"] = "50%";
 	tools.getLayer().addMotion(motion);
 	tools.refresh();
-	tools.setShapeFigure();
+	//tools.setShapeFigure();
 }
 tools.menuActions.shape.dragend = function(e) {
 

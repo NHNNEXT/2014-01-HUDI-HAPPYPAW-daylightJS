@@ -3,6 +3,7 @@ tools.transform.translate = function(x, y) {
 	
 }
 tools.setTransformFigure = function() {
+	//console.debug("set TRANSFORM FIGURE");
 	var dlElement = $(tools.nowSelectElement);
 	var offsetParentPos = dlElement.offsetParent().offset();
 	var pos = dlElement.position();

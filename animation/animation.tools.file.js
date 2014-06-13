@@ -81,6 +81,16 @@ tools.file.createLayer = function(timeline, element, json) {
 			timeline.totalTime = layer.totalTime;
 		}
 		layer.properties = json.properties || [];
+		if(json.style) {
+			var motions = {
+				time: 0,
+				fill: "add"
+			}
+			for(var property in json.style) {
+				motions[property] = json.style[property];
+			}
+			layer.addMotion(motions);
+		}
 	}
 }
 tools.file.createTimeline = function(json) {
@@ -126,26 +136,26 @@ tools.file.loadTimeline = function(json) {
 tools.file.newDocument = function() {
 	this.loadJSON({name:"DIV",id:"", className: "", totalTime: 0, style: {width: "500px", height: "500px", left:"10%", top: "10%"}, motions:[]});
 }
-tools.file.checkLayerEasyMode = function(layer, scene) {
+tools.file.checkLayerEasyMode = function(layer, scenes) {
 	//layer에 들어가 있는 시간이 씬에 있는 시간이 맞는지 확인 일치 없으면 전문가 모드 전부 일치하면 이지 모드 
 	var motions = layer.motions;
 	var motionsLength = motions.length;
 	var time = 0;
 	for(var i = 0; i < motionsLength; ++i) {
 		time = motions[i].time;
-		if(time !== 0 && scene.indexOf(time) === -1)
+		if(time !== 0 && scenes.indexOf(time) === -1)
 			return;
 	}
 	return true;
 }
 tools.file.checkTimelineEasyMode = function(timeline) {
-	var scene = timeline.scene || [];
+	var scenes = timeline.scenes = timeline.scenes || [0];
 	var layerTimes;
 	var layer;
 	var bEasyMode = false;
 	for(var i = 0; i < timeline.layers; ++i) {
 		layer = timeline.layers[i];
-		bEasyMode = this.checkLayerEasyMode(layer, scene);
+		bEasyMode = this.checkLayerEasyMode(layer, scenes);
 		if(!bEasyMode)
 			return false;
 		

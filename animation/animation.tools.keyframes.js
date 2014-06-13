@@ -16,8 +16,9 @@ tools.keyframes.mode = {easy:{}, expert:{}};
 tools.keyframes.init = function() {
 	this.mode.easy.init();
 };
-tools.keyframes.refreshTime = function() {
+tools.keyframes.refreshTime = function(is_time_control) {
 	console.debug("refreshTime");
+	this.mode.easy.refreshTime(is_time_control);
 }
 tools.keyframes.initKeyframesTime = function() {
 	console.debug("initKeyframesTime");

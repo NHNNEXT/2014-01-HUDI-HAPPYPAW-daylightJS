@@ -1,6 +1,7 @@
-daylight.UI = {};
+daylight.ui = daylight.UI = {};
 daylight.UI.drag = {};
 daylight.UI.resize = {};
+daylight.UI.textedit = {};
 daylight.UI.drag.dragstart = function(e) {
 	var dlDragTarget = $(".day-drag").has(e.dragElement, true);
 	e.dragInfo.otop = parseFloat(dlDragTarget.css("top")) || 0;
@@ -121,17 +122,21 @@ daylight.UI.resize.drag = function(e) {
 		dlResizeTarget.css(property, properties[property] + "px");
 	}
 	
-	dlResizeTarget.trigger("resize", {direction:{n:bPosN, s:bPosS, w:bPosW, e:bPosE}});
-	
+	dlResizeTarget.trigger("resize", {direction:{n:bPosN, s:bPosS, w:bPosW, e:bPosE}});	
 }
 daylight.UI.resize.dragend = function(e) {
 	if(!e.dragInfo.dlResizeTarget)
 		return;
 		
-		
 	e.dragInfo.dlResizeTarget.trigger("endresize");
 }
-
+daylight.ui.textedit.setText = function(dlTarget, text) {
+	var sPrefix = dlTarget.attr("data-edit-complete-prefix") || "";
+	var sSuffix = dlTarget.attr("data-edit-complete-suffix") || "";
+	var sText = sPrefix + text + sSuffix;
+	dlTarget.attr("data-text", text);
+	dlTarget.html(sText);
+}
 $(document).ready(function() {
 	$("body").drag();
 	
@@ -188,14 +193,11 @@ $(document).ready(function() {
 		var dlTarget = $(e.target);
 		dlTarget.removeClass("day-mode-edit");
 		var dlTextEdit = dlTarget.find(".day-textedit");
+		var oldVal = dlTarget.attr("data-text");
 		var val = dlTextEdit.val();
-		var sPrefix = dlTarget.attr("data-edit-complete-prefix") || "";
-		var sSuffix = dlTarget.attr("data-edit-complete-suffix") || "";
-		var sText = sPrefix + val + sSuffix;
-		dlTarget.attr("data-text", val);
-		dlTarget.html(sText);
+		daylight.ui.textedit.setText(dlTarget, val);
 		
-		daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val});
+		daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val, oldText: oldVal});
 	})
 	$("body").dblclick(function(e) {
 		if(!daylight.hasClass(e.target, "day-text-editable"))

@@ -25,7 +25,7 @@ tools.timer.timer = function() {
 	this.time += dt;
 	
 	this.time  = tools.timeline.totalTime === this.time ||  tools.timeline.totalTime == 0 ? tools.timeline.totalTime : this.time % tools.timeline.totalTime;
-	tools.nowTime = parseInt(tools.timer.time * 10) / 10;
+	tools.nowTime = tools.timer.time;//= parseInt(tools.timer.time * 10) / 10;
 	
 	var now = tools.nowTime;
 	
@@ -41,7 +41,7 @@ tools.timer.timer = function() {
 tools.timer.start = function() {
 	console.debug("START TIMER");
 	this.bPause = false;
-
+	tools.cancelSelect();
 	
 	if(tools.nowTime < 0)
 		tools.nowTime = 0;
@@ -53,13 +53,20 @@ tools.timer.start = function() {
 tools.timer.pause = function() {
 	console.debug("PAUSE TIMER");
 	tools.timer.bPause = true;
-	if(!tools.timeline)
+	var timeline = tools.timeline;
+	if(!timeline)
 		return;
-	if(tools.nowTime > tools.timeline.totalTime) {
-	
-		tools.nowTime = tools.timeline.totalTime;
-		tools.timer.layerTimer(tools.nowTime);
-		tools.setting.refresh();
-		tools.keyframes.refreshTime();
+		
+	if(!timeline.is_finish) {
+		timeline.stop();
+		timeline.reset();
 	}
+	
+	if(tools.nowTime > tools.timeline.totalTime) {
+		tools.nowTime = tools.timeline.totalTime;
+	}
+	tools.keyframes.refreshTime(true);
+	tools.timer.layerTimer(tools.nowTime);
+	tools.setting.refresh();
+
 }
