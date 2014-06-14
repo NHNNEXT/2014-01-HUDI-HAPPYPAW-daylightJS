@@ -52,6 +52,15 @@ tools.timer.start = function() {
 	if(tools.nowTime < 0)
 		tools.nowTime = 0;
 
+
+	//스타일 제거 시도.
+	var layers = tools.timeline.layers, layer;
+	var length = layers.length;
+	for(var i = 0; i < length; ++i) {
+		layer = layers[i];
+	}
+
+
 	this.prevTime = Date.now() / 1000;
 	this.time = tools.nowTime;		
 	requestAnimFrame(this.timer.bind(this));

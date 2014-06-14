@@ -71,7 +71,8 @@ daylight.animation = {
 		browserEffectCSS : {"origin" : "transform-origin:?", "transition":"transition:?"},
 		styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {type};\n{prefix}animation-fill-mode: forwards;\n{prefix}animation-iteration-count:{count};\n",
 		stylePauseAnimation : "{prefix}animation-play-state:paused;\n",
-		ignoreCSS : ["count", "time", "function", "length", "fill"]
+		ignoreCSS : ["count", "time", "function", "length", "fill"],
+		removeProperties: ["count", "length", "fill"]
 	},
 	prefixToBrowser : function(css, prefix) {
 		prefix = typeof prefix === "undefined" ? "all" : prefix;
@@ -446,7 +447,7 @@ daylight.animation.Layer = function Layer(selector, initMotion) {
 	if(type === "element" || type === "daylight") {
 		var id =  this.dl_object.attr("id");
 		var className =  this.dl_object.attr("class");
-		selector = id ? "#" + id  : "." + className.replaceAll(" ", ".");
+		selector = id ? "#" + id  : "." + className.trim().replaceAll(" ", ".");
 	}
 	else if(type !== "string") {
 		throw new Error(daylight.animation.ERRORMESSAGE.WRONGTYPE);
@@ -681,6 +682,7 @@ daylight.animation.Layer.prototype.optimizeRepeat = function(motion) {
 }
 daylight.animation.Layer.prototype.optimize = function() {
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
+	var removeProperties = daylight.animation.CONSTANT.removeProperties;
 	var transformList = daylight.animation.CONSTANT.transformList;
 	var properties = {"test":{prev:"", count:0}};
 	var motions = this.motions;
@@ -693,11 +695,12 @@ daylight.animation.Layer.prototype.optimize = function() {
 		motion = motions[i]
 		for(property in motion) {
 			
-			if(property.indexOf("?a") != -1) {
+			if(property.indexOf("?a") != -1 || removeProperties.indexOf(property) != -1) {
 				delete motion[property];
 				continue;
 			}
-
+			
+			
 			
 			if(ignoreCSS.indexOf(property) != -1)
 				continue;
@@ -1115,7 +1118,7 @@ daylight.animation.Timeline = function Timeline(selector) {
 	if(type === "element" || type === "daylight") {
 		var id =  this.dl_object.attr("id");
 		var className =  this.dl_object.attr("class");
-		selector = id ? "#" + id  : "." + className.replaceAll(" ", " .");
+		selector = id ? "#" + id  : "." + className.trim().replaceAll(" ", " .");
 	}
 	else if(type !== "string") {
 		console.error("selector : " + selector, type)
@@ -1317,10 +1320,12 @@ daylight.animation.Timeline.prototype.initTimer = function() {
 /**
 * @desc 모든 것을 되돌린다.
 */
-daylight.animation.Timeline.prototype.reset = function() {
+daylight.animation.Timeline.prototype.resetStyle = function() {
+	console.debug("RESET");
 	$(".daylightAnimationLayer").removeClass("animationStart");
 	var style = $(".daylightAnimation"+this.id+"Style, .daylightAnimation"+this.id+"InitStyle");
 	
+	console.log(style);
 	if(!style.isEmpty())//removeStyle
 		style.remove();
 }
@@ -1345,8 +1350,8 @@ daylight.animation.Timeline.prototype.init = function() {
 	}
 	
 	styleHTML += '</style>';
-
-	this.reset();
+	console.debug("RESET");
+	this.resetStyle();
 		
 	$("head").append(styleHTML);
 	$("head").append(this.getInitMotionCSS());
@@ -1524,7 +1529,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		//EXPORT_PROPERTIES[prefix + "transform"] = "none";
 		EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
 	}
-	daylight.animation.Timeline.prototype._exportStyle = function(element) {
+	var _exportStyle = function(element) {
 		var exportStyle = {};
 		var styles = window.getComputedStyle(element);
 		try {		
@@ -1544,8 +1549,17 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		}			
 		return exportStyle;
 	}
+	var _exportCheckRepeatStyle = function(style, motion) {
+		for(var property in style) {
+			if(motion[property] === style[property])
+				delete style[property];
+		}
+	}
 	daylight.animation.Timeline.prototype._exportToJSON = function(element) {
-		var json = {name:element.nodeName, id:element.id, className:element.className};
+		var className = element.className;
+		className = className.replace("daylightAnimationLayer", "");
+		className = className.trim();
+		var json = {name:element.nodeName, id:element.id, className:className};
 		var node, value;
 		switch(json.name) {
 		case "IMG": json.src = element.src;break;
@@ -1576,7 +1590,10 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 			value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
 			if(value) json.childNodes.push(value)
 		}
-		json.style = this._exportStyle(element);
+		json.style = _exportStyle(element);
+		if(json.motions && json.motions[0] && json.motions[0].time === 0) {
+			_exportCheckRepeatStyle(json.style, json.motions[0]);
+		}
 		return json;
 	}
 }());
