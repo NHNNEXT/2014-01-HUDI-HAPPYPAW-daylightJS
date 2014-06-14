@@ -13,6 +13,7 @@
 	}
 	tools.transform.setFigure = function() {
 		//console.debug("set TRANSFORM FIGURE");
+		
 		var dlElement = $(tools.nowSelectElement);
 		var offsetParentPos = dlElement.offsetParent().offset();
 		var pos = dlElement.position();
@@ -45,8 +46,8 @@
 		else
 			setPos("bottom");
 		
-		console.log(style);
-		
+		var motion = tools.getNowMotion();
+		cssObject.opacity = 1;
 		cssObject.margin = dlElement.css("margin");
 		cssObject.width = width + "px";
 		cssObject.height = height + "px";

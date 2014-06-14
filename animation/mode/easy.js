@@ -164,6 +164,14 @@
 		
 		scenes[index] = toScene;
 		
+		var scenesLength = scenes.length;
+		if(scenesLength === 0)
+			timeline.totalTime = 0;
+		else
+			timeline.totalTime = scenes[scenesLength - 1];		
+		
+		var totalTime = timeline.totalTime;
+			
 		var layer, motion;
 		for(var i = 0; i < layersLength; ++i) {
 			layer = layers[i];
@@ -172,13 +180,10 @@
 				continue;
 				
 			motion.time = toScene;
+			layer.totalTime = totalTime;
 		}
 		
-		var scenesLength = scenes.length;
-		if(scenesLength === 0)
-			timeline.totalTime = 0;
-		else
-			timeline.totalTime = scenes[scenesLength - 1];		
+
 		
 		return true;
 	}

@@ -28,7 +28,9 @@ input, textarea {
 	border-radius: inherit;
 	box-sizing: border-box;
 }
-
+.daylightAnimationLayer.animationStart:before {
+	display: none;
+}
 .day-tool {
 	z-index: 5;
 	font-family: sans-serif;

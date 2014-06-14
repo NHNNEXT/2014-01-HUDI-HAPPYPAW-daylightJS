@@ -957,7 +957,15 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 				value = value + "px";
 				break;
 			}
-		} else {		
+		} else {
+			switch(property) {
+			case "scale":
+				var fromScale = prevMotion.split(",");
+				var toScale = nextMotion.split(",");
+				var xScale = _dot(parseFloat(fromScale[0]), parseFloat(toScale[0]), nextTime, prevTime);
+				var yScale = _dot(parseFloat(fromScale[1]), parseFloat(toScale[1]), nextTime, prevTime);
+				return xScale +", " + yScale;
+			}	
 			return "transition";
 		}
 	} catch(e) {

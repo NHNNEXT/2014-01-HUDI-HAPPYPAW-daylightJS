@@ -69,7 +69,7 @@ tools.menuActions.pointer.drag = function(e) {
 		if(dlResizeDot.hasClass("origin"))
 			tools.transform.moveOrigin(e);
 		else
-			tools.scale(e);
+			tools.transform.scale(e);
 	}
 	else if(tools.rotateArea.equal(e.dragElement)) {
 		tools.transform.rotate(e);

@@ -1,6 +1,6 @@
 tools.window = {};
 tools.window.windowTemplate = '<div class="day-tool day-tools-properties day-drag" style="left:{x}; top:{y};"><div class="day-drag-draggable"></div><div class="day-property"><h3 class="day-drag-draggable">{title}</h3>{contents}</div>';
-tools.window.innerWindowTemplate = '<div class="day-property-inner">{title}<table>{properties}<tr>{column}<td class="day-item-property">{name}</td><td class="day-item-value"><input type="input" data-item="{property}"/></td>{/column}</tr>{/properties}</table></div>';
+tools.window.innerWindowTemplate = '<div class="day-property-inner">{title}<table>{properties}<tr>{column}<td class="day-item-property">{name}</td><td class="day-item-value"><input type="input" data-item="{property}" data-default="{default}"/></td>{/column}</tr>{/properties}</table></div>';
 tools.window.makeColumn = function(obj) {
 	obj.forEach(function(element, index) {
 		var is_multi = element.multi;
@@ -10,6 +10,9 @@ tools.window.makeColumn = function(obj) {
 		if(!is_multi) {
 			properties.forEach(function(element, index) {
 				properties[index] = {column:[element]};
+				
+				if(!element.hasOwnProperty("default"))
+					element.default = "";
 			});
 		} else {
 			var rowCount = Math.round(properties.length / 2);
@@ -19,6 +22,9 @@ tools.window.makeColumn = function(obj) {
 					properties[row] = {column:[element]};
 				else
 					properties[row].column[1] =element;
+					
+				if(!element.hasOwnProperty("default"))
+					element.default = "";
 			});
 			properties.splice(rowCount, properties.length - rowCount);
 			
@@ -47,10 +53,10 @@ tools.window.makeWindow = function(title, obj, pos) {
 
 tools.window.init = function() {
 	tools.window.makeWindow("Transform", [{title:"", multi:true, properties:[
-	{name: "X", property:"tx"},
-	{name: "Y", property:"ty"},
-	{name: "scale", property:"scale"},
-	{name: "각도", property:"rotate"}
+	{name: "X", property:"tx", default: "0px"},
+	{name: "Y", property:"ty", default: "0px"},
+	{name: "scale", property:"scale", default: "1, 1"},
+	{name: "각도", property:"rotate", default: "0deg"}
 
 	]},
 	{title:"", multi:false, properties:[	{name: "기준점", property:"origin"}]}]

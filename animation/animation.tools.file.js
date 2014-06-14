@@ -167,7 +167,13 @@ tools.file.checkTimelineEasyMode = function(timeline) {
 	return true;
 }
 tools.file.loadJSON = function(json) {
-
+	tools.nowSelectElement = null;
+	tools.timelines = [];
+	
+	var figure = tools.figure;
+	$("body").prepend(figure);
+	figure.removeClass("show");
+	
 	try {
 		if(typeof json !== "object")		
 			json = JSON.parse(json);
@@ -199,6 +205,11 @@ tools.file.loadJSON = function(json) {
 }
 
 tools.file.saveJSON = function() {
+	tools.nowSelectElement = null;
+	var figure = tools.figure;
+	$("body").prepend(figure);
+	figure.removeClass("show");
+	
 	var timelines = daylight.map(tools.timelines, function() {
 		return this.exportToJSON(true);	
 	});
