@@ -711,8 +711,6 @@ daylight.animation.Layer.prototype.optimize = function() {
 			if(transformList.hasOwnProperty(property))
 				continue;
 			
-			
-			
 		
 			if(!properties.hasOwnProperty(property)) {
 				properties[property] = {prev:motion, count:0, value: motion[property]};
@@ -756,7 +754,7 @@ daylight.animation.Layer.prototype._addMotion = function(motion) {
         is_max = true;
         index = this.motions.length - 1;
     }
-    if(is_max || motion.fill === "auto") {
+    if(motion.fill === "auto") {
 
     	this._fillPrevMotionsWithMotionWithIndex(motion, index);
     }
@@ -791,6 +789,8 @@ daylight.animation.Layer.prototype.addMotion = function(motion) {
 				return;
 				
 			if(ignoreCSS.indexOf(k) !== -1)
+				return;
+			if(k.indexOf("?a") !== -1)
 				return;
 			
 			self.properties.push(k);
@@ -1527,7 +1527,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	for(var i = 0; i < browserPrefix.length; ++i) {
 		prefix = browserPrefix[i];
 		//EXPORT_PROPERTIES[prefix + "transform"] = "none";
-		EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
+		//EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
 	}
 	var _exportStyle = function(element) {
 		var exportStyle = {};
@@ -1553,6 +1553,13 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		for(var property in style) {
 			if(motion[property] === style[property])
 				delete style[property];
+				
+			if(property.indexOf("transform-origin")) {
+				if(!motion.hasOwnProperty("motion")) {
+					motion.origin = style[property];
+				}
+				delete style[property];
+			}
 		}
 	}
 	daylight.animation.Timeline.prototype._exportToJSON = function(element) {
