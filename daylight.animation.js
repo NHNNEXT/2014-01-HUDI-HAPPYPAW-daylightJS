@@ -477,6 +477,8 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 	var self = this;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	//is_force -1이면 언제든지 바꾸기 요청이 오면 바꾸게 할 수 있다.
+	//is_force 1이면 강제성
+	
 	if(!fromMotion)
 		return;
 
@@ -491,7 +493,6 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 			if(motion.hasOwnProperty(key))
 				is_repeat = true;
 			
-	
 		});
 	}
 	if(is_repeat) {
@@ -503,14 +504,17 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 		if(ignoreCSS.indexOf(key) >= 0)
 			return;
 			
-		if(motion.hasOwnProperty(key + "?a") && !is_force) {
+		 else if(motion.hasOwnProperty(key + "?a") && !is_force) {
 			motion[key] = value;
 			delete motion[key + "?a"];
-		} else if(!motion.hasOwnProperty(key) || is_force)
+		} else if(!motion.hasOwnProperty(key) || is_force === 1) {
 			motion[key] = value;
-		if(is_force === -1) {
+			if(motion.hasOwnProperty(key + "?a"))
+				delete motion[key + "?a"];
+		} else if(is_force === -1) {
 			motion[key + "?a"] = value;
 		}
+
 	});
 	return true;
 }
@@ -1270,7 +1274,7 @@ daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 	
 	layer.fillMotion(fMotion, finalMotion, 1);
 	fMotion.time = totalTime;
-
+	
 	if(!layer.getMotion(totalTime)) {
 		layer.addMotion(fMotion);
 	}
