@@ -91,6 +91,7 @@
 			right		: (keyCode == 39),
 			enter		: (keyCode == 13),		
 			esc			: (keyCode == 27),
+			command		: (keyCode == 91),
 			character	: String.fromCharCode(keyCode)
 		};
 	

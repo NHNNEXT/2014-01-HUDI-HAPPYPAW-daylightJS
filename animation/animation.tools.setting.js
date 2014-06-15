@@ -188,7 +188,7 @@
 		if(dlPrev.size() === 0)
 			return;
 			
-		dlPrev.prepend(nowSelectElement);
+		dlPrev.before(nowSelectElement);
 	}
 	tools.setting.goForward = function() {
 		if(!tools.timeline)
@@ -204,6 +204,6 @@
 		if(dlNext.size() === 0)
 			return;
 			
-		dlNext.append(nowSelectElement);
+		dlNext.after(nowSelectElement);
 	}
 })(tools);

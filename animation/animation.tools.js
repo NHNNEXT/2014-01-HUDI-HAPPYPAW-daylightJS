@@ -350,11 +350,10 @@ tools.keyup = function(e) {
 		tools.setting.keyup(e);
 		return;
 	}
-	
 	var key = $.Event(e).key();
 	tools.key = {};
 	var keyCode = key.keyCode;
-	console.debug("keycode", keyCode);
+	console.debug("keycode",e, keyCode);
 	switch(keyCode) {
 	case 27://esc
 		tools.cancelSelect();
@@ -376,6 +375,14 @@ tools.keyup = function(e) {
 		break;
 	case 'R':
 		//씐 삭제
+		break;
+	case 'B':
+		tools.setting.goBack();
+		break;
+	case "C":
+		if(key.ctrl) {
+			console.log("copy");
+		}
 		break;
 	case "D":
 		//삭제
