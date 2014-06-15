@@ -186,6 +186,11 @@ if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
 	$(document).on("dragend", function(e) {
 		executeMenuActionWithEvent("dragend", e);
 	});
+	$(document).click(function(e) {
+		if(e.target === document.body) {
+			tools.cancelSelect();
+		}
+	});
 	$(window).keyup(tools.keyup);
 	$(window).keydown(tools.keydown);
 	

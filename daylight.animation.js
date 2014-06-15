@@ -599,7 +599,29 @@ daylight.animation.Layer.prototype.removeProperty = function(time, property) {
 	if(!_motion)
 		return;
 
+	
 	delete _motion[property];
+	
+	
+	
+	
+	var is_has_property = this.getPrevMotion(property, time, 1).hasOwnProperty(property) ||
+							this.getNextMotion(property, time, 1).hasOwnProperty(property)
+							
+	if(is_has_property)
+		return;
+	
+	console.log(property, _motion[property]);
+	
+	
+	var properties = this.properties;
+	var index = properties.indexOf(property);
+
+	if(index === -1)
+		return;
+		
+	properties.splice(index, 1);
+	
 }
 daylight.animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
 	var max_time = -2;

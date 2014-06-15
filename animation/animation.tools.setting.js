@@ -29,7 +29,7 @@
 			return;
 			
 		console.debug("removeProperty", property);
-		delete tools.getMotion(tools.nowTime)[property];
+		tools.getLayer().removeProperty(tools.nowTime, property);
 		dlItem.parent().prev().removeClass("has-property");
 	}
 	tools.setting.applyProperty = function(dlItem) {
@@ -172,5 +172,38 @@
 	
 		
 		
+	}
+	
+	tools.setting.goBack = function() {
+		if(!tools.timeline)
+			return;
+		
+
+		if(!tools.nowSelectElement)
+			return;
+			
+			
+		var nowSelectElement = tools.nowSelectElement;
+		var dlPrev = nowSelectElement.prev();
+		if(dlPrev.size() === 0)
+			return;
+			
+		dlPrev.prepend(nowSelectElement);
+	}
+	tools.setting.goForward = function() {
+		if(!tools.timeline)
+			return;
+		
+
+		if(!tools.nowSelectElement)
+			return;
+			
+			
+		var nowSelectElement = tools.nowSelectElement;
+		var dlNext = nowSelectElement.next();
+		if(dlNext.size() === 0)
+			return;
+			
+		dlNext.append(nowSelectElement);
 	}
 })(tools);

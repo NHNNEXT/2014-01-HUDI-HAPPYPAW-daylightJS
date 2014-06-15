@@ -209,7 +209,8 @@ tools.file.saveJSON = function() {
 	var figure = tools.figure;
 	$("body").prepend(figure);
 	figure.removeClass("show");
-	
+	$("body").prepend(tools.rotateArea);
+	tools.rotateArea.removeClass("show");
 	var timelines = daylight.map(tools.timelines, function() {
 		return this.exportToJSON(true);	
 	});
