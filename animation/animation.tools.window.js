@@ -59,7 +59,7 @@ tools.window.init = function() {
 	{name: "각도", property:"rotate", default: "0deg"}
 
 	]},
-	{title:"", multi:false, properties:[	{name: "기준점", property:"origin"}]}]
+	{title:"", multi:false, properties:[	{name: "기준점", property:"origin", default:"50% 50%"}]}]
 	
 	, {x:30, y:100});
 	

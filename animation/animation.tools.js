@@ -370,6 +370,7 @@ tools.keyup = function(e) {
 		
 		break;
 	case 'R':
+		//씐 삭제
 		break;
 	case "D":
 		//삭제

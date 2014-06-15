@@ -70,13 +70,15 @@
 				return;
 			var is_motion = !!motion[item];
 			var value = nowMotion[item];
-				
-			if(!value) {
+			
+			if(nowMotion.hasOwnProperty(item)) {
+				value = nowMotion[item];
+			} else {
 				is_motion = false;
 				if(transformList.hasOwnProperty(item)) {
 					value = dlItem.attr("data-default");
 				} else {
-					value = dlElement.css(item);
+					value = dlElement.css(item) || dlItem.attr("data-default") || 0;
 				}
 			}
 			if(is_motion)
