@@ -1,5 +1,7 @@
-datl.event = {};
-
-datl.addEvent = function(event, startMotion, endMotion) {
+(function(tools) {
+	tools.event = {};
 	
-}
+	tools.addEvent = function(event, startMotion, endMotion) {
+		
+	};
+})(tools);
