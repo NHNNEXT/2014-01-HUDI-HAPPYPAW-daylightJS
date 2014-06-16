@@ -1184,8 +1184,10 @@ daylight.animation.Timeline = function Timeline(selector) {
 	
 }
 
-
-daylight.animation.Timeline.prototype.exportToJSON = function(is_object) {
+daylight.animation.Timeline.prototype.importJSON = function(json) {
+	
+}
+daylight.animation.Timeline.prototype.exportToJSON = function(is_object, is_minify) {
 	var id = "";
 	var dl_object = this.dl_object;
 	var element = dl_object.o[0];
@@ -1402,6 +1404,17 @@ daylight.animation.Timeline.prototype.init = function() {
 }
 daylight.animation.Timeline.prototype.executeFunction = function(schedule, spendTime, count) {
 	
+}
+daylight.animation.Timeline.prototype.synchronize = function(percentage) {
+	var time = percentage * this.totalTime / 100;
+	
+	var layers = this.layers;
+	var layersLength = layers.length;
+	var layer;
+	for(var i = 0; i < layersLength; ++i) {
+		layer = layers[i];
+		layer.timer(time, false, true);
+	}
 }
 daylight.animation.Timeline.prototype.timer = function() {
 	if(!this.totalTime) {
