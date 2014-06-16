@@ -1,4 +1,3 @@
-(function() {
 
 window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       ||
@@ -8,6 +7,10 @@ window.requestAnimFrame = (function(){
             window.setTimeout(callback, 1000 / 60);
           };
 })();
+
+
+(function(daylight) {
+
 //content width에 따라 바뀔 수 있는 속성
 var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right"];
 //content height에 따라 바뀔 수 있는 속성
@@ -1147,7 +1150,7 @@ daylight.animation.Layer.prototype.print = function() {
 *
 * @class
 * @classdesc 타임라인
-*
+* @method $Animation.Timeline
 */
 daylight.animation.Timeline = function Timeline(selector) {
 	console.log("NEW TIMELINE");
@@ -1558,123 +1561,125 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	
 }
 
-(function() {
-	var browserPrefix = daylight.animation.CONSTANT.browserPrefix;
-	var NO_CHILD = ["IMG"];
-	var EXPORT_PROPERTIES = {"opacity":1, "box-sizing":"content-box", width:"0px", height:"0px" , "border-radius":"0px", "color":"rgb(255, 255, 255)", position:"static"};
-	var POS = ["left","top", "right", "bottom"];
-	var BACKGROUND = "background-";
-	EXPORT_PROPERTIES[BACKGROUND + "color"] = "rgba(0, 0, 0, 0)";
-	EXPORT_PROPERTIES[BACKGROUND + "image"] = "none";
-	EXPORT_PROPERTIES[BACKGROUND + "size"] = "auto";
-	EXPORT_PROPERTIES[BACKGROUND + "position"] = "0% 0%";
-
-	EXPORT_PROPERTIES["margin"] = "0px none rgb(0, 0, 0, 0)";
-	EXPORT_PROPERTIES["padding"] = "0px";
-	EXPORT_PROPERTIES["border"] = "";
-	for(var i = 0; i < 4; ++i) {
-		//EXPORT_PROPERTIES["border-"+ POS[i]] = {has:"0px"};
-		//EXPORT_PROPERTIES["padding-"+ POS[i]] = "0px";
-		//EXPORT_PROPERTIES["margin-"+ POS[i]] = "0px";
-		EXPORT_PROPERTIES[POS[i]] = "auto";
-	}
-	var prefix;
-	for(var i = 0; i < browserPrefix.length; ++i) {
-		prefix = browserPrefix[i];
-		//EXPORT_PROPERTIES[prefix + "transform"] = "none";
-		//EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
-	}
-	var _lengthObject = function(obj) {
-		var count = 0;
-		for(var i in obj) {++count;}
-		return count;
-	}
-	var _exportStyle = function(element) {
-		var exportStyle = {};
-		var styles = window.getComputedStyle(element);
-		try {		
-			for(var property in EXPORT_PROPERTIES) {
+	(function() {
+		var browserPrefix = daylight.animation.CONSTANT.browserPrefix;
+		var NO_CHILD = ["IMG"];
+		var EXPORT_PROPERTIES = {"opacity":1, "box-sizing":"content-box", width:"0px", height:"0px" , "border-radius":"0px", "color":"rgb(255, 255, 255)", position:"static"};
+		var POS = ["left","top", "right", "bottom"];
+		var BACKGROUND = "background-";
+		EXPORT_PROPERTIES[BACKGROUND + "color"] = "rgba(0, 0, 0, 0)";
+		EXPORT_PROPERTIES[BACKGROUND + "image"] = "none";
+		EXPORT_PROPERTIES[BACKGROUND + "size"] = "auto";
+		EXPORT_PROPERTIES[BACKGROUND + "position"] = "0% 0%";
 	
-				var propertyValue = styles[property];
-				var propertyDefaultValue = EXPORT_PROPERTIES[property];
-				if(typeof propertyValue === "undefined" || propertyValue === "" || propertyValue === propertyDefaultValue)
-					continue;
-				
-				exportStyle[property] = propertyValue;
-			}
-			if(!exportStyle.position || exportStyle.postion === "static")
-				exportStyle.position = "relative";
-		} catch (e){
-			console.log(element, "type : " + element.nodeType, property);
-		}			
-		return exportStyle;
-	}
-	var _exportCheckRepeatStyle = function(style, motion) {
-		for(var property in style) {
-			if(motion[property] === style[property])
-				delete style[property];
-				
-			if(property.indexOf("transform-origin")) {
-				if(!motion.hasOwnProperty("motion")) {
-					motion.origin = style[property];
+		EXPORT_PROPERTIES["margin"] = "0px none rgb(0, 0, 0, 0)";
+		EXPORT_PROPERTIES["padding"] = "0px";
+		EXPORT_PROPERTIES["border"] = "";
+		for(var i = 0; i < 4; ++i) {
+			//EXPORT_PROPERTIES["border-"+ POS[i]] = {has:"0px"};
+			//EXPORT_PROPERTIES["padding-"+ POS[i]] = "0px";
+			//EXPORT_PROPERTIES["margin-"+ POS[i]] = "0px";
+			EXPORT_PROPERTIES[POS[i]] = "auto";
+		}
+		var prefix;
+		for(var i = 0; i < browserPrefix.length; ++i) {
+			prefix = browserPrefix[i];
+			//EXPORT_PROPERTIES[prefix + "transform"] = "none";
+			//EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
+		}
+		var _lengthObject = function(obj) {
+			var count = 0;
+			for(var i in obj) {++count;}
+			return count;
+		}
+		var _exportStyle = function(element) {
+			var exportStyle = {};
+			var styles = window.getComputedStyle(element);
+			try {		
+				for(var property in EXPORT_PROPERTIES) {
+		
+					var propertyValue = styles[property];
+					var propertyDefaultValue = EXPORT_PROPERTIES[property];
+					if(typeof propertyValue === "undefined" || propertyValue === "" || propertyValue === propertyDefaultValue)
+						continue;
+					
+					exportStyle[property] = propertyValue;
 				}
-				delete style[property];
+				if(!exportStyle.position || exportStyle.postion === "static")
+					exportStyle.position = "relative";
+			} catch (e){
+				console.log(element, "type : " + element.nodeType, property);
+			}			
+			return exportStyle;
+		}
+		var _exportCheckRepeatStyle = function(style, motion) {
+			for(var property in style) {
+				if(motion[property] === style[property])
+					delete style[property];
+					
+				if(property.indexOf("transform-origin")) {
+					if(!motion.hasOwnProperty("motion")) {
+						motion.origin = style[property];
+					}
+					delete style[property];
+				}
 			}
 		}
-	}
-	daylight.animation.Timeline.prototype._exportToJSON = function(element) {
-		var className = element.className;
-		className = className.replace("daylightAnimationLayer", "");
-		className = className.trim();
-		var json = {name:element.nodeName, id:element.id, className:className};
-		var node, value;
-		switch(json.name) {
-		case "IMG": json.src = element.src;break;
-		}
-		
-		var layer = this.getLayer(element);
-
-		if(layer) {
-			json.motions = layer.motions;
-			json.totalTime = layer.totalTime;
-			json.properties = layer.properties;
-			layer.optimize();
-		}
-		
-	
-	
-		var childNodes = element.childNodes;
-		var length = childNodes && childNodes.length || 0; 
-		
-		if(length !== 0)
-			json.childNodes = [];
-		
-		for(var i = 0; i < length; ++i) {
-			node = childNodes[i];
-			//주석
-			if(node.nodeType === 8)
-				continue;
-			value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
-			if(value) json.childNodes.push(value)
-		}
-		json.style = _exportStyle(element);
-		if(json.motions && json.motions[0] && json.motions[0].time === 0) {
-			_exportCheckRepeatStyle(json.style, json.motions[0]);
-		}
-		if(_lengthObject(json.style) === 0)
-			delete json.style;
+		daylight.animation.Timeline.prototype._exportToJSON = function(element) {
+			var className = element.className;
+			className = className.replace("daylightAnimationLayer", "");
+			className = className.trim();
+			var json = {name:element.nodeName, id:element.id, className:className};
+			var node, value;
+			switch(json.name) {
+			case "IMG": json.src = element.src;break;
+			}
 			
+			var layer = this.getLayer(element);
+	
+			if(layer) {
+				json.motions = layer.motions;
+				json.totalTime = layer.totalTime;
+				json.properties = layer.properties;
+				layer.optimize();
+			}
 		
-		return json;
-	}
-}());
+			var childNodes = element.childNodes;
+			var length = childNodes && childNodes.length || 0; 
+			
+			if(length !== 0)
+				json.childNodes = [];
+			
+			for(var i = 0; i < length; ++i) {
+				node = childNodes[i];
+				//주석
+				if(node.nodeType === 8)
+					continue;
+				value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
+				if(value) json.childNodes.push(value)
+			}
+			json.style = _exportStyle(element);
+			if(json.motions && json.motions[0] && json.motions[0].time === 0) {
+				_exportCheckRepeatStyle(json.style, json.motions[0]);
+			}
+			if(_lengthObject(json.style) === 0)
+				delete json.style;
+				
+			
+			return json;
+		}
+	}());
 
 
-})();
-daylight.defineGetterSetter(daylight.animation.Timeline, "animationType");
-daylight.defineGetterSetter(daylight.animation.Timeline, "count");
-daylight.defineGetter(daylight.animation.Timeline, "is_finish");
-daylight.defineGetter(daylight.animation.Timeline, "is_start");
-daylight.defineGetter(daylight.animation.Timeline, "is_pause");
-daylight.extend(daylight.animation);
+	daylight.defineGetterSetter(daylight.animation.Timeline, "animationType");
+	daylight.defineGetterSetter(daylight.animation.Timeline, "count");
+	daylight.defineGetter(daylight.animation.Timeline, "is_finish");
+	daylight.defineGetter(daylight.animation.Timeline, "is_start");
+	daylight.defineGetter(daylight.animation.Timeline, "is_pause");
+	daylight.extend(daylight.animation);
+
+
+})(daylight);
+
+
 
