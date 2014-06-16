@@ -93,12 +93,18 @@
 	easy.refreshAll = function() {
 		if(!tools.timeline)
 			return;
-		
+
+		this.dlScenes.html("");
+		this.dlScenes.append('<div class="datl-scene" data-text="0">0s</div><div class="datl-scene-add"><div class="datl-scene-add1"></div><div class="datl-scene-add2"></div></div>');
 		var scenes = tools.timeline.scenes;
 		var scenesLength = scenes.length;
 		var scene, dlScene, prevScene;
 		
+		
+		
 		console.debug("loadScene", scenes);
+		
+		 
 		for(var i = 0; i < scenesLength; ++i) {
 			scene = scenes[i];
 			prevScene = dlScene;
@@ -113,6 +119,9 @@
 		this.dlSceneCollection = daylight(".datl-scene");
 	}
 	easy.addSceneNode = function(time, dlPrevScene) {
+		if(time === 0) {
+		
+		}
 		if(!dlPrevScene)
 			return;
 		dlPrevScene.after(daylight.template({time:time}, this.sceneTemplate));

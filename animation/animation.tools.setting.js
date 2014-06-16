@@ -57,7 +57,8 @@
 	tools.setting.refresh = function() {
 		if(!tools.timeline)
 			return;
-		var nowMotion = tools.getNowMotion();
+		
+		var nowMotion = tools.getNowMotion(true);
 		var motion = tools.getMotion(tools.nowTime)
 		var dlElement = tools.nowSelectElement;
 		if(!dlElement)
@@ -102,7 +103,7 @@
 		
 		this.select.on("change", function(e) {
 			console.log("SELECT");
-			tools.setting.apply($(this));
+			tools.setting.applyProperty($(this));
 		});
 		this.properties.click(function(e) {
 			var eTarget = e.target;

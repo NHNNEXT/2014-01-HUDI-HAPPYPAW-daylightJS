@@ -97,7 +97,21 @@ tools.menuActions.shape.dragstart = function(e) {
 	if(tools.dlTool.has(e.dragElement, true).size() > 0)
 		return;
 	
-	var size = $(".daylightAnimationShape").size();
+	var size = 0;
+	$(".daylightAnimationShape").each(function(e) {
+		var classes = e.className.split(" ");
+		var length = classes.length;
+		var v = 0;
+		for(var i = 0; i < length; ++i) {
+			if(classes[i].indexOf("day-shape") === -1)
+				continue;
+				
+			v = parseFloat(classes[i].replace("day-shape", "")) || 0;
+			if(v > size)
+				size = v;
+		}
+	});
+	
 	console.log("-" + size);
 	
 	if(!tools.timeline)

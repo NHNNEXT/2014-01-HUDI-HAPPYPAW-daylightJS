@@ -1038,6 +1038,14 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_n
 			//console.log(property, prev, next, value);
 		}
 		if(value === "transition") {
+			if(property === "display") {
+				motions[property] = prev[property];
+				continue;
+			}
+				
+			if(is_not_transition) {
+				console.debug("notTransition");
+			}
 			if(is_not_transition) {
 				motions[property] = prev[property];
 			} else {
@@ -1563,6 +1571,11 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		//EXPORT_PROPERTIES[prefix + "transform"] = "none";
 		//EXPORT_PROPERTIES[prefix + "transform-origin"] = "";
 	}
+	var _lengthObject = function(obj) {
+		var count = 0;
+		for(var i in obj) {++count;}
+		return count;
+	}
 	var _exportStyle = function(element) {
 		var exportStyle = {};
 		var styles = window.getComputedStyle(element);
@@ -1618,9 +1631,9 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	
 	
 		var childNodes = element.childNodes;
-		var length = childNodes && childNodes.length; 
+		var length = childNodes && childNodes.length || 0; 
 		
-		if(NO_CHILD.indexOf(json.name) === -1)
+		if(length !== 0)
 			json.childNodes = [];
 		
 		for(var i = 0; i < length; ++i) {
@@ -1635,6 +1648,10 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		if(json.motions && json.motions[0] && json.motions[0].time === 0) {
 			_exportCheckRepeatStyle(json.style, json.motions[0]);
 		}
+		if(_lengthObject(json.style) === 0)
+			delete json.style;
+			
+		
 		return json;
 	}
 }());

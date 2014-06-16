@@ -34,12 +34,12 @@ var datl = tools = {
 		}
 		return layer;
 	},
-	getTimeMotion: function(time) {
+	getTimeMotion: function(time, is_not_transition) {
 		var layer = this.getLayer();
 		if(!layer)
 			return;
 			
-		var motion = layer.getTimeMotion(time) || {time: time};
+		var motion = layer.getTimeMotion(time, is_not_transition) || {time: time};
 		return motion;
 	},
 	getMotion: function(time) {
@@ -50,8 +50,8 @@ var datl = tools = {
 		var motion = layer.getMotion(time) || {time: time};
 		return motion;
 	},
-	getNowMotion: function() {
-		return this.getTimeMotion(this.nowTime);
+	getNowMotion: function(is_not_transition) {
+		return this.getTimeMotion(this.nowTime, is_not_transition);
 	},
 	pause: function() {
 		if(!tools.timeline)
@@ -214,7 +214,7 @@ tools.refreshLayer = function() {
 		
 	
 	var layer = tools.getLayer();
-	layer.timer(tools.nowTime);
+	layer.timer(tools.nowTime, true);
 	if(tools.tmp.isCreateLayer || tools.tmp.isRemoveLayer) {
 		console.debug("Create Layer");
 		tools.keyframes.refresh();
@@ -333,6 +333,21 @@ tools.keydown = function(e) {
 	else if(key.right)
 		tools.addPosition(multiple, 0);	
 	
+	if(key.ctrl) {
+		switch(key.character) {
+		case "C":
+
+			console.log("copy");
+			tools.clipboard.copy();
+
+			break;
+		case "V":
+		
+			console.log("paste");
+			tools.clipboard.paste();
+			
+		}
+	}
 	tools.key = key;
 	
 	if(key.keyCode === 32) {
@@ -379,18 +394,13 @@ tools.keyup = function(e) {
 	case 'B':
 		tools.setting.goBack();
 		break;
-	case "C":
-		if(key.ctrl) {
-			console.log("copy");
-		}
-		break;
 	case "D":
 		//삭제
 		if(!tools.timeline)
 			break;
 		
 		var layers = tools.timeline.layers;
-		var layer = tools.getLayer()
+		var layer = tools.getLayer();
 		var index = layers.indexOf(layer);
 		
 		if(index !== -1) {

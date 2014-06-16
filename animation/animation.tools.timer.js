@@ -10,7 +10,7 @@
 		var layers = tools.timeline.layers;
 		var length = layers.length;
 		for(var i = 0; i < length; ++i) {
-			layers[i].timer(time, is_not_transition);
+			layers[i].timer(time, false, is_not_transition);
 		}
 	}
 	tools.timer.timer = function() {
@@ -92,7 +92,7 @@
 			tools.nowTime = tools.timeline.totalTime;
 		}
 		tools.keyframes.refreshTime(true);
-		tools.timer.layerTimer(tools.nowTime);
+		tools.timer.layerTimer(tools.nowTime, true);
 		tools.setting.refresh();
 	
 	}
