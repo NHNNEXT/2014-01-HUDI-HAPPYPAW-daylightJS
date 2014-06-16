@@ -198,6 +198,7 @@ $(document).ready(function() {
 		daylight.ui.textedit.setText(dlTarget, val);
 		
 		daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val, oldText: oldVal});
+		
 	})
 	$("body").dblclick(function(e) {
 		if(!daylight.hasClass(e.target, "day-text-editable"))

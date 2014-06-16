@@ -58,6 +58,8 @@
 		if(!tools.timeline)
 			return;
 		
+		console.debug("setting.refresh");
+		
 		var nowMotion = tools.getNowMotion(true);
 		var motion = tools.getMotion(tools.nowTime)
 		var dlElement = tools.nowSelectElement;

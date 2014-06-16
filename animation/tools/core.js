@@ -39,7 +39,7 @@ var datl = tools = {
 		if(!layer)
 			return;
 			
-		var motion = layer.getTimeMotion(time, is_not_transition) || {time: time};
+		var motion = layer.getTimeMotion(time, false, is_not_transition) || {time: time};
 		return motion;
 	},
 	getMotion: function(time) {
@@ -51,7 +51,7 @@ var datl = tools = {
 		return motion;
 	},
 	getNowMotion: function(is_not_transition) {
-		return this.getTimeMotion(this.nowTime, is_not_transition);
+		return this.getTimeMotion(this.nowTime, false, is_not_transition);
 	},
 	pause: function() {
 		if(!tools.timeline)
@@ -171,6 +171,7 @@ tools.init = function(timeline) {
 	}
 	$(document).drag();
 	$(document).on("dragstart", function(e) {
+		console.debug("dragstart");
 		tools.timer.pause();
 		executeMenuActionWithEvent("dragstart", e);
 	});
@@ -214,7 +215,7 @@ tools.refreshLayer = function() {
 		
 	
 	var layer = tools.getLayer();
-	layer.timer(tools.nowTime, true);
+	layer.timer(tools.nowTime, false, true);
 	if(tools.tmp.isCreateLayer || tools.tmp.isRemoveLayer) {
 		console.debug("Create Layer");
 		tools.keyframes.refresh();
@@ -376,9 +377,11 @@ tools.keyup = function(e) {
 	case 32://space
 		if(tools.timer.bPause && tools.timeline.is_finish)
 			tools.timer.start();
-		else
+		else {
 			tools.timer.pause();
-			
+			tools.setting.refresh();
+		}
+
 		break;
 	}
 	switch(key.character) {
@@ -413,6 +416,7 @@ tools.keyup = function(e) {
 		tools.setting.refreshLayerWindow();
 		break;
 	}
+	
 	tools.refreshStatus();
 	tools.refreshMenu();
 

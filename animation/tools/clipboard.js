@@ -44,6 +44,8 @@
 		
 		console.log("f" + size);
 		dlElement.removeClass("daylightAnimationLayer");
+		
+		
 		dlElement.each(function(e) {
 			var classes = e.className.split(" ");
 			var length = classes.length;

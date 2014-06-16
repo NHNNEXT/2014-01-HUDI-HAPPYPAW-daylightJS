@@ -93,8 +93,6 @@
 		}
 		tools.keyframes.refreshTime(true);
 		tools.timer.layerTimer(tools.nowTime, true);
-		tools.setting.refresh();
-	
 	}
 
 })(tools);

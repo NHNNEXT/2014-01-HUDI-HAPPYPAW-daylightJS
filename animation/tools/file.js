@@ -129,7 +129,11 @@ tools.file.createTimeline = function(json) {
 	return timeline;
 }
 tools.file.loadTimeline = function(json) {
-	var elTimeline = this.createTimeline(json);
+	//var elTimeline = this.createTimeline(json);
+			
+	var elTimeline = daylight.animation.importJSON(json);
+	document.body.appendChild(elTimeline.dl_object.get(0));
+	
 	tools.timelines.push(elTimeline);
 	tools.timeline = elTimeline;
 }

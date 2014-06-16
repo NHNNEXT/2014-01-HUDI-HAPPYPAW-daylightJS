@@ -1047,7 +1047,7 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_n
 			}
 				
 			if(is_not_transition) {
-				console.debug("notTransition");
+				//console.debug("notTransition");
 			}
 			if(is_not_transition) {
 				motions[property] = prev[property];

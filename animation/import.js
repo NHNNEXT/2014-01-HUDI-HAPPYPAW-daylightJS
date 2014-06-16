@@ -4,10 +4,15 @@
 		alert(message);
 		return;
 	}
-	function getStyle(properties) {
+	
+	
+	function getStyle(properties, ignores) {
 		var style = "";
 		properties.position = properties.position || "relative";
 		for(var property in properties) {
+			if(ignores.hasOwnProperty(property))
+				continue;
+			
 			style += property +":" + properties[property] +";";
 		}
 		return style;
@@ -20,9 +25,10 @@
 			
 		var layer = timeline.createLayer(element);
 		var totalTime = json.tt || json.totalTime || 0;
-		var properties = json.p || json.p || {};
+		var properties = json.p || json.properties || {};
 		var style = json.s || json.style || {};
 		
+		layer.properties = properties;
 		layer.motions = motions;
 		layer.totalTime = totalTime < timeline.totalTime ? timeline.totalTime : totalTime;
 		if(timeline.totalTime < layer.totalTime) {
@@ -44,6 +50,9 @@
 	function createElement(json) {
 		
 		var name = json.n || json.name;
+		var motions = json.ms || json.motions || {};
+		
+		
 		if(!name)
 			return errorMessage("잘못된 형식입니다.");
 			
@@ -52,7 +61,7 @@
 		var style = json.s || json.style || {};
 		
 		var element = daylight.createElement(name, {id:id, class:className});
-		style = getStyle(style);
+		style = getStyle(style, motions);
 		
 		element.setAttribute("style", style);
 		element.setAttribute("data-style", style);
@@ -66,12 +75,12 @@
 		var element = createElement(json);
 		
 		createLayer(timeline, element, json);
-		createchildNodes(json, timeline);
+		createchildNodes(json, element, timeline);
 		
 		
 		return element;
 	}
-	function createchildNodes(json, timeline) {
+	function createchildNodes(json, element, timeline) {
 		var childNodes = json.cns || json.childNodes || 0;
 		var childLength = childNodes.length;
 		var value = "";
@@ -98,9 +107,9 @@
 		var element = createElement(json);
 		var timeline = new daylight.Timeline(element);
 		timeline.scenes = scenes;
+		createLayer(timeline, element, json);
 		
-		create(json, timeline);
-		createchildNodes(json, timeline);
+		createchildNodes(json, element, timeline);
 		return timeline;
 	}
 })(daylight);
