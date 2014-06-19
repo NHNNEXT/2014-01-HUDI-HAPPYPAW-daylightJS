@@ -35,7 +35,14 @@ input, textarea {
 .daylightAnimationLayer.animationStart:before {
 	display: none;
 }
-
+.day-tools-screen {
+	position: fixed;
+	width: 100%;
+	overflow: auto;
+	height: -webkit-calc(100% - 130px);
+	height: calc(100% - 130px);
+	background: inherit;
+}
 .day-tool * {
 	font-family:"Lato", "Helvetica Neue", Helvetica, sans-serif;
 }
@@ -54,8 +61,8 @@ input, textarea {
 /* MENU */
 .day-tools-menu {
 	position: fixed;
-	background: #272726;
-	width: 52px;
+
+/* 	width: 50px; */
 }
 .day-tools-menu:hover {
 }
@@ -67,16 +74,19 @@ input, textarea {
 }
 .day-tools-menu li {
 	color:#fff;
-	padding: 5px 10px 5px;
+	width: 140px;
+	font-size: 14px;
+	background: #252525;
 }
 .day-tools-menu li.selected {
-	background: #404040;
+	background: #393739;
 }
-.day-tools-menu li {
-	text-align: center;
-}
+
 .day-tools-menu li img {
-	width: 32px;
+	width: 50px;
+	padding:10px;
+	box-sizing: border-box;
+	vertical-align: middle;
 }
 
 /*Window*/
@@ -98,7 +108,7 @@ input, textarea {
 	text-align: left;
 	vertical-align: middle;
 	font-size: 14px;
-	padding: 4px;
+	padding: 6px 4px;
 	border: 1px solid #333;
 	border-top:0px;
 	font-weight: 300;
@@ -122,7 +132,7 @@ input, textarea {
 	width: 250px;
 	color: #fff;
 	font-family:"Helveticta Neue", Helvetica, sans-serif;
-	border:10px solid #272726;
+	border:5px solid #272726;
 	padding:0px 0px 0px;
 	max-height: 300px;
 	overflow: auto;
@@ -213,6 +223,7 @@ input, textarea {
 	top:200px;
 }
 */
+
 .day-tools-timeline .day-layers {
 	list-style: none;
 	margin:0;
@@ -251,6 +262,7 @@ input, textarea {
 	bottom:0;
 	font-size: 0.9em;
 }
+
 .day-tools-timeline-head {
 	position: absolute;
 	width: 100%;
@@ -381,46 +393,6 @@ input, textarea {
 }
 
 
-.day-tool-dialog {
-	display: none;
-	box-sizing: border-box;
-	background: #EBEBEB;
-	width: 500px;
-	z-index: 10;
-	position: fixed;
-	padding: 2px 20px 0px;
-	color:#777;
-	top:50%;
-	left:50%;
-	margin-left:-250px;
-	margin-top:-150px;
-}
-.day-tool-dialog h1 {
-	margin:10px 0px;
-	font-weight: 300;
-	font-size: 1.2em;
-}
-.day-tool-dialog textarea{
-	width: 100%;
-	height: 200px;
-	border: 0;
-	background: #F7F7F7;
-}
-.day-tool-dialog .day-btn-area {
-	text-align: right;
-	padding: 10px 0px;
-}
-.day-tool-dialog .day-btn {
-	width: 70px;
-	height: 28px;
-	background: #FFFFFF;
-	border:1px solid #ccc;
-	margin-left: 10px;
-}
-.day-tool-dialog.show {
-	display: block;
-	
-}
 
 .datl-scenes {
 	margin:10px 10px;
@@ -486,3 +458,74 @@ input, textarea {
 .datl-scene.selected {
 	border-color: #579EE8;
 }
+
+/*dialog*/
+.day-tool-dialog {
+	display: none;
+	box-sizing: border-box;
+	background: #EBEBEB;
+	width: 500px;
+	z-index: 10;
+	position: fixed;
+	padding: 2px 20px 0px;
+	color:#777;
+	top:50%;
+	left:50%;
+	margin-left:-250px;
+	margin-top:-150px;
+}
+.day-tool-dialog h1 {
+	margin:10px 0px;
+	font-weight: 300;
+	font-size: 1.2em;
+}
+.day-tool-dialog textarea{
+	width: 100%;
+	height: 200px;
+	border: 0;
+	background: #F7F7F7;
+}
+.day-tool-dialog .day-btn-area {
+	text-align: right;
+	padding: 10px 0px;
+}
+.day-tool-dialog .day-btn {
+	width: 70px;
+	height: 28px;
+	background: #FFFFFF;
+	border:1px solid #ccc;
+	margin-left: 10px;
+}
+.day-tool-dialog.show {
+	display: block;
+	
+}
+
+
+.day-tools-timeline.min-size {
+	height: 100px;
+}
+
+.day-tools-timeline.min-size .datl-scenes-head {
+	padding:5px 10px;
+}
+
+.day-tools-timeline.min-size .datl-scenes-head {
+	padding:5px 10px;
+}
+.day-tools-timeline.min-size .datl-scenes  {
+	margin:3px 10px;
+}
+.day-tools-timeline.min-size .datl-scene {
+	height: 40px;
+	line-height: 40px;
+}
+
+.day-tools-timeline.min-size .datl-scene-add {
+	height: 40px;
+	line-height: 40px;
+}
+
+
+
+

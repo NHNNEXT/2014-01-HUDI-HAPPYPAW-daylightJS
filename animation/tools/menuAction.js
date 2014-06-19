@@ -19,7 +19,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 		return;
 	
 	console.log("pointer dragstart");
-	tools.setFigure();
+	//tools.setFigure();
 	var is_transform = tools.selectedMenu.transform;
 	if(!is_transform) {
 		e.dragInfo.owidth = tools.nowSelectElement.css("width");
@@ -28,6 +28,7 @@ tools.menuActions.pointer.dragstart = function(e) {
 		e.dragInfo.oleft = tools.nowSelectElement.css("left");
 		e.dragInfo.obottom = tools.nowSelectElement.css("bottom");
 		e.dragInfo.oright = tools.nowSelectElement.css("right");
+		tools.setFigure();
 	} else {
 		var motion = tools.getNowMotion();
 		

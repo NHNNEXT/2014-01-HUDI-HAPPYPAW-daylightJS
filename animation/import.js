@@ -1,19 +1,23 @@
 (function(daylight) {
 	var animation = daylight.animation;
 	function errorMessage(message) {
+		console.error(message);
 		alert(message);
 		return;
 	}
 	
 	
-	function getStyle(properties, ignores) {
+	function getStyle(styles, ignores) {
 		var style = "";
-		properties.position = properties.position || "relative";
-		for(var property in properties) {
+		if(!ignores.hasOwnProperty("position")) {
+			styles.position = styles.position || "relative";
+			console.debug(ignores);
+		}
+		for(var property in styles) {
 			if(ignores.hasOwnProperty(property))
 				continue;
 			
-			style += property +":" + properties[property] +";";
+			style += property +":" + styles[property] +";";
 		}
 		return style;
 	}
@@ -25,7 +29,7 @@
 			
 		var layer = timeline.createLayer(element);
 		var totalTime = json.tt || json.totalTime || 0;
-		var properties = json.p || json.properties || {};
+		var properties = json.p || json.properties || [];
 		var style = json.s || json.style || {};
 		
 		layer.properties = properties;
@@ -50,18 +54,18 @@
 	function createElement(json) {
 		
 		var name = json.n || json.name;
-		var motions = json.ms || json.motions || {};
+		var motions = json.ms || json.motions || [];
 		
 		
 		if(!name)
-			return errorMessage("잘못된 형식입니다.");
+			return errorMessage("Nonamed 잘못된 형식입니다.");
 			
 		var id = json.i || json.id;
 		var className = json.cn || json.className;
 		var style = json.s || json.style || {};
 		
 		var element = daylight.createElement(name, {id:id, class:className});
-		style = getStyle(style, motions);
+		style = getStyle(style, motions[0] || {});
 		
 		element.setAttribute("style", style);
 		element.setAttribute("data-style", style);
@@ -99,7 +103,7 @@
 		
 		var name = json.n || json.name;
 		if(!name)
-			return errorMessage("잘못된 형식입니다.");
+			return errorMessage("NoNamed 잘못된 형식입니다.");
 			
 
 		var scenes = json.ss || json.scenes || [0];

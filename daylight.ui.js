@@ -130,6 +130,7 @@ daylight.UI.resize.dragend = function(e) {
 		
 	e.dragInfo.dlResizeTarget.trigger("endresize");
 }
+
 daylight.ui.textedit.setText = function(dlTarget, text) {
 	var sPrefix = dlTarget.attr("data-edit-complete-prefix") || "";
 	var sSuffix = dlTarget.attr("data-edit-complete-suffix") || "";
@@ -137,11 +138,74 @@ daylight.ui.textedit.setText = function(dlTarget, text) {
 	dlTarget.attr("data-text", text);
 	dlTarget.html(sText);
 }
+daylight.ui.textedit.complete = function(dlTarget) {
+	dlTarget.removeClass("day-mode-edit");
+	var dlTextEdit = dlTarget.find(".day-textedit");
+	var oldVal = dlTarget.attr("data-text");
+	var val = dlTextEdit.val();
+	daylight.ui.textedit.setText(dlTarget, val);
+	daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val, oldText: oldVal});
+}
+daylight.ui.textedit.cancel = function(dlTarget) {
+	dlTarget.removeClass("day-mode-edit");
+	var dlTextEdit = dlTarget.find(".day-textedit");
+	var oldVal = dlTarget.attr("data-text");
+	daylight.ui.textedit.setText(dlTarget, oldVal);
+}
+daylight.ui.textedit.event = function() {
+	$("body").click(function(e) {
+		if(!daylight.hasClass(e.target, "day-text-editable"))
+			return;
+			
+		if(!daylight.hasClass(e.target, "day-mode-edit"))
+			return;
+		
+		daylight.ui.textedit.complete($(e.target));		
+	});
+	$("body").dblclick(function(e) {
+		if(!daylight.hasClass(e.target, "day-text-editable"))
+			return;
+		
+		var dlTarget = $(e.target);
+		dlTarget.addClass("day-mode-edit");
+		dlTarget.html('<input type="text" class="day-textedit" value="'+(dlTarget.attr("data-text") || "")+'"/>');
+	});
+	$("body").keyup(function(e) {
+		if(!daylight.hasClass(e.target, "day-textedit"))
+			return;
+
+		var key = $.Event(e).key();		
+		if(key.enter) {
+			daylight.ui.textedit.complete($(e.target).parent());
+		}else if(key.esc) {
+			daylight.ui.textedit.cancel($(e.target).parent());			
+		}
+	});
+	$(document).on("editCancel", function(e) {
+		
+	});
+}
 $(document).ready(function() {
 	$("body").drag();
 	
 	var is_drag_start = false;
 	var otop, oleft;
+	$("[data-templates]").each(function(e) {
+		var target = $(this);
+		var html =  target.html();
+		html = html.replaceAll("img-src", "src");
+		var info = target.attr("data-templates");
+		target.attr("data-templates", "");
+		try {
+			var json = JSON.parse(info);
+			target.template(json, html);
+		} catch(e) {
+			console.log(e);
+			alert("실패" + info);
+		
+		}
+
+	});
 	$("body").on("dragstart", function(e) {
 	
 		e.stopPropagation();
@@ -182,32 +246,5 @@ $(document).ready(function() {
 		daylight(selector).toggleClass("collapse");
 		return;
 	});
-
-	$("body").click(function(e) {
-		if(!daylight.hasClass(e.target, "day-text-editable"))
-			return;
-			
-		if(!daylight.hasClass(e.target, "day-mode-edit"))
-			return;
-		
-		var dlTarget = $(e.target);
-		dlTarget.removeClass("day-mode-edit");
-		var dlTextEdit = dlTarget.find(".day-textedit");
-		var oldVal = dlTarget.attr("data-text");
-		var val = dlTextEdit.val();
-		daylight.ui.textedit.setText(dlTarget, val);
-		
-		daylight.trigger(document, "editComplete", {editTarget: dlTarget, completeText: val, oldText: oldVal});
-		
-	})
-	$("body").dblclick(function(e) {
-		if(!daylight.hasClass(e.target, "day-text-editable"))
-			return;
-		
-		var dlTarget = $(e.target);
-		dlTarget.addClass("day-mode-edit");
-		dlTarget.html('<input type="text" class="day-textedit" value="'+(dlTarget.attr("data-text") || "")+'"/>');
-		
-	});
-
+	daylight.ui.textedit.event();
 });

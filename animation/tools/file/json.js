@@ -132,7 +132,7 @@ tools.file.loadTimeline = function(json) {
 	//var elTimeline = this.createTimeline(json);
 			
 	var elTimeline = daylight.animation.importJSON(json);
-	document.body.appendChild(elTimeline.dl_object.get(0));
+	$(".day-tools-screen").append(elTimeline.dl_object.get(0));
 	
 	tools.timelines.push(elTimeline);
 	tools.timeline = elTimeline;
@@ -181,7 +181,7 @@ tools.file.loadJSON = function(json) {
 	$("body").prepend(figure);
 	figure.removeClass("show");
 	
-	try {
+	//try {
 		if(typeof json !== "object")		
 			json = JSON.parse(json);
 		$(".daylightAnimationTimeline").remove();
@@ -198,11 +198,13 @@ tools.file.loadJSON = function(json) {
 				this.loadTimeline(timelines[i]);
 			}
 		}
-	} catch(e){
+	/*
+} catch(e){
 		console.log(e);
 		console.log(e.stack);
 		throw new Error("잘못된 형식입니다.");
 	}
+*/
 	tools.nowSelectElement = null;
 	tools.mode = this.checkTimelineEasyMode(tools.timeline) ? "easy" : "expert";
 	tools.timer.layerTimer(0);

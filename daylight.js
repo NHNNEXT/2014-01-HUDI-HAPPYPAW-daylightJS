@@ -712,18 +712,22 @@ daylight.clone = function(node, dataAndEvent, deepDataAndEvent) {
 	n.innerHTML = node.innerHTML;
 	return n;
 }
-/*??제거 대상*/
-daylight.createElement = function(name, object) {
-	var element = document.createElement(name);
-	
-	for(var attr in object) {
-		if(typeof object[attr] === "undefined")
-			continue;
-			
-		element.setAttribute(attr, object[attr]);	
+daylight.extend({
+	createElement: function(name, object) {
+		var element = document.createElement(name);
+		
+		for(var attr in object) {
+			if(typeof object[attr] === "undefined")
+				continue;
+				
+			element.setAttribute(attr, object[attr]);	
+		}
+		return element;
+	},
+	jsonToElement: function(json) {
+		
 	}
-	return element;
-}
+});
 
 
 daylight.extend({

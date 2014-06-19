@@ -70,7 +70,7 @@ daylight.animation = {
 		BIGNUMBER : 10000000,
 		
 		browserPrefix : ["", "-webkit-", "-moz-", "-o-", "-ms-"],
-		transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
+		transformList : {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)","tz":"translateZ(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"},
 		browserEffectCSS : {"origin" : "transform-origin:?", "transition":"transition:?"},
 		styleStartAnimation : "{prefix}animation: daylightAnimation{id} {time}s {type};\n{prefix}animation-fill-mode: forwards;\n{prefix}animation-iteration-count:{count};\n",
 		stylePauseAnimation : "{prefix}animation-play-state:paused;\n",
@@ -173,7 +173,7 @@ daylight.animation = {
 
 		for(action in actionList) {
 			if(action in CONSTANT.transformList) {
-				if(action === "tx" || action === "ty") {
+				if(action === "tx" || action === "ty" || action === "tz") {
 					index = transformList.indexOf("rotate");
 					if(index !== -1) {
 						transformList.splice(index, 0, action);
@@ -977,6 +977,7 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 				break;
 			case "tx":
 			case "ty":
+			case "tz":
 			case "gtop":
 			case "gleft":
 				value = value + "px";
@@ -1186,10 +1187,6 @@ daylight.animation.Timeline = function Timeline(selector) {
 	dl_object.scroll(function(e) {e.preventDefault();});
 	
 }
-
-daylight.animation.Timeline.prototype.importJSON = function(json) {
-	
-}
 daylight.animation.Timeline.prototype.exportToJSON = function(is_object, is_minify) {
 	var id = "";
 	var dl_object = this.dl_object;
@@ -1204,8 +1201,8 @@ daylight.animation.Timeline.prototype.exportToJSON = function(is_object, is_mini
 
 
 	var json = this._exportToJSON(element);
-	json.scenes = this.scenes;
-	json.totalTime = this.totalTime;
+	json.ss = this.scenes;
+	json.tt = this.totalTime;
 	if(is_object)
 		return json;
 	return JSON.stringify(json);
@@ -1629,7 +1626,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 			var className = element.className;
 			className = className.replace("daylightAnimationLayer", "");
 			className = className.trim();
-			var json = {name:element.nodeName, id:element.id, className:className};
+			var json = {n:element.nodeName, i:element.id, cn:className};
 			var node, value;
 			switch(json.name) {
 			case "IMG": json.src = element.src;break;
@@ -1638,9 +1635,9 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 			var layer = this.getLayer(element);
 	
 			if(layer) {
-				json.motions = layer.motions;
-				json.totalTime = layer.totalTime;
-				json.properties = layer.properties;
+				json.ms = layer.motions;
+				json.tt = layer.totalTime;
+				json.p = layer.properties;
 				layer.optimize();
 			}
 		
@@ -1648,7 +1645,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 			var length = childNodes && childNodes.length || 0; 
 			
 			if(length !== 0)
-				json.childNodes = [];
+				json.cns = [];
 			
 			for(var i = 0; i < length; ++i) {
 				node = childNodes[i];
@@ -1656,14 +1653,14 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 				if(node.nodeType === 8)
 					continue;
 				value = node.nodeType === 3? node.innerHTML : this._exportToJSON(childNodes[i]);
-				if(value) json.childNodes.push(value)
+				if(value) json.cns.push(value)
 			}
-			json.style = _exportStyle(element);
-			if(json.motions && json.motions[0] && json.motions[0].time === 0) {
-				_exportCheckRepeatStyle(json.style, json.motions[0]);
+			json.s = _exportStyle(element);
+			if(json.ms && json.ms[0] && json.ms[0].time === 0) {
+				_exportCheckRepeatStyle(json.s, json.ms[0]);
 			}
-			if(_lengthObject(json.style) === 0)
-				delete json.style;
+			if(_lengthObject(json.s) === 0)
+				delete json.s;
 				
 			
 			return json;

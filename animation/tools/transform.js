@@ -25,8 +25,8 @@
 		var figure = tools.rotateArea;
 
 		figure.attr("style", style);		
-		dlElement.parent()[0].appendChild(figure.o[0]);
-		
+		//dlElement.parent()[0].appendChild(figure.o[0]);
+		dlElement.before(figure.o[0]);
 
 		
 		var cssObject = {};

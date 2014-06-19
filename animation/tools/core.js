@@ -66,9 +66,9 @@ var datl = tools = {
 	},
 	key: {},
 	inputNodeNames: ["INPUT", "SELECT"],
+	size: "-5px"
 };
-tools.size = "-6px";
-{
+(function(tools) {
 	var relative = "relative", none = "none", absolute = "absolute", block="block",center="center", left="left", hidden="hidden";
 	tools.css = {
 		".day-rotate-area": {
@@ -79,7 +79,7 @@ tools.size = "-6px";
 			border:"0px!important",
 			"border-radius":"0px!important",
 			background:"transparent!important",
-			"z-index":1
+			"z-index":0
 		},
 		".day-transform-figure, .day-figure": {
 			border:"1px solid #72BCEB!important",
@@ -96,22 +96,26 @@ tools.size = "-6px";
 			cursor: "auto",
 			display: block,
 			width: "100%",
-			height: "100%"
+			height: "100%",
+			"tz": "3px"	
 		},
 		".day-rotate-area.show, .day-figure.show": {
 			display: "block"
 		},
 		".day-transform-figure div, .day-figure div" : {
 			position: "absolute",
-			width: "10px",
-			height: "10px",
-			background:"#fff",
+			width: "8px",
+			height: "8px",
+			background:"#fff!important",
 			border:"1px solid #72BCEB!important",
 			"border-radius":"50%",
-			"z-index":1
+			"z-index":2
 		},
 		".day-transform-figure, .day-transform-figure div": {
 			border: "1px solid #E24E58!important"
+		},
+		".day-transform-figure div": {
+			
 		},
 		".day-transform-figure .nw, .day-figure .nw" : {top:0, left:0, "margin-left":tools.size, "margin-top":tools.size},
 		".day-transform-figure .origin, .day-figure .origin" : {"margin-left":tools.size, "margin-top":tools.size},
@@ -132,7 +136,7 @@ tools.size = "-6px";
 		".motion:hover .tip":{display:block}
 		
 	};
-}
+})(tools);
 tools.objectToCSS = function(css) {
 	var html = "";
 	for(var selector in css) {
@@ -154,6 +158,7 @@ tools.init = function(timeline) {
 	this.transformFigure = $(".day-transform-figure");
 	this.shapeFigure = $(".day-shape-figure");
 	this.dlTool = $(".day-tool");
+	this.dlScreen = $(".day-tools-screen");
 	var styleElement = document.createElement("style");
 	var styleHTML = '<style class="daylightAnimationToolsStyle">\n';
 	styleHTML += this.objectToCSS(this.css);
@@ -188,7 +193,7 @@ if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
 		executeMenuActionWithEvent("dragend", e);
 	});
 	$(document).click(function(e) {
-		if(e.target === document.body) {
+		if(e.target === document.body || tools.dlScreen.equal(e.target) ) {
 			tools.cancelSelect();
 		}
 	});
@@ -202,7 +207,7 @@ if(tools.inputNodeNames.indexOf(e.target.nodeName) == -1) {
 	this.file.init();
 	
 	$(window).resize(function() {
-		$("body").css("min-height", $("body").scrollHeight() );
+		//$("body").css("min-height", $("body").scrollHeight() );
 	});
 	$(window).resize();
 }
@@ -255,7 +260,7 @@ tools.setFigure = function() {
 	
 	var dlElement = tools.nowSelectElement;
 	var offsetParentPos = dlElement.offsetParent().offset();
-	var pos = dlElement.offset();
+	var pos = dlElement.position();
 	var width = dlElement.innerWidth();
 	var height = dlElement.innerHeight();
 	dlElement.parent().prepend(tools.figure);
@@ -268,7 +273,11 @@ tools.setFigure = function() {
 	
 	var left = parseFloat(dlElement.css("left")) + parseFloat(dlElement.css("border-left-width"));
 	var top = parseFloat(dlElement.css("top")) + parseFloat(dlElement.css("border-top-width"));
+	
+	//left = pos.left;
+	//top = pos.top;
 	figure.css({
+		position: "absolute",
 		left: left + "px",
 		top:  top +"px",
 		bottom: dlElement.css("bottom"),
@@ -276,7 +285,7 @@ tools.setFigure = function() {
 		margin: dlElement.css("margin"),
 		width: width + "px",
 		height: height + "px"
-	});
+	});	
 	
 	
 }

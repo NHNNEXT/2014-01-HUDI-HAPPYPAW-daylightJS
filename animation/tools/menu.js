@@ -53,7 +53,7 @@ tools.refreshMenu = function() {
 
 
 tools.refreshStatus = function() {
-	if(tools.selectedMenu.pointer && tools.nowSelectElement) {
+	if(tools.selectedMenu.pointer &&!tools.selectedMenu.transform && tools.nowSelectElement) {
 		tools.setFigure();	
 		tools.figure.addClass("show");
 	} else
