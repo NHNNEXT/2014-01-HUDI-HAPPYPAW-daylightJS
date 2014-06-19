@@ -20,7 +20,9 @@
 	.for-mobile {
 		display: block;	
 	}
-	
+	.for-pc {
+		display: none!important;
+	}
 	.navbar-collapse.collapse .navbar-menu {
 		display: block;
 		height: auto;
