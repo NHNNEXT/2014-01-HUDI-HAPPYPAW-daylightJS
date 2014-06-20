@@ -7,6 +7,9 @@ String.prototype.ltrim = function(){
 String.prototype.rtrim = function(){
 	return this.replace( /\s+$/, "" );
 }
+String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+ };
 String.prototype.replaceAll = function(from, to) {
 	if(!this)
 		return "";

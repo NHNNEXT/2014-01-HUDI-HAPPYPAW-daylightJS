@@ -947,6 +947,10 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 	var nextMotion = next.hasOwnProperty(property) ? next[property] : next[property + "?a"];
 	var dimension = "";
 	
+	
+	if(prevMotion === nextMotion)
+		return prevMotion;
+		
 	var value = prevMotion;
 	if(lrtype.indexOf(property) !== -1)
 		dimension =  "width";
@@ -958,6 +962,7 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 	var prevTime = time - prev.time;
 	prevTime = prevTime >= 0 ? prevTime : 0;
 	var nextTime = next.time - time;
+
 	try {
 		if(dimension === "width" || dimension === "height") {
 			var p100 = this.dl_object.dimension(dimension);//100퍼센트 기준으로 수치
@@ -966,8 +971,14 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 			nextMotion = _abspx(nextMotion, p100);
 			value = _dot(prevMotion, nextMotion, nextTime, prevTime) +"px";
 		} else if(dimension === "dimension") {
+
+			var oprevMotion;
 			prevMotion = _abspx(prevMotion);
 			nextMotion = _abspx(nextMotion);
+			
+			if(prevMotion === nextMotion)
+				return oprevMotion;
+			
 			//console.log(prevMotion, nextMotion);
 			value = _dot(prevMotion, nextMotion, nextTime, prevTime);
 			//console.log(property, value, prevMotion, nextMotion);
@@ -991,8 +1002,11 @@ daylight.animation.Layer.prototype.getTimeValue = function(time, property, prev,
 				var xScale = _dot(parseFloat(fromScale[0]), parseFloat(toScale[0]), nextTime, prevTime);
 				var yScale = _dot(parseFloat(fromScale[1]), parseFloat(toScale[1]), nextTime, prevTime);
 				return xScale +", " + yScale;
-			}	
-			return "transition";
+			}		
+			if(daylight.animation.getTimeValue)
+				return daylight.animation.getTimeValue(this.dl_object, time, property, prev, next);
+			else
+				return "transition";
 		}
 	} catch(e) {
 		console.error("time :" + time, "property : " + property, "value : " + value, e);
