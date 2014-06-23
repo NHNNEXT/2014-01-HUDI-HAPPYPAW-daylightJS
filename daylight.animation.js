@@ -436,7 +436,8 @@ animation.Layer = function Layer(selector, initMotion) {
 		this.addMotion(this.initMotion);
 	}
 }
-daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_force) {
+var layerPrototype = animation.Layer.prototype;
+layerPrototype.fillMotion = function(motion, fromMotion, is_force) {
 	var self = this;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	//is_force -1이면 언제든지 바꾸기 요청이 오면 바꾸게 할 수 있다.
@@ -482,7 +483,7 @@ daylight.animation.Layer.prototype.fillMotion = function(motion, fromMotion, is_
 	return true;
 }
 //index 이전의 모션에 등록되어 있는 속성들을 지금 속성에 붙혀넣기.
-animation.Layer.prototype._fillPrevMotionsWithMotionWithIndex = function(motion, index) {
+layerPrototype._fillPrevMotionsWithMotionWithIndex = function(motion, index) {
 	var motions = this.motions;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 
@@ -510,7 +511,7 @@ animation.Layer.prototype._fillPrevMotionsWithMotionWithIndex = function(motion,
     }
 }
 
-animation.Layer.prototype._fillNextMotions = function(motion, time) {
+layerPrototype._fillNextMotions = function(motion, time) {
 	var self = this;
 	var motions = this.motions;
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
@@ -540,7 +541,7 @@ animation.Layer.prototype._fillNextMotions = function(motion, time) {
 	@return {Number} 1 가지고 있다. 0 auto속성으로 가지고 있다. -1 없다.
 	@desc 해당하는 모션이 해당 속성을 가지고 있는지 검사한다.
 */
-animation.Layer.prototype.hasProperty = function(index, property) {
+layerPrototype.hasProperty = function(index, property) {
 	var motions = this.motions;
 	var motion = typeof index === "object" ?index : motions[i];
 	if(motion.hasOwnProperty(property))
@@ -557,7 +558,7 @@ animation.Layer.prototype.hasProperty = function(index, property) {
 	@return {motion} time 이전의 property를 가지고 있는 모션을 반환
 	@desc time 이전의 property를 가지고 있는 모션을 찾아준다.
 */
-animation.Layer.prototype.applyAll = function(property, value) {
+layerPrototype.applyAll = function(property, value) {
 	
 	var properties = this.properties;
 	var index = properties.indexOf(property);
@@ -580,7 +581,7 @@ animation.Layer.prototype.applyAll = function(property, value) {
 	}	
 	
 }
-animation.Layer.prototype.removePropertyAll = function(property) {
+layerPrototype.removePropertyAll = function(property) {
 	var index = properties.indexOf(property);
 	if(index === -1)
 		return;
@@ -597,7 +598,7 @@ animation.Layer.prototype.removePropertyAll = function(property) {
 	properties.splice(index, 1);
 	
 }
-animation.Layer.prototype.removeProperty = function(time, property) {
+layerPrototype.removeProperty = function(time, property) {
 	var _motion = this.getMotion(time);
 	if(!_motion)
 		return;
@@ -626,7 +627,7 @@ animation.Layer.prototype.removeProperty = function(time, property) {
 	properties.splice(index, 1);
 	
 }
-animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
+layerPrototype.getPrevMotion = function(name, time, nAuto) {
 	var max_time = -2;
 	var value = {};
 	
@@ -651,7 +652,7 @@ animation.Layer.prototype.getPrevMotion = function(name, time, nAuto) {
 	@return {motion} time 이후의 property를 가지고 있는 모션을 반환
 	@desc time 이후의 property를 가지고 있는 모션을 찾아준다.
 */
-animation.Layer.prototype.getNextMotion = function(property, time, nAuto) {
+layerPrototype.getNextMotion = function(property, time, nAuto) {
 	var min_time = daylight.animation.CONSTANT.BIGNUMBER;
 	var value = {};
 	
@@ -667,14 +668,14 @@ animation.Layer.prototype.getNextMotion = function(property, time, nAuto) {
 	});
 	return value;
 }
-animation.Layer.prototype.addAction = function(name, startTime, endTime, option) {
+layerPrototype.addAction = function(name, startTime, endTime, option) {
 	if(daylight.animation.animationActions.hasOwnProperty(name)) {
 		daylight.animation.animationActions[name](this, startTime, endTime, option);
 	} else {
 		throw new Error("해당하는 엑션이 없습니다.")
 	}
 }
-animation.Layer.prototype.optimizeRepeat = function(motion) {
+layerPrototype.optimizeRepeat = function(motion) {
 	var pos = ["top", "left", "right", "bottom"];
 	var i = 0;
 	var properties = this.properties, index;
@@ -709,7 +710,7 @@ animation.Layer.prototype.optimizeRepeat = function(motion) {
 		}
 	}
 }
-animation.Layer.prototype.optimize = function() {
+layerPrototype.optimize = function() {
 	var ignoreCSS = daylight.animation.CONSTANT.ignoreCSS;
 	var removeProperties = daylight.animation.CONSTANT.removeProperties;
 	var transformList = daylight.animation.CONSTANT.transformList;
@@ -765,7 +766,7 @@ animation.Layer.prototype.optimize = function() {
 	}
 }
 
-animation.Layer.prototype._addMotion = function(motion) {
+layerPrototype._addMotion = function(motion) {
 	var motions = this.motions;
 	var time = motion.time;
 	
@@ -792,7 +793,7 @@ animation.Layer.prototype._addMotion = function(motion) {
 *	@param {object|object[]} motion / motion List / from Motion to Motion
 *	@returns {Layer} this
 */
-animation.Layer.prototype.addMotion = function(motion) {
+layerPrototype.addMotion = function(motion) {
 	if(!motion)
 		return;
 	
@@ -858,7 +859,7 @@ animation.Layer.prototype.addMotion = function(motion) {
 	
 	return this;
 };
-animation.Layer.prototype.initTimer = function() {
+layerPrototype.initTimer = function() {
 	var motions = this.motions;
 	console.log("INIT   " + this.id);
 	for(var i = 0; i < motions.length; ++i) {
@@ -877,7 +878,7 @@ animation.Layer.prototype.initTimer = function() {
 	
 	return this.getCSSInitMotion();
 }
-animation.Layer.prototype.getMotion = function(time) {
+layerPrototype.getMotion = function(time) {
 	var totalTime = this.totalTime;
 	var motions = this.motions;
 	var length = this.motions.length;
@@ -923,7 +924,7 @@ animation.Layer.prototype.getMotion = function(time) {
 	    
     return;
 }
-animation.Layer.prototype.indexOfNextMotionWithTime = function(time) {
+layerPrototype.indexOfNextMotionWithTime = function(time) {
 	time = parseFloat(time);
 	var length = this.motions.length;
 	for(var i = 0; i < length; ++i) {
@@ -942,7 +943,7 @@ animation.Layer.prototype.indexOfNextMotionWithTime = function(time) {
 * @return {string | number} 이전 시간과 이후 시간을 현재시간에 비례하여 내적을 한 값을 반환한다.
 * @desc  이전 시간과 이후 시간을 현재시간에 비례하는 값을 찾아준다.
 */
-animation.Layer.prototype.getTimeValue = function(time, property, prev, next) {
+layerPrototype.getTimeValue = function(time, property, prev, next) {
 	var prevMotion = prev.hasOwnProperty(property) ? prev[property] : prev[property + "?a"] ;
 	var nextMotion = next.hasOwnProperty(property) ? next[property] : next[property + "?a"];
 	var dimension = "";
@@ -1013,7 +1014,7 @@ animation.Layer.prototype.getTimeValue = function(time, property, prev, next) {
 	}
 	return value;
 }
-daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_not_transition) {
+layerPrototype.getTimeMotion = function(time, is_start, is_not_transition) {
 	var properties = this.properties;
 	var length = properties.length;
 	var motions = {};
@@ -1087,7 +1088,7 @@ daylight.animation.Layer.prototype.getTimeMotion = function(time, is_start, is_n
 	motions.time = time;
 	return motions;	
 }
-daylight.animation.Layer.prototype.timer = function(time, is_start, is_not_transition) {
+layerPrototype.timer = function(time, is_start, is_not_transition) {
 	var motion = this.getTimeMotion(time, is_start, is_not_transition);
 	var style = daylight.animation.objectToCSS(motion);
 	
@@ -1101,13 +1102,13 @@ daylight.animation.Layer.prototype.timer = function(time, is_start, is_not_trans
 }
 
 
-daylight.animation.Layer.prototype.getCSSInitMotion = function() {
+layerPrototype.getCSSInitMotion = function() {
 	var initMotion = this.motions.length > 0 && this.motions[0].time === 0 ? this.motions[0]: {};
 	var styleHTML = daylight.animation.objectToCSSWithSelector(this.selector, initMotion);
 	return styleHTML;
 }
 //count와. type 테스트 값.
-daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
+layerPrototype.getCSSInit = function(count, type) {
 	var prefix = "-webkit-";
 	var CONSTANT = daylight.animation.CONSTANT;
 	var styleStartAnimation = CONSTANT.styleStartAnimation;
@@ -1156,7 +1157,7 @@ daylight.animation.Layer.prototype.getCSSInit = function(count, type) {
 
 
 //test
-daylight.animation.Layer.prototype.print = function() {
+layerPrototype.print = function() {
 	var motions = this.motions;
 	daylight.each(motions, function() {
 		console.log(JSON.stringify(this));
@@ -1169,7 +1170,7 @@ daylight.animation.Layer.prototype.print = function() {
 * @classdesc 타임라인
 * @method $Animation.Timeline
 */
-daylight.animation.Timeline = function Timeline(selector) {
+animation.Timeline = function Timeline(selector) {
 	console.log("NEW TIMELINE");
 	
 	var type = daylight.type(selector, true);
@@ -1203,7 +1204,8 @@ daylight.animation.Timeline = function Timeline(selector) {
 	dl_object.scroll(function(e) {e.preventDefault();});
 	
 }
-daylight.animation.Timeline.prototype.exportToJSON = function(is_object, is_minify) {
+var timelinePrototype = animation.Timeline.prototype;
+timelinePrototype.exportToJSON = function(is_object, is_minify) {
 	var id = "";
 	var dl_object = this.dl_object;
 	var element = dl_object.o[0];
@@ -1224,10 +1226,10 @@ daylight.animation.Timeline.prototype.exportToJSON = function(is_object, is_mini
 	return JSON.stringify(json);
 	
 }
-daylight.animation.Timeline.prototype.hasLayer = function(layer) {
+timelinePrototype.hasLayer = function(layer) {
 	return !!this.getLayer(layer);
 }
-daylight.animation.Timeline.prototype.getLayer = function(layer) {
+timelinePrototype.getLayer = function(layer) {
 	var layers = this.layers;
 	var t = daylight.type(layer, true);
 	var is_string = (t === "string");
@@ -1250,7 +1252,7 @@ daylight.animation.Timeline.prototype.getLayer = function(layer) {
 	
 	return;
 }
-daylight.animation.Timeline.prototype.createLayer = function(selector, initMotion) {
+timelinePrototype.createLayer = function(selector, initMotion) {
 	var a = new daylight.animation.Layer(selector, initMotion);
 	if(this.isOnlyOneLayer && a.dl_object.size() > 1)
 		throw new Error("오직 한개의 레이어만 가능합니다.");
@@ -1260,7 +1262,7 @@ daylight.animation.Timeline.prototype.createLayer = function(selector, initMotio
 	
 	return a;
 }
-daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) {
+timelinePrototype.addLayer = function(selector, initMotion) {
 
 	var layer = (selector instanceof daylight.animation.Layer) ? selector : new daylight.animation.Layer(selector, initMotion);
 	
@@ -1275,7 +1277,7 @@ daylight.animation.Timeline.prototype.addLayer = function(selector, initMotion) 
 	return layer.id;
 }
 
-daylight.animation.Timeline.prototype.addAction = function(layer, name, startTime, endTime, option) {
+timelinePrototype.addAction = function(layer, name, startTime, endTime, option) {
 	//fade-in
 	//fade-out
 	//move, zoom(not scale)
@@ -1288,7 +1290,7 @@ daylight.animation.Timeline.prototype.addAction = function(layer, name, startTim
 	return this;
 }
 
-daylight.animation.Timeline.prototype.addMotion = function(layer, motion) {
+timelinePrototype.addMotion = function(layer, motion) {
 	if(!layer) {
 		throw new Error(daylight.animation.ERRORMESSAGE.WRONGLAYER);
 	}
@@ -1299,7 +1301,7 @@ daylight.animation.Timeline.prototype.addMotion = function(layer, motion) {
 	_layer.addMotion(motion);
 	return this;
 }
-daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
+timelinePrototype.fillTimeline = function(layer) {
 	var motions = layer.motions;
 	var totalTime = this.totalTime;
 	var fMotion = {time:0};
@@ -1338,7 +1340,7 @@ daylight.animation.Timeline.prototype.fillTimeline = function(layer) {
 	
 	return this;
 }
-daylight.animation.Timeline.prototype.getInitMotionCSS = function() {
+timelinePrototype.getInitMotionCSS = function() {
 	var styleHTML = '<style class="daylightAnimation'+this.id+'InitStyle">\n';
 	var layers = this.layers;
 	var layerLength = layers.length;
@@ -1349,7 +1351,7 @@ daylight.animation.Timeline.prototype.getInitMotionCSS = function() {
 	
 	return styleHTML;
 }
-daylight.animation.Timeline.prototype.initTimer = function() {
+timelinePrototype.initTimer = function() {
 	console.log("INIT TIMELINE TIMER");
 	this.is_timer = true;
 	var layers = this.layers;
@@ -1380,7 +1382,7 @@ daylight.animation.Timeline.prototype.initTimer = function() {
 /**
 * @desc 모든 것을 되돌린다.
 */
-daylight.animation.Timeline.prototype.resetStyle = function() {
+animation.Timeline.prototype.resetStyle = function() {
 	console.debug("RESET");
 	$(".daylightAnimationLayer").removeClass("animationStart");
 	var style = $(".daylightAnimation"+this.id+"Style, .daylightAnimation"+this.id+"InitStyle");
@@ -1389,7 +1391,7 @@ daylight.animation.Timeline.prototype.resetStyle = function() {
 	if(!style.isEmpty())//removeStyle
 		style.remove();
 }
-daylight.animation.Timeline.prototype.init = function() {
+animation.Timeline.prototype.init = function() {
 	console.log("INIT TIMELINE");
 
 	var layers = this.layers;
@@ -1418,10 +1420,10 @@ daylight.animation.Timeline.prototype.init = function() {
 
 	return this;
 }
-daylight.animation.Timeline.prototype.executeFunction = function(schedule, spendTime, count) {
+timelinePrototype.executeFunction = function(schedule, spendTime, count) {
 	
 }
-daylight.animation.Timeline.prototype.synchronize = function(percentage) {
+timelinePrototype.synchronize = function(percentage) {
 	var time = percentage * this.totalTime / 100;
 	
 	var layers = this.layers;
@@ -1432,7 +1434,7 @@ daylight.animation.Timeline.prototype.synchronize = function(percentage) {
 		layer.timer(time, false, true);
 	}
 }
-daylight.animation.Timeline.prototype.timer = function() {
+timelinePrototype.timer = function() {
 	if(!this.totalTime) {
 		this.finish();
 		return;
@@ -1505,7 +1507,7 @@ daylight.animation.Timeline.prototype.timer = function() {
 *
 * @desc 애니메이션을 종료한다.
 */
-daylight.animation.Timeline.prototype.finish = function() {
+timelinePrototype.finish = function() {
 	console.log("FINISH TIMELINE totalTime : " + this.totalTime);
 	this.startTime = this.prevTime = this.nowTime = this.spendTime = 0;
 	this.is_start = false;
@@ -1517,10 +1519,10 @@ daylight.animation.Timeline.prototype.finish = function() {
 *
 * @desc 애니메이션을 강제 종료한다.
 */
-daylight.animation.Timeline.prototype.reset = function() {
+timelinePrototype.reset = function() {
 	
 }
-daylight.animation.Timeline.prototype.stop = function() {
+timelinePrototype.stop = function() {
 	this.finish();
 	$(".daylightAnimationLayer").removeClass("animationStart");
 }
@@ -1528,7 +1530,7 @@ daylight.animation.Timeline.prototype.stop = function() {
 *
 * @desc 재생된 횟수를 초기화한다.
 */
-daylight.animation.Timeline.prototype.initCount = function() {
+timelinePrototype.initCount = function() {
 	var layers = this.layers;
 	daylight.each(layers, function(layer, index) {
 		var motions = layer.motions;
@@ -1537,14 +1539,16 @@ daylight.animation.Timeline.prototype.initCount = function() {
 		});
 	});
 }
+
 /**
 *
 * @desc 애니메이션을 시작한다.
 */
-daylight.animation.Timeline.prototype.start = function() {
+timelinePrototype.start = function() {
 	console.log("START TIMELINE totalTime : " + this.totalTime);
-	$(".daylightAnimationLayer").addClass("animationStart");
-	$(".daylightAnimationLayer").removeClass("animationPause");
+	var dlLayer = $(".daylightAnimationLayer");
+	dlLayer.addClass("animationStart");
+	dlLayer.removeClass("animationPause");
 	this.initCount();
 	
 	this.startTime = this.prevTime = Date.now();
@@ -1560,7 +1564,7 @@ daylight.animation.Timeline.prototype.start = function() {
 *
 * @desc 일시중지
 */
-daylight.animation.Timeline.prototype.pause = function() {
+timelinePrototype.pause = function() {
 	console.log("PAUSE TIMELINE");
 	$(".daylightAnimationLayer").toggleClass("animationPause");
 	this.is_pause = !this.is_pause;
@@ -1570,7 +1574,7 @@ daylight.animation.Timeline.prototype.pause = function() {
 	}
 	return this;
 }
-daylight.animation.Timeline.prototype.showAnimationBar = function() {
+timelinePrototype.showAnimationBar = function() {
 	
 }
 
@@ -1638,7 +1642,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 				}
 			}
 		}
-		daylight.animation.Timeline.prototype._exportToJSON = function(element) {
+		timelinePrototype._exportToJSON = function(element) {
 			var className = element.className;
 			className = className.replace("daylightAnimationLayer", "");
 			className = className.trim();
@@ -1689,7 +1693,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	daylight.defineGetter(daylight.animation.Timeline, "is_finish");
 	daylight.defineGetter(daylight.animation.Timeline, "is_start");
 	daylight.defineGetter(daylight.animation.Timeline, "is_pause");
-	//daylight.extend(daylight.animation);
+	
 	daylight.defineGlobal("$Anim", daylight.animation);
 	daylight.defineGlobal("$Timeline", daylight.animation.Timeline);
 
