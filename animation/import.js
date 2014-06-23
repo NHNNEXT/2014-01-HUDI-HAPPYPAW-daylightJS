@@ -34,10 +34,19 @@
 		
 		layer.properties = properties;
 		layer.motions = motions;
+		
+		
+		if(json.position && timeline.dl_object.equal(element)) {
+			style.position = json.position;
+			layer.applyAll("position", json.position);
+		}
+
 		layer.totalTime = totalTime < timeline.totalTime ? timeline.totalTime : totalTime;
+		
 		if(timeline.totalTime < layer.totalTime) {
 			timeline.totalTime = layer.totalTime;
 		}
+		
 		if(style) {
 			var motions = {
 				time: 0,
@@ -98,7 +107,8 @@
 		}	
 	}
 	
-	animation.importJSON = function(json) {
+	animation.Timeline.import = function(json, position) {
+
 
 		
 		var name = json.n || json.name;
@@ -109,8 +119,11 @@
 		var scenes = json.ss || json.scenes || [0];
 		
 		var element = createElement(json);
-		var timeline = new daylight.Timeline(element);
+		
+
+		var timeline = new animation.Timeline(element);
 		timeline.scenes = scenes;
+		json.position = position || "";
 		createLayer(timeline, element, json);
 		
 		createchildNodes(json, element, timeline);

@@ -8,6 +8,10 @@ body {
 .span4, .span8, .span3, .span6, .span9, .span12 {
 	float: left;
 }
+.table {display: table;}
+.table-cell {display: table-cell;}
+.fright {float:right;}
+.fleft {float:left;}
 .fixed {position: fixed;}
 .absolute {position: absolute;}
 .relative {position: relative;}

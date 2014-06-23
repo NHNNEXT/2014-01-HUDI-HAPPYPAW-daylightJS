@@ -75,7 +75,7 @@ var animation = daylight.animation = {
 		ignoreCSS : ["count", "time", "function", "length", "fill"],
 		removeProperties: ["count", "length", "fill"]
 	},
-	prefixToBrowser : function(css, prefix, prefixList) {
+	prefixToBrowser : function(css, prefix) {
 		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix
 		//all : prefix별로 바꿔준다.
@@ -83,15 +83,14 @@ var animation = daylight.animation = {
 		//나머지 : 지정된 prefix로 바꿔준다.
 		
 		var CONSTANT = this.CONSTANT;
-		var browserPrefix = prefixList || CONSTANT.browserPrefix;
-		var browserPrefixLength = browserPrefix.length;
+		var browserPrefixLength = CONSTANT.browserPrefix.length;
 		var cssWithPrefix;
 		
 		switch(prefix) {
 		case "all":
 			var totalStyle = "";
 			for(var i = 0; i < browserPrefixLength; ++i) {
-				totalStyle +=daylight.replace("{prefix}", browserPrefix[i], css);
+				totalStyle +=daylight.replace("{prefix}", CONSTANT.browserPrefix[i], css);
 			}
 			return totalStyle;
 			break;
@@ -186,7 +185,6 @@ var animation = daylight.animation = {
 			cssList = cssTypeList[cssType];
 			totalStyle += cssList.get(prefix);
 		}
-		totalStyle = totalStyle.replaceAll(";", ";\n");
 		var cssStyle = daylight.replace("{prefix}", CONSTANT.browserPrefix[1], totalStyle);
 		
 		return cssStyle;
@@ -557,46 +555,6 @@ animation.Layer.prototype.hasProperty = function(index, property) {
 	@return {motion} time 이전의 property를 가지고 있는 모션을 반환
 	@desc time 이전의 property를 가지고 있는 모션을 찾아준다.
 */
-animation.Layer.prototype.applyAll = function(property, value) {
-	
-	var properties = this.properties;
-	var index = properties.indexOf(property);
-	if(index === -1)
-		properties[properties.length] = property;
-		
-	var motions = this.motions;
-	var length = motions.length;
-	var properties = this.properties;
-	var motion, i;
-	
-	for(i = 0; i < length; ++i) {
-		motion = motions[i];
-		if(i === 0) {
-			motion[property] = value;
-		} else {
-			delete motion[property];
-			delete motion[property + "?a"];
-		}
-	}	
-	
-}
-animation.Layer.prototype.removePropertyAll = function(property) {
-	var index = properties.indexOf(property);
-	if(index === -1)
-		return;
-	var motions = this.motions;
-	var length = motions.length;
-	var properties = this.properties;
-	var motion, i;
-	
-	for(i = 0; i < length; ++i) {
-		motion = motions[i];
-		delete _motion[property];
-		delete _motion[property + "?a"];
-	}	
-	properties.splice(index, 1);
-	
-}
 animation.Layer.prototype.removeProperty = function(time, property) {
 	var _motion = this.getMotion(time);
 	if(!_motion)
@@ -1696,3 +1654,420 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 
 
 
+(function(da) {
+	var dimensionType = ["px", "em", "%"];
+	function _dot(a1,a2,b1,b2) {
+		if(b1 + b2 === 0)
+			return a1;
+		return a1 * b2 / (b1 + b2) + a2 * b1 / (b1 + b2);
+	}
+	function _abspx(a, p100) {
+		var v = parseFloat(a);
+		if(p100 && a.indexOf("%") > -1)
+			return v * p100 / 100;
+		else
+			return v;
+	}
+	function _percentage(a, p100) {
+		var v = parseFloat(a);
+		if(p100 && a.indexOf("%") === -1)
+			return v * 100 / p100;
+		else
+			return v;		
+	}
+	function _getDimensionType(a) {
+		var length = dimensionType.length;
+		for(var i = 0; i < length; ++i) {
+			if(a.indexOf(dimensionType[i]) != -1)
+				return dimensionType[i];
+			}
+		return "";
+	}
+	function hexToRGB(h) {
+		h = cutHex(h);
+		var r = parseInt(h.substring(0,2), 16);
+		var g = parseInt(h.substring(2,4), 16);
+		var b = parseInt(h.substring(4,6), 16);
+		return [r, g, b];
+	}
+	function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16)}
+	function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16)}
+	function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16)}
+	function cutHex(h) {return (h.charAt(0)==="#") ? h.substring(1,7):h}
+	function hex4to6(h) {
+		var r = h.charAt(1);
+		var g = h.charAt(2);
+		var b = h.charAt(3);
+		var arr = [r, r, g, g, b, b];
+		
+		return arr.join("");
+	}
+	function getRGB(v) {
+		var rgb = [];
+		if(v.charAt(0) === "#")  {
+			if(v.length === 4) {
+				rgb = hexToRGB(hex4to6(v));
+			} else if(v.length === 7) {
+				rgb = hexToRGB(v);
+			}
+		} else if(v.indexOf("rgb(") === 0 || v.indexOf("rgba(") === 0) {
+			v = v.replace("rgb(", "");
+			v = v.replace("rgba(", "");			
+			v = v.replace(")", "");
+			v = v.replaceAll(" ", "");
+			rgb = v.split(",");
+			var length = rgb.length;
+			for(var i = 0; i < length; ++i) {
+				rgb[i] = parseInt(rgb[i]);
+			}
+		}
+		return rgb;
+			
+	}
+	function color(value1, value2, time1, time2) {
+		var rgb = [];
+		var rgb1 = getRGB(value1);
+		var rgb2 = getRGB(value2);
+		
+		console.log(rgb1, rgb2);
+		var length1 = rgb1.length;
+		var length2 = rgb2.length;
+		if(length1 !== length2) {
+			if(length1 === 4)
+				rgb2[3] = 1;
+			if(length2 === 4)
+				rgb1[3] = 1;
+			
+			length1 = length2 = 4;
+		}
+		for(var i = 0; i < length1; ++i) {
+			rgb[i] = parseInt(_dot(rgb1[i], rgb2[i], time1, time2));
+		}
+		if(length1 === 3)
+			return "rgb(" + rgb.join(",") + ")";
+		if(length2 === 4)
+			return "rgba(" + rgb.join(",") + ")";
+		
+		return "rgb(0, 0, 0)";
+	}
+	function margin(element, value1, value2, time1, time2) {
+		var v1 = value1.split(" "), v2 = value2.split(" ");
+		var length1 = v1.length;
+		var length2 = v2.length;
+		var i;
+		var width = element.parent().innerWidth();
+		var height = element.parent().innerHeight();
+		var margin = [];
+		var m1, m2, t1, t2;
+		if(length1 === length2) {
+			if(length1 === 1) {
+				t1 = _getDimensionType(v1[0]);
+				t2 = _getDimensionType(v2[0]);
+				m1 = _abspx(v1[0]);
+				m2 = _abspx(v2[0]);
+				if(t1 === t2)
+					return _dot(m1, m2, time1, time2) + t1;
+
+				v1 = [v1[0], v1[0]];
+				v2 = [v2[0], v2[0]];
+				length1 = 2;
+				length2 = 2;
+			}
+			for(i = 0; i < length1; ++i) {
+				m1 = v1[i];
+				m2 = v2[i];
+				if(i % 2 === 0) {
+					m1 = _abspx(m1, width);
+				} else {
+					m1 = _abspx(m1, height);
+				}
+				margin.push(_dot(m1, m2, time1, time2) + "px");
+			}
+		}
+	}
+	function origin(element, value1, value2, time1, time2) {
+		if(!value1)
+			value1 = "50% 50%";
+		
+		if(!value2)
+			value2 = "50% 50%";
+		var v1 = value1.split(" ");
+		var v2 = value2.split(" ");
+		var length1 = v1.length;
+		var length2 = v2.length;
+		var origin = [];
+		var width = element.innerWidth();
+		var height = element.innerHeight();
+		var m1, m2;
+		for(var i = 0; i < length1; ++i) {
+			m1 = _percentage(v1[i], width);
+			m2 = _percentage(v2[i], height);
+			origin.push(_dot(m1, m2, time1, time2) + "%");
+		}
+		return origin.join(" ");
+	}
+	da.getTimeValue = function(dlElement, time, property, prev, next) {
+		var prevMotion = prev.hasOwnProperty(property) ? prev[property] : prev[property + "?a"];
+		var nextMotion = next.hasOwnProperty(property) ? next[property] : next[property + "?a"];
+		var prevTime = time - prev.time;
+		prevTime = prevTime >= 0 ? prevTime : 0;
+		var nextTime = next.time - time;
+		var value = "";
+		
+
+		switch(property) {
+			case "margin":
+			case "padding":
+				value = margin(dlElement, prevMotion, nextMotion, prevTime, nextTime);
+				break;
+			case "origin":
+				value = origin(dlElement, prevMotion, nextMotion, prevTime, nextTime);
+				break;
+			case "color":
+			case "background-color":
+				value = color(prevMotion, nextMotion, prevTime, nextTime);
+				break;
+			default:
+				value = "transition";
+		}
+		//console.log(property + "   " + value);
+		return value;
+	}
+})(daylight.animation);(function(daylight) {
+	var animation = daylight.animation;
+	function errorMessage(message) {
+		console.error(message);
+		alert(message);
+		return;
+	}
+	
+	
+	function getStyle(styles, ignores) {
+		var style = "";
+		if(!ignores.hasOwnProperty("position")) {
+			styles.position = styles.position || "relative";
+			console.debug(ignores);
+		}
+		for(var property in styles) {
+			if(ignores.hasOwnProperty(property))
+				continue;
+			
+			style += property +":" + styles[property] +";";
+		}
+		return style;
+	}
+	function createLayer(timeline, element, json) {
+		var motions = json.ms || json.motions || 0;
+		
+		if(!motions)
+			return;
+			
+		var layer = timeline.createLayer(element);
+		var totalTime = json.tt || json.totalTime || 0;
+		var properties = json.p || json.properties || [];
+		var style = json.s || json.style || {};
+		if(json.position && timeline.dl_object.equal(element)) {
+			style.position = json.position;
+		}
+		layer.properties = properties;
+		layer.motions = motions;
+		layer.totalTime = totalTime < timeline.totalTime ? timeline.totalTime : totalTime;
+		
+		if(timeline.totalTime < layer.totalTime) {
+			timeline.totalTime = layer.totalTime;
+		}
+		
+		if(style) {
+			var motions = {
+				time: 0,
+				fill: "add"
+			}
+			for(var property in style) {
+				motions[property] = style[property];
+			}
+			layer.addMotion(motions);
+		}
+
+	}
+
+	function createElement(json) {
+		
+		var name = json.n || json.name;
+		var motions = json.ms || json.motions || [];
+		
+		
+		if(!name)
+			return errorMessage("Nonamed 잘못된 형식입니다.");
+			
+		var id = json.i || json.id;
+		var className = json.cn || json.className;
+		var style = json.s || json.style || {};
+		
+		var element = daylight.createElement(name, {id:id, class:className});
+		style = getStyle(style, motions[0] || {});
+		
+		element.setAttribute("style", style);
+		element.setAttribute("data-style", style);
+	
+		return element;
+	}
+	function create(json, timeline) {
+		if(!timeline)
+			return;
+					
+		var element = createElement(json);
+		
+		createLayer(timeline, element, json);
+		createchildNodes(json, element, timeline);
+		
+		
+		return element;
+	}
+	function createchildNodes(json, element, timeline) {
+		var childNodes = json.cns || json.childNodes || 0;
+		var childLength = childNodes.length;
+		var value = "";
+		
+		for(var i = 0; i < childLength; ++i) {
+			value = childNodes[i];
+			if(typeof value !== "object")
+				element.insertAdjacentHTML("beforeend", value);
+			else
+				element.appendChild(create(childNodes[i], timeline));
+		}	
+	}
+	
+	animation.Timeline.import = function(json, position) {
+
+
+		
+		var name = json.n || json.name;
+		if(!name)
+			return errorMessage("NoNamed 잘못된 형식입니다.");
+			
+
+		var scenes = json.ss || json.scenes || [0];
+		
+		var element = createElement(json);
+		
+
+		var timeline = new animation.Timeline(element);
+		timeline.scenes = scenes;
+		json.position = position || "";
+		createLayer(timeline, element, json);
+		
+		createchildNodes(json, element, timeline);
+		return timeline;
+	}
+})(daylight);
+(function(anim) {
+
+	
+	var CSSList = anim.CSSList = function AnimationList(list) {
+		this.list = list || {};
+	}
+	CSSList.prototype = {
+		add: function(name, value) {
+			 this.list[name] = value;
+		},
+		get: function(prefix) {
+			var list = this.list;
+			var value;
+			var sStyle = "";
+			for(var name in list) {
+				value = list[name]
+				sStyle += name + ": " + value +";";
+			}
+			return anim.prefixToBrowser(sStyle, prefix);
+		},
+		has: function(name) {
+			return this.list.hasOwnProperty(name);
+		}
+		
+	};
+
+	daylight.defineGlobal("$CSSList", CSSList);
+	
+})(daylight.animation);
+(function(anim) {
+
+	var BrowserEffectCSSList = anim.BrowserEffectCSSList = function BrowserEffectCSSList() {
+		this.list = {};
+	}
+	var effectCSSList = BrowserEffectCSSList.list = {"origin" : "transform-origin:?", "transition":"transition:?"}
+	
+	BrowserEffectCSSList.has = function(name) {
+		return effectCSSList.hasOwnProperty(name);
+	}
+	daylight.extend(true, BrowserEffectCSSList.prototype, $CSSList.prototype);
+	BrowserEffectCSSList.prototype.get = function(prefix) {
+		var list = this.list;
+		var value;
+		var sStyle = "";
+		var length = 0;
+		var effectCSS;
+		for(var name in list) {
+			value = list[name];
+			if(!effectCSSList.hasOwnProperty(name))
+				continue;
+				
+			effectCSS = effectCSSList[name];
+			sStyle += "{prefix}" +  effectCSS.replace("?", list[name]) +";";
+			++length;
+		}
+		
+		if(length === 0)
+			return "";
+			
+		return anim.prefixToBrowser(sStyle, prefix);
+	};
+	
+	
+	daylight.defineGlobal("$BrowserEffectCSSList", BrowserEffectCSSList);
+	
+})(daylight.animation);
+(function(anim) {
+
+	var transform = anim.Transform = function Transform() {
+		this.list = {};
+	}
+	var transformList = transform.list = {"gleft":"translateX(?)","tx":"translateX(?)", "gtop":"translateY(?)","ty":"translateY(?)","tz":"translateZ(?)", "rotate":"rotate(?)", "scale" : "scale(?)", "rotateX":"rotateX(?)", "rotateY":"rotateY(?)"};
+	transform.has = function(name) {
+		return transformList.hasOwnProperty(name);
+	}
+	daylight.extend(true, transform.prototype, $CSSList.prototype);
+/*
+if(action === "tx" || action === "ty" || action === "tz") {
+	index = transformList.indexOf("rotate");
+	if(index !== -1) {
+		transformList.splice(index, 0, action);
+		continue;
+	}
+}
+*/
+	transform.prototype.get = function(prefix) {
+		var list = this.list;
+		var value;
+		var transform;
+		var sStyle = "{prefix}transform:";
+		var length = 0;
+		for(var name in list) {
+			value = list[name];
+			if(!transformList.hasOwnProperty(name))
+				continue;
+				
+			transform = transformList[name];
+			sStyle += " " +  transform.replace("?", list[name]);
+			++length;
+		}
+		if(length === 0)
+			return "";
+		
+		sStyle += ";";
+		return anim.prefixToBrowser(sStyle, prefix);
+	};
+	
+	
+	daylight.defineGlobal("$Transform", transform);
+	
+})(daylight.animation);

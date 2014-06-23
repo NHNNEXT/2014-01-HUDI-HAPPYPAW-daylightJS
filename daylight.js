@@ -464,8 +464,9 @@ daylight.extend = daylight.fn.extend = function() {
 	var target = this;
 	var src , copy;
 	
-	if(typeof target === "boolean") {
-		target = a[0] || {};
+	if(typeof a[0] === "boolean") {
+		target = a[1] || {};
+		i = 2;
 	}	
 	
 	var name;
@@ -1281,6 +1282,7 @@ daylight.fn.extend({
 	drag: function(dragFunc) {
 		var dragObject = null;
 		var is_drag = false;
+		var is_move = false;
 		var dragDistance = {x : 0, y : 0};
 		var prePosition = null;
 		var self = this;
@@ -1292,13 +1294,23 @@ daylight.fn.extend({
 		
 
 		var mouseDown = function(e) {
+			if(e.type === "touchstart") {
+				var touches = e.touches;
+				if(touche.length > 1) {
+					if(is_move === false) {
+						is_drag = false;
+					}
+				}
+			}
 			prePosition = daylight.$E.cross(e);
 			isScreenPosition = prePosition.screenX !== undefined;
 			pos = bScreenPosition ? {x:"screenX", y:"screenY"} : {x:"pageX", y:"pageY"};
 			dragDistance = {stx :prePosition[pos.x], sty : prePosition[pos.y], x : 0, y : 0, dx:0, dy:0, is_touch:prePosition.is_touch, is_drag: false};
 			dragObject = e.target || e.srcElement;
+			
 			is_drag = true;
-	
+			is_move = false;
+			
 			var extra = self.dragEvent(e, dragDistance, dragObject);
 			var returnValue = daylight.trigger(this, "dragstart", extra);
 
@@ -1310,6 +1322,7 @@ daylight.fn.extend({
 		var mouseMove = function(e) {
 			if(!is_drag)
 				return;
+			is_move = true;
 			var position = daylight.$E.cross(e);
 			
 			dragDistance.dx = position[pos.x] - prePosition[pos.x];

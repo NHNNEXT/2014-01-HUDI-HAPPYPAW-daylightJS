@@ -174,7 +174,7 @@
 			default:
 				value = "transition";
 		}
-		console.log(property + "   " + value);
+		//console.log(property + "   " + value);
 		return value;
 	}
 })(daylight.animation);

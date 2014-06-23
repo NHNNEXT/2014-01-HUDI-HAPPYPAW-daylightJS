@@ -15,6 +15,9 @@ String.prototype.replaceAll = function(from, to) {
 		return "";
 	return this.split(from).join(to);
 }
+String.prototype.toUpperFirst = function() {
+	return this.substring(0,1).toUpperCase() + this.substring(1);
+}
 Array.prototype.indexOf = Array.prototype.indexOf = function (element) {
 	var length = this.length;
 	
