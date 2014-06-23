@@ -43,7 +43,6 @@ daylight.document = document;
 
 daylight.version = "0.2.1";
 
-
 daylight.CONSTANT = {SLOW:"slow", FAST:"fast"};
 daylight.OPTION = {speed : daylight.CONSTANT.SLOW};
 
@@ -165,7 +164,6 @@ var _dimensionCssHook = function(element, component, pre_styles) {
 
 	return dimension;
 }
-
 var _curCssHook = function(element, name, pre_styles) {
 	//content width에 따라 바뀔 수 있는 속성
 	var lrtype = ["left", "right", "width", "margin-left", "margin-right", "padding-left", "padding-right"];
@@ -190,8 +188,8 @@ var _curCssHook = function(element, name, pre_styles) {
 	//%를 쓸 수 있는 css 속성이 있는지 확인할 수가 없다 ;;; 조사해보자 ㅠㅠ
 	return 0;
 }
+
 /*
-	
 	daylihgtObject의 매핑된 오브젝트 각각에 대해 element를 추가한다.
 */
 var _addDomEach = function(daylightObject, element, callback) {
@@ -280,13 +278,10 @@ String.prototype.replaceAll = function(from, to) {
 	return daylight.replace(from, to, this);
 }
 
-
+//reference to jQuery Type
 "Boolean Number String Text Function Array Date RegExp Object Error Window NodeList HTMLCollection".split(" ").forEach(function(name, index, arr) {
 	class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
-
-
-
 
 
 //FORM INPUT, SELECT VALUE값는 찾는 함수와 설정하는 함수
@@ -411,7 +406,41 @@ daylight._AGENT_IS_CH = daylight._userAgent.indexOf("Chrome") > -1;
 daylight._AGENT_IS_WK = daylight._userAgent.indexOf("WebKit") > -1;
 daylight._AGENT_IS_MO = /(iPad|Mobile|Android|Nokia|webOS|BlackBerry|Opera Mini)/.test(daylight._userAgent);
 
+/**
+* @func: daylight.query(query, element)
+* @param: query(CSS Query, HTMLElement)
+* @return: new daylight.Object
+*/
+daylight.query = daylight.searchElement = function(query, element) {
+	element = element || document;
+	objects = query ? element.querySelectorAll(query) || [] : [];
+	return new this.Object(objects);
+}
 
+
+/**
+* @func : daylight.init(query)
+* @param : query(CSS Query)
+* @return : new daylight.Object
+*/
+daylight.$ = daylight.init = function(query, option) {
+	var objects;
+	var t = daylight.type(query);
+	switch(t) {
+	case "daylight":
+		return query;	
+	case "string":
+		objects = query ? document.querySelectorAll(query) || [] : [];
+		break;
+	case "array":
+	case "nodelist":
+		objects = query;
+		break;
+	default:
+		objects = [query];
+	}
+	return new this.Object(objects, option);
+}
 
 
 /**
@@ -478,13 +507,6 @@ daylight.extend = daylight.fn.extend = function() {
 		for(name in options) {
 			src = target[name];
 			copy = options[name];
-
-/*
-	중복제거
-			//ildan  continue;
-			if(src)
-				continue;
-*/
 			
 			target[name] = copy;
 		}
@@ -593,7 +615,6 @@ daylight.extend( {
 * @retruns {string} name
 * @desc GetterSetter함수를 만듭니다.
 */
-	//
 	defineGetterSetter :function(object, name) {
 		this.defineGetter(object, name);
 		this.defineSetter(object, name);
@@ -1040,30 +1061,7 @@ daylight.extend({
 	}
 });
 
-/**
-* @func : daylight.init(query)
-* @param : query(CSS Query)
-* @return : new daylight.Object
-*/
-daylight.$ = daylight.init = function(query, option) {
-	var objects;
-	var t = daylight.type(query);
-	switch(t) {
-	case "daylight":
-		return query;	
-	case "string":
-		objects = query ? document.querySelectorAll(query) : [];
-		if(!objects) objects = [];
-		break;
-	case "array":
-	case "nodelist":
-		objects = query;
-		break;
-	default:
-		objects = [query];
-	}
-	return new this.Object(objects, option);
-}
+
 /**
 * @func : daylight.template(object, template)
 * @param : object(Array, Object), template(String, Daylight)

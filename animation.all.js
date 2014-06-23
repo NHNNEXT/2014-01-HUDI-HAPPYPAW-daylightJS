@@ -75,7 +75,7 @@ var animation = daylight.animation = {
 		ignoreCSS : ["count", "time", "function", "length", "fill"],
 		removeProperties: ["count", "length", "fill"]
 	},
-	prefixToBrowser : function(css, prefix) {
+	prefixToBrowser : function(css, prefix, prefixList) {
 		prefix = typeof prefix === "undefined" ? "all" : prefix;
 		//prefix
 		//all : prefix별로 바꿔준다.
@@ -83,14 +83,15 @@ var animation = daylight.animation = {
 		//나머지 : 지정된 prefix로 바꿔준다.
 		
 		var CONSTANT = this.CONSTANT;
-		var browserPrefixLength = CONSTANT.browserPrefix.length;
+		var browserPrefix = prefixList || CONSTANT.browserPrefix;
+		var browserPrefixLength = browserPrefix.length;
 		var cssWithPrefix;
 		
 		switch(prefix) {
 		case "all":
 			var totalStyle = "";
 			for(var i = 0; i < browserPrefixLength; ++i) {
-				totalStyle +=daylight.replace("{prefix}", CONSTANT.browserPrefix[i], css);
+				totalStyle +=daylight.replace("{prefix}", browserPrefix[i], css);
 			}
 			return totalStyle;
 			break;
@@ -185,6 +186,7 @@ var animation = daylight.animation = {
 			cssList = cssTypeList[cssType];
 			totalStyle += cssList.get(prefix);
 		}
+		totalStyle = totalStyle.replaceAll(";", ";\n");
 		var cssStyle = daylight.replace("{prefix}", CONSTANT.browserPrefix[1], totalStyle);
 		
 		return cssStyle;
@@ -555,6 +557,46 @@ animation.Layer.prototype.hasProperty = function(index, property) {
 	@return {motion} time 이전의 property를 가지고 있는 모션을 반환
 	@desc time 이전의 property를 가지고 있는 모션을 찾아준다.
 */
+animation.Layer.prototype.applyAll = function(property, value) {
+	
+	var properties = this.properties;
+	var index = properties.indexOf(property);
+	if(index === -1)
+		properties[properties.length] = property;
+		
+	var motions = this.motions;
+	var length = motions.length;
+	var properties = this.properties;
+	var motion, i;
+	
+	for(i = 0; i < length; ++i) {
+		motion = motions[i];
+		if(i === 0) {
+			motion[property] = value;
+		} else {
+			delete motion[property];
+			delete motion[property + "?a"];
+		}
+	}	
+	
+}
+animation.Layer.prototype.removePropertyAll = function(property) {
+	var index = properties.indexOf(property);
+	if(index === -1)
+		return;
+	var motions = this.motions;
+	var length = motions.length;
+	var properties = this.properties;
+	var motion, i;
+	
+	for(i = 0; i < length; ++i) {
+		motion = motions[i];
+		delete _motion[property];
+		delete _motion[property + "?a"];
+	}	
+	properties.splice(index, 1);
+	
+}
 animation.Layer.prototype.removeProperty = function(time, property) {
 	var _motion = this.getMotion(time);
 	if(!_motion)
@@ -1648,7 +1690,8 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	daylight.defineGetter(daylight.animation.Timeline, "is_start");
 	daylight.defineGetter(daylight.animation.Timeline, "is_pause");
 	//daylight.extend(daylight.animation);
-	daylight.defineGlobal("Anim", daylight.animation);
+	daylight.defineGlobal("$Anim", daylight.animation);
+	daylight.defineGlobal("$Timeline", daylight.animation.Timeline);
 
 })(daylight);
 
@@ -1866,11 +1909,16 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		var totalTime = json.tt || json.totalTime || 0;
 		var properties = json.p || json.properties || [];
 		var style = json.s || json.style || {};
-		if(json.position && timeline.dl_object.equal(element)) {
-			style.position = json.position;
-		}
+		
 		layer.properties = properties;
 		layer.motions = motions;
+		
+		
+		if(json.position && timeline.dl_object.equal(element)) {
+			style.position = json.position;
+			layer.applyAll("position", json.position);
+		}
+
 		layer.totalTime = totalTime < timeline.totalTime ? timeline.totalTime : totalTime;
 		
 		if(timeline.totalTime < layer.totalTime) {
@@ -1959,8 +2007,7 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 		createchildNodes(json, element, timeline);
 		return timeline;
 	}
-})(daylight);
-(function(anim) {
+})(daylight);(function(anim) {
 
 	
 	var CSSList = anim.CSSList = function AnimationList(list) {
@@ -1975,10 +2022,10 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 			var value;
 			var sStyle = "";
 			for(var name in list) {
-				value = list[name]
+				value = list[name];
 				sStyle += name + ": " + value +";";
 			}
-			return anim.prefixToBrowser(sStyle, prefix);
+			return sStyle;
 		},
 		has: function(name) {
 			return this.list.hasOwnProperty(name);

@@ -1,6 +1,6 @@
 <meta charset="utf-8"/>
 <body>
-<script src="../../js/jquery.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../daylight.js"></script>
 <script src="../daylight.Event.js"></script>
 <script src="unittest.js"></script>
@@ -55,4 +55,7 @@ $test("outerWidth").assertSpeed(function() {daylight("input").outerWidth()}, fun
 $test("outerWidth2").assertSpeed(function() {daylight(".tog").outerWidth()}, function() {jQuery(".tog").outerWidth()});
 $test("outerWidth(true)").assertSpeed(function() {daylight("input").outerWidth(true)}, function() {jQuery("input").outerWidth(true)});
 $test("outerWidth(true)").assertSpeed(function() {daylight(".tog").outerWidth(true)}, function() {jQuery(".tog").outerWidth(true)});
+
+$test("$.query vs  $()").assertSpeed(function() {daylight.searchElement("th")}, function() {daylight("th");});
+$test("$.query vs  dom").assertSpeed(function() {daylight.searchElement("th")}, function() {document.querySelectorAll("th");});
 </script>

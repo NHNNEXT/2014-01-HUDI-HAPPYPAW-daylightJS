@@ -1690,7 +1690,8 @@ daylight.animation.Timeline.prototype.showAnimationBar = function() {
 	daylight.defineGetter(daylight.animation.Timeline, "is_start");
 	daylight.defineGetter(daylight.animation.Timeline, "is_pause");
 	//daylight.extend(daylight.animation);
-	daylight.defineGlobal("Anim", daylight.animation);
+	daylight.defineGlobal("$Anim", daylight.animation);
+	daylight.defineGlobal("$Timeline", daylight.animation.Timeline);
 
 })(daylight);
 
