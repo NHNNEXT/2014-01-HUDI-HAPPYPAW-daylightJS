@@ -129,4 +129,11 @@
 		createchildNodes(json, element, timeline);
 		return timeline;
 	}
+	animation.Timeline.load = function(element, json, position) {
+		var dlElement = $(element);
+		var timeline = this.import(json, position);
+		dlElement.append(timeline.dl_object);
+		
+		return timeline;
+	}
 })(daylight);
